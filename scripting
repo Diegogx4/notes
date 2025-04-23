@@ -1,0 +1,15 @@
+Windows batch files
+PowerShell
+Bash
+Python
+
+Windows batch file format is usable on all modern versions of Windows. However, the features offered by batch files can be a bit limited and awkward from a modern scripting perspective. Generally, batch files are used for legacy reasons or for simple tasks, although batch files are fairly common as logon scripts. Simple tasks may be easier to perform or deploy from batch files, however as the complexity of the script grows, the more complicated it can be to create these scripts as batch files. Filenames for batch files end in .bat or .cmd, though the exact execution behavior between these two extensions can differ.
+
+
+PowerShell is a .NET-based, cross-platform scripting solution that has native support for remote execution and is deployed by default on modern versions of Windows, and versions of which are deployable on Unix-like platforms. In addition, its usage can be managed via Group Policy on Windows domains. It contains many features that enable richer scripts, such as full support for object-oriented programming, creation of new cmdlets — small commands or scripts written for PowerShell, which typically return a .NET object for further display or manipulation — for reusable scripting functionality, and many built-in cmdlets for commonly used functions. PowerShell script filenames end in .ps1, however, other files used in PowerShell can have other extensions.
+
+
+Bash scripting is typically used on Unix-like systems, such as Linux, MacOS, Berkeley Software Distribution (BSD), etc. In addition, Bash can be deployed to Windows systems through Windows Subsystem for Linux (WSL), Cygwin, or other similar tools. While often seen as limited, this method of scripting is available on any system using the Bash shell, and after years of experience, it is used fairly often for system maintenance. Z Shell (ZSH) and other shells on Unix-like systems often have fairly similar scripting environments that may be mostly compatible with Bash scripts. Shell scripts — which Bash is a subset of — typically have a filename ending in .sh, though this is by convention only, and is not required. Adversaries often choose not to use this file extension.
+
+
+Python is a programming language often use in scripting. It is cross-platform, and often installed on Unix-like operating systems as well as being deployed on Windows workstations and servers where it is a dependency. Python is well-supported by programming tools that support multiple languages, and has a rich package system available with pip. Python scripts traditionally end in .py, however, this is not necessary and an adversary can choose not to use this file extension.
