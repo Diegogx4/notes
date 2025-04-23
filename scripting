@@ -13,3 +13,403 @@ Bash scripting is typically used on Unix-like systems, such as Linux, MacOS, Ber
 
 
 Python is a programming language often use in scripting. It is cross-platform, and often installed on Unix-like operating systems as well as being deployed on Windows workstations and servers where it is a dependency. Python is well-supported by programming tools that support multiple languages, and has a rich package system available with pip. Python scripts traditionally end in .py, however, this is not necessary and an adversary can choose not to use this file extension.
+
+Script Editing
+Editing scripts can be done with any text editor that saves plain text, such as Notepad, Vi/Vim, Sublime, etc. Some text editors include — or can be configured to use — features that can help make the creation of scripts easier, such as:
+
+Syntax Highlighting: Changes the color of text to indicate the category of item that is represented by that text.
+Autocompletion: Allows the editor to provide probable completions to the text currently being entered (based upon the syntax of the scripting language in use), which can speed up development.
+Debugging: Allows the pausing of execution of a script or program to view the current state of the environment or manually direct program flow.
+Script Execution via Hotkey: Executes the script being edited via selecting a button or hotkey, allowing for more rapid execution and development.
+Throughout this course, the following editors may be used (not exhaustive):
+
+Notepad: A simple text editor included in Windows by default; only supports editing.
+Gedit: The default editor for Gnome; included by default on some Linux distributions. Supports editing and syntax highlighting for any included languages.
+Nano/Pico: A simple, easy to use command line text editor, commonly available or able to be installed on Unix-like machines. Only supports basic editing, however it may support some syntax highlighting.
+PowerShell ISE: Integrated into some versions of PowerShell; supports all these features and many more, such as block code execution (executes a highlighted block of code) and help files for PowerShell features.
+Sublime Text: Included on some machines used during this course; supports syntax highlighting for some scripting languages, and limited autocompletion. Plugins may be available to support other features.
+Notepad++: An open-source text editor with many features similar to Sublime Text. Supports highlighting for some languages, and supports additional languages via plugins or editing the configuration.
+Visual Studio Code: This editor behaves as a full-blown Integrated Development Environment (IDE) for many languages — either natively or via plugins. It supports many features to assist development, such as syntax highlighting, autocompletion, debugger support, and many hotkeys and configurations to assist development.
+Vi/Vim: While this command line text editor has rich configuration support, if used during this course, it is generally used as a basic text editor. 
+
+Execution History
+Many consoles or terminals store execution history. This can be a useful artifact when performing forensics or for sensors to read. While a malicious actor can often trivially clear the history on a machine, if this log is present, it can still be a useful artifact to be examined.
+
+﻿
+
+Bash’s history file is present at <userhome>/.bash_history by default, and PowerShell — since 5.0 — has a default location at %APPDATA%\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt.
+
+﻿
+
+PowerShell’s default location can be changed using the Set-PSReadLineOption cmdlet's -HistorySavePath option, and the location can be displayed using Get-PSReadLineOption.
+
+﻿
+
+Utilizing History in a Hunt
+﻿
+
+During the course of their duties, a user - Patti Mcclure - had their credentials stolen. A threat actor used Remote Desktop Protocol (RDP) to connect to the machine, and used PowerShell to perform actions on the machine.
+
+﻿
+
+Connect to this machine and determine what actions the threat actor took.
+
+Common Data Types
+
+
+Types in PowerShell are specified by encapsulating the type name with brackets (e.g., [string]). PowerShell has many common data types:
+***String
+String of characters, denoted in a literal by encapsulating the value with either quotation marks (") or single tick marks (').
+***Numbers
+Integer ([int]) supports values from -2,147,483,648 to 2,147,483,647.
+Short ([short]) supports -32,768 to 32,767. In later PowerShell versions, it is denoted when specifying values by appending s (e.g., $foo = 100s). In versions prior to 6.2 (used in this lesson), it is specified by casting an integer (e.g., ([short]) 100).
+Long ([long]) supports values from -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807. Denoted as a literal with l (e.g., 100000000l).
+Decimal ([decimal]) is a base-10 implementation of floating point numbers. Useful for denoting money or other human-derived values where base-10 is desired.
+Float ([double] or [single]) is a base-2 implementation of floating point numbers. Default is double-precision, operations on floating point values are generally faster than decimal.
+***Collections
+Strongly typed arrays can be denoted by ending the type of the array with brackets (e.g., [int[]]). New arrays can be declared in a few different ways, one of which is by putting the elements in the array inside parentheses and prepending an @ symbol (e.g., $myarray = @(1, 2) creates an array with values of 1 and 2, while $myarray = @() creates an empty array).For storing a value associated with a particular key, PowerShell has hash tables. Hash tables are denoted with an @ symbol followed by braces ({}) (e.g., $table = @{ "foo" = 1, "bar" = 2}) and can be accessed via indexing (e.g., $table["foo"]).In addition to these, PowerShell has access to the entirety of collections in the .NET framework.
+**Boolean
+Boolean values can be the results of expressions or specified via the constants $true and $false.
+
+
+
+For the number types that only support integer, short, and long, unsigned variants exist for storing only positive values. These are outside of the context of this lesson.
+
+
+According to Microsoft’s PowerShell documentation, numeric literals without a type specifier have their type determined using the following logic:
+If the value can be represented by type [int], that is its type.Otherwise, if the value can be represented by type [long], that is its type.Otherwise, if the value can be represented by type [decimal], that is its type.Otherwise, it is represented by type [double].
+
+
+Variables
+
+
+Variables are a core feature of most scripting languages. This feature allows the storage of a value, and then overwrites this value with a new value, if needed. For example, the following code leaves the value of number as 2:
+
+
+number = 1
+number = number + 1
+
+
+
+Depending on the language, some syntax differences exist with variables, such as requiring the user to specify the type. In addition, depending on the language, the user cannot save a variable of a different type than the existing value. The following code might cause an error message in some scripting or programming languages:
+
+
+number = 1
+number = "one"
+
+
+
+In some scripting languages, the language attempts to convert between types automatically, such as between string and integer. If the language attempts to add them, it might cause the language to convert the string to an integer value and parse the string as a numeric value with the resulting value being a number.
+
+
+Input/Output
+
+
+When creating a script, it is often necessary to take in input or output data. The syntax and methods can vary greatly depending on the scripting language, however these are common input sources and output destinations:
+Console: The console can often be read from or written to.
+File: Scripting languages can often read from or write to files.
+Registry: Scripting languages on Windows may be able to read or write to the registry. This may require the use of external binaries.
+Databases: Some scripting languages support reading or writing to or from databases, or external binaries may be usable to perform the same operations.
+Command Line Arguments: Many scripting languages allow command line arguments to be read, and command line arguments can be supplied to other scripts or applications.
+Network: Scripting languages — either natively or through invoking of external code — can allow a script to connect to other machines via networking to send or receive data. This can take the form of Hypertext Transfer Protocol (HTTP) requests, Transmission Control Protocol (TCP) connections, or other lower-level connections. This is useful for downloading software to deploy — legitimate or malicious. Threat actors may also use this functionality to establish remote shells by connecting to a remote machine that issues commands.
+
+
+These inputs/outputs allow the creation of scripts that can perform many functions. For example, a script might take in command line arguments to create a configuration file with specified parameters, or a script might be written to adjust values in a database depending on input prompts.
+
+
+Loops/Iteration
+
+
+Iteration — in some manner — is a common component of scripts. For example, a script can parse through multiple files in a single directory and search each line in the file — a loop inside a loop.
+
+
+A simple loop might look like this:
+
+
+for line in lines:
+    print(line)
+
+
+
+This loop iterates over multiple items — lines. However, loops can be arbitrary, such as going to a predefined number of iterations:
+
+
+for x in range(10):
+    print(x)
+
+
+
+The above Python code block prints the numbers from 0–9. Note that it is still iterating over a set of values. Some languages support separate conditions for the basic for loop:
+
+
+for ($x = 0; $x -lt 10; $x++)
+{
+    Write-Output $x
+}
+
+
+
+In this PowerShell code block, the for statement consists of several parts — the three statements separated by semicolons are the initialization block, condition block, and iteration block. The initialization block ($x = 0) is executed first, and is often intended to be used to initialize a variable to be used in the for loop itself. The condition block ($x -lt 10; note that -lt is a less than operator) is an expression that returns a Boolean value (i.e., true or false). The iteration block ($x++; note that $variable++ is used to increment a value by 1 in this example) is executed after each time this for loop is executed, and is intended to be used to change the value of one or more variables being used in the condition block. Notably, in some languages, one or more of these can be empty.
+
+
+When executed, this PowerShell code block prints the numbers 0–9.
+
+
+Aside from for loops, many languages support some form of while or do while loops — the syntax and exact behavior changes from language to language — however, the essence of their behavior is that the loop continues while a specified condition is still met. For example:
+
+
+i = 0
+while i < 10:
+    print(i)
+    i = i + 1
+
+
+
+In addition, some languages have a similar construct, known as do…until, which behaves in a somewhat similar way. The syntax of this might resemble:
+
+
+i = 0
+do {
+    print i
+    i++
+} until i = 10
+
+
+
+This mimics the behavior of the above for loops. While loops can also branch based upon more complex behavior, such as;
+
+
+done = False
+while not done:
+    # perform work
+    done = validate() #method that determines if more work exists
+
+
+
+This loop continues until done is set to True via validate(). While this example is contrived, a similar pattern may be used in some languages for processing data with an unknown length such as data being received from a remote machine — determine if more data exists, and perform work on a segment of that data.
+
+
+Most languages support some sort of early exiting for loops — particularly useful in nested loops searching for an index or value. The keyword for this may be something like break. In addition, some languages support skipping to the next iteration via a keyword like continue. This can be useful if the script needs to only operate on values that match specific criteria.
+
+
+Branching Logic
+
+
+Being able to control the flow of the execution of a script or program is a fundamental feature of any scripting language. This can take the form of if/then statements, switch statements, etc. These statements alter which line is executed next, allowing conditions to alter or direct program flow.
+
+
+If/then/else statements might resemble the following:
+
+
+ if x:
+    print("x is true")
+ else:
+    print("x is false")
+
+
+
+In the above, the code block entered depends on what x evaluates to — x can either be a Boolean value, or an expression that evaluates to a Boolean value. Note that if/then statements generally do not require an else block if not needed:
+
+
+if x:
+   print("do something with this code path")
+
+
+
+Switch statements might resemble the following:
+
+
+switch(x){
+    case 1:
+        print "x is 1"
+    case 2:
+        print "x is 2"
+    default:
+        print "unhandled case"
+}
+
+
+
+In the above pseudocode block, three code paths exist:
+If x is 1If x is 2Any other value of x
+This type of statement can reduce the amount of typing and screen space taken up for repetitive program flow patterns on the same value versus simply using a lot of if/then statements.
+
+
+
+*******Input/Output
+
+
+Some common input and output methods are covered here:
+ConsoleConsole can be written to in many ways; one is the Write-Output cmdlet.Write-Output can be invoked with a singled unnamed parameter to write output to the console (e.g., Write-Output "Hello World")
+Console can be read from using the Read-Host cmdlet:$response = Read-Host "Here is my optional prompt"
+
+Standard Input/OutputWhile the standard input and output are generally mapped to the console, applications can have their input or output redirected. For example, cmdlets often accept input from other cmdlets (e.g., Get-ChildItem | Sort-Object). The pipe operator (|) is used to indicate redirection of one program’s output to another’s input.
+FileFiles can be read or written to in many different ways, depending on whether or not the file is being read as a string or raw bytes:Get-Content can be used to read a file’s contents as string data (e.g., Get-Content 'File.txt'). The output of this directs to the console, unless redirected or stored.Text files can be written by redirecting output with the > operator, such as "Hello World” > File.txt or via Out-File using the -FilePath parameter (e.g., Get-Process | Out-File -FilePath File.txt).Raw binary files can be read and written to using the .NET framework functions for this purpose:[System.IO.File]::ReadAllBytes('file.bin')  [System.IO.File]::WriteAllBytes(path, value)  
+
+
+Command Line ArgumentsCommand line arguments can be read in several ways. Arguments can be positional via $args[n] (where n is the index) or named via param ($argumentname, ...) at the top of the file. For example, .\script.ps1 -Foo “test” can be set for $Foo via param ($Foo) — $Foo is set to ”test”.
+Registry: Covered in subsequent lessons.
+
+
+Loops/Iteration
+
+
+PowerShell supports several methods of looping or iterating over objects. Some of these are covered here.
+
+
+ForEach loops can be used to iterate over collections:
+
+
+ForEach ($Line in $Lines)
+{
+    Write-Output $Line
+}
+
+
+
+For loops can be used to loop a specific number of times or using conditions:
+
+
+For ($x = 0; $x -lt 10; $x++)
+{
+    Write-Output $x
+}
+
+
+
+ForEach — with a range of values — can be used to emulate the above behavior:
+
+
+ForEach ($x in 0..9)
+{
+    Write-Output $x
+}
+
+
+
+While loops work as expected, for example:
+
+
+$x = 0
+While ($x -lt 10)
+{
+    Write-Output $x
+    $x++
+}
+
+
+
+Do-While loops exist — the difference between the two is that While loops check the condition before executing the code and Do-While loops execute the code block first, and then evaluate whether or not to continue iterating — this means that the code in the Do block executes at least once even if the condition is not met. The syntax is slightly different than the standard while loop:
+
+
+$x = 0
+Do 
+{
+    Write-Output $x
+    $x++
+} While ($x -lt 9)
+
+
+
+Branching Logic
+
+
+PowerShell supports if/then/else statements and switch statements for basic program flow. These statements follow this pattern:
+
+
+if (condition) {
+    # perform work
+}
+else {
+    # perform different work
+}
+
+
+
+For example:
+
+
+if (x -gt y) {
+   Write-Output "x > y"
+}
+else {
+   Write-Output "x !> y"
+}
+
+
+
+Note that the else code block is optional if not needed for program flow.
+
+
+PowerShell’s comparison operators (e.g., -gt in this above example) are fairly unique. A selection of these operators are covered later in this lesson.
+
+
+Switch statements follow this pattern:
+
+
+switch (value) {
+    condition { Action() }
+}
+
+
+
+For example:
+
+
+$value = 3
+switch ($value){
+    1 { Write-Output "Value is 1" }
+    2 { Write-Output "Value is 2" }
+    3 { Write-Output "Value is 3" }
+}
+
+
+
+Note that the switch operator can accept an array or list, and compares each value:
+
+
+$value = @(2, 3)
+switch ($value){
+    1 { Write-Output "Value is 1" }
+    2 { Write-Output "Value is 2" }
+    3 { Write-Output "Value is 3" }
+}
+
+
+
+This code block outputs Value is 2 and Value is 3.
+
+
+Comparison Operators
+
+
+PowerShell supports many comparison operators, some of the most common ones are shown here:
+-eq: Equal — Returns True if the left and right values are equal. -ne: Not Equal — Returns True if the left and right values are not equal.-gt: Greater Than — Returns True if the left value is greater than the right value.-ge: Greater Than or Equal — Returns True if the left value is greater than or equal to the right value.-lt: Less Than — Returns True if the left value is less than the right value.-le: Less Than or Equal — Returns True if the left value is less than or equal to the right value.
+In addition to these, some string operators are available for fuzzy matching such as the following selection:
+-like: Like — Returns True if the string on the left matches the wildcard pattern on the right (e.g., "Hello" -like "*ell?” matches because * matches any number of characters and ? matches any character).-notlike: Not Like — Returns True if the string on the left does not match the wildcard pattern on the right.
+Troubleshooting
+
+
+PowerShell ISE supports debugging PowerShell scripts, which can be useful during this course. To debug a PowerShell script:
+
+
+1. Create a new breakpoint, either using toggle breakpoint from the debug menu, or by selecting F9.
+
+
+2. Save and invoke the script from the ISE terminal.
+
+
+3. If the code line that the breakpoint is on is hit, the code stops execution.
+
+
+From here, variables can be examined to determine if they match expected values. In addition, Step Over (F10), Step Into (F11), and Step Out (F12) can be used to step line by line through the code.
+
+
+To continue execution normally, remove the breakpoint by toggling it back off, and select Debug > Run/Continue (F5).
+
+Execution History Conclusion
+As the data indicated, the malicious actor was able to gain persistence via a registry run key. In the MITRE ATT&CK framework, this corresponds to T1547.001 — Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder — which consists of multiple readily-detectable methods usable by attackers on Windows.
+
+﻿
+
+In addition, the gathering of information by the attacker on cda-hr-1 are examples of Discovery according to MITRE ATT&CK framework.
