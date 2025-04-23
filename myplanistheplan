@@ -1,1 +1,165 @@
 hello
+cyber security is cool i guess
+Th1s is 0perational Cyber Training!
+future
+Range Considerations
+
+
+The ranges and associated VMs within PCTE rely on different automation and orchestration technologies to provide a realistic training and certification environment. The platform provides automatic configuration capabilities, simulated internet, and user emulation, which may be necessary for normal range function. These advanced capabilities leave artifacts behind in the ranges that may be visible during this course. These occurrences, also known as range-isms, are called out periodically in lessons to remind you of their presence. You must ignore or avoid interacting with these items. At best, they are minor annoyances that take up some extra space; at worst, interacting with them may cause the range to fail and require a redeployment. Some of these range-isms include:
+The 10.0.0.0/8 subnet is used for range management and configuration.
+WARNING: Do not interact with this subnet or it may cause an error in the range.There are several files, directories, and processes that are related to normal range operation. These items are off-limits and should not be interfered with. If uncovered within the context of an investigation, these items can be safely ignored, as they are not relevant to the investigation.systeminit.exe and all files related to this binaryjava.exe listening on port 49999 and 49998 java.exe communicating over port 5762, 15672, & 27017Advanced Message Queuing Protocol (AMQP) listening on port 5672Software or files located in C:\Program Files (x86)\Lincoln\Software or files located in C:\ProgramData\staging\Software or files located in C:\Program Files\Puppet Labs\Software or files located in C:\ProgramData\PuppetLabs\ Software or files located in C:\Program Files (x86)\SimSpace\ruby.exe on Windows and ruby on Linux
+
+**Software or files located in C:\Program Files\Puppet Labs\Software or files located in C:\ProgramData\PuppetLabs\ 
+**ruby.exe on Windows and ruby on Linux
+**10.0.0.0/8 subnet 
+
+A library is a software module that implements some functionality and makes that functionality available to other programs by exposing it through an interface.
+create() function within the library to create a network connection, and some send() function to send data over that connection. Finally, the application calls some close()
+
+**\\ring 0 most damaged kernel
+**rung 3 user: least damage least priv
+**ring 1 and 2 device drivers
+
+Process Structure in Memory
+
+
+During process creation, the OS allocates a block of memory to be used by that process. All of that process’s execution of code operations occurs within this memory block, which is divided into five main parts: text, data, Block Started by Symbol (BSS), heap, and stack. An additional piece of a process’s memory is reserved for use by the OS, and is used when the OS takes operations to manage that process.
+Text: Contains the machine instructions loaded from the executable. This is the actual set of instructions that the CPU executes.Data: Stores any variables that were initialized by the programmer or compiler. The initialization process requires the compiler to know how much memory is needed to store the variable, as well as the initial, non-zero value of the variable.BSS: Used to store variables that have been instantiated, but not initialized. This means that the compiler is able to determine how much memory is needed to store a variable, but the program has not set its value, or has set its value explicitly to zero.Heap: Used to dynamically allocate memory for variables whose sizes cannot be known until runtime, i.e., the actual execution of the program. This usually occurs when the size of the variable differs each time the program is run, so the compiler cannot assign a chunk of memory to the variable right off the bat. The heap can freely grow and shrink during program execution.Stack: Last In, First Out (LIFO) data structure used to store stack frames, which contain information about the current  execution sta te of the process. If a process has multiple threads, each thread is given its own stack. As an example, imagine that a thread is currently executing function1(), which contains a call to another function, function2(). When the call to function2() occurs, the current state of function1() is saved into the stack frame for function1() and placed on top of the stack. Then, a new stack frame is created to initialize function2(), itself being placed on top of the stack. When function2() eventually completes, execution is returned to function1() by loading the saved function1() stack frame, which includes loading the code within function1() that lies directly after the call to function2()
+
+A Terminated process has completed its execution, or was explicitly killed by some other process or system action. Killing a process is a common phrase when discussing process termination.
+Process Termination Complications
+A terminated process must wait for its parent process to read its exit status before the OS can free its assigned Process Identifier (PID) for use elsewhere. Until the parent reads its child’s exit status, the child process continues to exist in the Terminated state. The name for such a process is a zombie process. Depending on the specifics of the parent process, a zombie process may continue to exist indefinitely.
+
+
+An orphan process is a child process whose parent process has terminated before it. This may lead to the child process being adopted by a new parent process — usually the root process of the system or another process specifically delegated by the OS to adopt orphan processes — but not always.
+
+The root process is responsible for loading every other process necessary for the system to function. Usually, the root process delegates some of these responsibilities by spawning other processes known as daemon processes
+**On Windows machines, daemon processes are referred to as services.
+
+1. UID column: Illustrates that users are associated with each process, which is also true within Windows systems. The Unix root user, by default, is allowed to access everything within the system, which includes the ability to execute things within kernel mode in the CPU.
+
+
+2.  PPID column: Shows the PPID of all the processes on the system. The red arrows at the bottom show the parent/child relationships between several processes involved in the execution of the ps command.
+
+
+3. CMD column, bracketed items: Items surrounded by brackets indicate that the processes are executing in kernel mode within the CPU. The very first item in this list is kthreadd — the kernel thread daemon — which is responsible for handling the execution of kernel mode threads. It is no surprise that other kernel threads list kthreadd (PID 2) as their parent process!
+
+
+4. CMD column, non-bracketed items: Items not surrounded by brackets indicate processes executing in user mode within the CPU. The highlighted area shows the results of supplying the -H option to the ps command — processes are displayed in a hierarchical relationship, with child processes having their names tabulated underneath their parent process.
+
+/Metadata in Filesystems
+
+
+Filesystem metadata is stored within a file’s record. This metadata may include the file’s physical location on disk, its size, any associated permissions, and a set of timestamps describing when a file was last modified, accessed, or created. Different filesystem implementations keep track of different metadata information.
+
+
+Filesystem metadata is a fantastic source of information about the system. Later in this lesson, filesystem metadata is used as an evidence source for a simple investigation.
+\
+File Allocation Table (FAT) is a basic filesystem that uses a specific construct to reference files stored on a disk. FAT comes in several variants, the oldest of which, FAT8
+FAT12, FAT16, and FAT32 are updated versions of the FAT filesystem, and support increasingly larger disk sizes, single file sizes, and longer filenames. FAT12 was used in the very first version of Microsoft Disk Operating System (DOS)
+
+
+New Technology File System
+
+
+New Technology File System (NTFS) is a journaling filesystem originally developed by Microsoft to replace FAT in Windows NT 3.1. NTFS has undergone several revisions during its lifetime, and provides several enhancements to filesystem performance, efficiency, capacity, resilience, and security. NTFS is still the most common filesystem in use on Windows OSs.
+
+
+Journaling filesystems can more easily deal with problems caused by unintended interruptions, such as a power outage. A journaling filesystem keeps a journal, a small historical record of operations that are currently being performed within the filesystem. In the event of an unintended interruption to filesystem operations, the journal can be used to help the filesystem recover to a viable state.
+
+
+Another big reason behind the change from FAT to NTFS is that NTFS natively implements security mechanisms that allow for access controls to be applied directly within the filesystem. NTFS contains two Access Control Lists (ACL), which are associated with each file or directory; the Discretionary Access Control List (DACL) and the System Access Control List (SACL). The DACL is responsible for implementing basic permissions that define which users and/or groups can perform actions, reading, writing, execution, or deletion of a file or folder. The SACL is responsible for determining how the system should audit attempted actions being performed against a file or folder as well as whether those actions succeeded or not. For example, the SACL can be used to log the username of anyone attempting to delete an important file.
+
+
+Metadata about files and directories within an NTFS are stored in a database known as the Master File Table (MFT), which also serves as the directory for the filesystem. The MFT is an extremely important evidence source that can be utilized to investigate a system that uses NTFS.
+
+Resilient File System (ReFS) is another filesystem developed by Microsoft, intended to be the next generation Windows filesystem to replace NTFS
+
+**Extended Filesystem
+
+
+According to Jim Salter’s Understanding Linux filesystems article, the Extended Filesystem (ext) was created one year after the initial release of the Linux OS. Soon after, ext2 was released and quickly became the default filesystem for use in most Linux distributions. The ext3 filesystem was the first in the ext line to implement journaling capabilities, and ext4 further expanded the functionality provided by ext3. Improvements in ext4 consisted of large filesystem support, improved resistance to fragmentation, higher performance, and improved timestamps. The ext4 filesystem is still the default filesystem in many Linux distributions, such as Debian and Ubuntu.
+
+XFS
+
+
+XFS is the default filesystem for Red Hat Enterprise Linux — a common Linux distribution. It offers similar features to ext4. Further discussion on this filesystem is not incredibly necessary — Jim Salter’s Understanding Linux filesystems article states that like ext4, [XFS] should most likely be considered a stopgap along the way towards something better.
+
+
+ZFS
+
+
+ZFS is considered a next-generation filesystem because of several fundamental changes in its approach to storage volume management. According to Wikipedia, ZFS was designed with a focus on data integrity, and offers several highly-advanced features that meet this design goal; it provides automatic identification, and (potential) reconstruction of corrupted data via the use of data integrity checking procedures — checksums — across the entire filesystem, as well as native handling of snapshots and backup/replication.
+
+*********Index Nodes
+
+
+The Linux kernel supports a large variety of filesystems compared to other OSs. This is because of a construct called the index node (inode) that exists as an abstraction layer within the Linux kernel. Inodes are an integral part of the Linux kernel; all file management behavior within Linux OSs deals directly with these inodes, requiring only that the Linux VFS perform small translation steps between the Linux kernel and the underlying concrete filesystem.
+
+
+The behaviors made available by inodes include the creation of hard links and symbolic links, which themselves can be used in fairly interesting ways.
+****Hard Links
+
+
+When a regular file is created on a Linux machine, the filesystem creates a new record for the file within its record list, and provides a unique ID number back to the Linux kernel. The kernel uses this ID number as the inode ID; the inode ID number is used by the kernel to perform operations against the file located on the filesystem.
+
+
+Making a hard link to a file creates a new file as normal, but instead of its own inode, the hard link directly references the inode of a different file. Follow the steps below to explore the properties of hard links.
+
+Symbolic Links
+
+
+Symbolic links, also known as symlinks or softlinks, reference a file by that file’s name and location on the filesystem, rather than its inode value. Advantages of symlinks include creating a link to directory locations, and to files or directory locations located on a completely different filesystem. This is in contrast to hard links, which can only reference a file as directory locations do not have their own inode values. Additionally, hard links can only reference files within a single filesystem, since they rely on the filesystem’s internal inode value.
+
+
+Unfortunately, symlinks do have a drawback; because a symlink does not reference an inode value, moving or deleting the target of the symlink (i.e., the file or directory location that the symlink is referencing) breaks the symlink.
+
+Network Management
+Network devices or network interfaces are specialized hardware peripherals that enable the transmission of data between two or more systems. In modern systems, basic networking interfaces are usually built directly into that system’s hardware. For example, most desktop-grade motherboards contain a single ethernet port, and possibly some other wireless capabilities. A process wishing to send or receive data using a network device must use the kernel as an interface to do so; this allows the kernel’s networking subsystem to manage multiple processes connecting over the same physical networking interface at the same time.
+
+﻿
+
+Sockets
+﻿
+A socket is a virtual construct that acts as the endpoint for a communication link on the system. Many sockets can be open on the system at a given time. A client application that is running on the system can request a socket from the kernel, and use system calls to read or write data to the socket.
+
+﻿
+
+*****Socket System Calls
+﻿
+The following system calls (syscalls) are used by an application to request and utilize a socket. Prior to using any of these syscalls, the application must first request a socket from the kernel via a process known as socket instantiation.
+
+bind: The application requests the kernel to bind a previously instantiated socket to a network port or to a local file. Binding to a local file is used for communication within the local system only. The bind syscall must be used if the socket intends to listen for incoming connections, and does not need to be used otherwise.
+listen: The application puts the socket into a listening state, meaning that the client application using the socket is actively ready to handle incoming connections. When an incoming connection is received, the application must choose to accept the connection or terminate it.
+accept: The application accepts an incoming connection to a listening socket. This does not affect the listening socket; a new socket object is created to handle the accepted connection. The accept syscall is mainly used by a listening socket wishing to establish a Transmission Control Protocol (TCP) connection; it is not used for User Datagram Protocol (UDP) communications.
+connect: The application uses the socket to establish a connection with a different listening socket, which may be on the local system or located on some external network. To connect over a network to a socket present on an external system, the socket must reference the external system’s address, (usually an Internet Protocol [IP] address), and the network port that a listening socket is bound to. The connect syscall is mainly used by a connecting socket wishing to make a TCP connection to a listening socket; it is not used for UDP communications.
+recv or recvfrom: Short for receive. The application reads data from the socket. The recv syscall can be used as a shortcut by certain applications that have already established a connection with another socket; recvfrom is used otherwise.
+send or sendto: The application sends data over the socket, which is transmitted to the corresponding socket on the other end of the connection. The send syscall is used as a shortcut by certain applications that have already established a connection; sendto is used otherwise.
+close: The application closes the established connection. This may be performed by the listening socket or the connecting socket, and is mainly needed to close TCP connections; UDP communications do not maintain the concept of a connection, so there is nothing to close.
+
+Windows Registry
+Though it is not included within the Windows architecture diagram, Windows OSs make use of a construct called the registry to store system and user configuration information. The registry is a hierarchical database that stores information in key:value pairs, persists through system reboots by being saved to the system’s hard disk, and quickly referenced by both user mode and kernel mode processes running on the system. Information contained in the registry can be secured with a standard set of permissions; create, read, update, and delete permissions can be assigned by the owner of a particular registry key in order to limit others' access to the key.
+
+ shows the standard layout of the registry in Windows’s default registry viewing and editing tool, Registry Editor (regedit). The registry is separated into several hives, which contain nested registry keys. Registry keys contain a data type and an associated value.
+
+
+Hives and nested registry keys can all be combined together into a registry path. This works similarly to a file path, and can be used to identify a specific registry key. In Figure 1.1-71, the full registry path for the key shown would be HKEY_CURRENT_USER:\\Environment\TEMP. Looking up this key within the registry would return the value %USERPROFILE%\AppData\Local\Temp.
+
+﻿
+
+Registry hives are frequently referenced within the system via a standard set of abbreviations. The most common hives are: HKEY_CURRENT_USER (HKCU), HKEY_LOCAL_MACHINE (HKLM), and HKEY_USERS (HKU).
+
+﻿
+
+Registry Investigation
+﻿
+
+**The registry can be a vitally important evidence source during a security investigation. Now that you are familiar with the Windows registry, follow the steps below to identify several useful registry keys.
+The additional folders listed under the ProfileList folder represent the different users located on the system. Within the Windows OS, user accounts are assigned a unique Security Identifier (SID) that is used to identify their user profile across the system. The first three SIDs are present on all modern Windows systems; they represent users that are used by the OS to launch certain system services and OS-level tasks. Regular user accounts with no special OS use begin with S-1-5-21.
+
+
+5. Navigate to the SID ending in 1010. Identify the value of the ProfileImagePath key, which identifies the home folder and username of the associated user.
+
+**the Profiles key contains a list of Globally Unique Identifier (GUID) values, which are present throughout the Windows OS. Windows uses GUIDs to refer to unique objects within the system, though GUIDs are not guaranteed to be unique across systems. In this case, each GUID represents a different network profile that this machine has been connected to. 
+
+
