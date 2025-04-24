@@ -162,6 +162,140 @@ If tasked, the CPT develops a Risk Mitigation Plan (RMP) following mission execu
 
 NOTE: RMPs are explored in-depth in the CDA-B RMP lesson.
 
+Planning and Executing a Hunt Mission
+
+
+The specific planning steps required for a hunt operation are discussed in more detail in the CDA-B Hunt lesson M3L1 — Hunt, but are presented within the following fictional case study as an example. As you read through the case study, note how information acquired during earlier steps of the CPT OP is used during the Tactical Planning and Execution step. All indicators, threat groups, and companies used in the case study are fictional.
+
+
+Trigger
+
+
+A CPT hunt operation was triggered by the following sample threat intelligence report. 
+
+
+Intel Flash
+
+
+MistyIguana Group Tied to Recent Attacks on Pharmaceutical Companies
+
+
+A recent intelligence report published by public-sector cybersecurity company Frostgaze has tied several network artifacts used in an attack campaign against pharmaceutical company Draxx Inc back to the MistyIguana threat group. The Frostgaze intelligence report released the following network-based Indicators of Compromise (IOC) to the public.
+
+
+
+
+
+Table 2.1-2
+
+
+The above intelligence report triggered a CPT hunt operation for related MistyIguana activity on the network of Alabaster Corp, a DoD-affiliated contractor. Alabaster Corp is working on a DoD-critical project, and MistyIguana has been known to target defense-related networks in the past.
+
+
+Terrain Identification and Prioritization
+
+
+During this step of the CPT Operations process, the CPT worked with network owners at Alabaster Corp to build a network diagram of the Alabaster Corp network. The CPT also performed steps to identify MRT-C and Key Terrain in Cyberspace (KT-C) on the Alabaster Corp network, and have identified several servers that host information related to the DoD-critical project that Alabaster Corp is working on. Additionally, the CPT has worked with the local defenders of Alabaster Corp and have identified several evidence sources that can be utilized during the CPT hunting operation. These evidence sources include Alabaster Corp's Security Information and Event Management (SIEM) platform, which contains host and network logs for a majority of the Alabaster Corp network.
+
+
+Tactical Planning Inputs
+
+
+At this stage, the CPT has access to a wealth of information of the Alabaster Corp network, including network diagrams, vulnerability assessment results, knowledge of the MRT-C and Key Terrain in Cyberspace (KT-C) present within the network, and the location of evidence sources that can be utilized during the hunt operation. The initial trigger for the CPT operation is important in determining the overall purpose and scope of the hunt operation, as well. (Since the CPT was deployed to perform a hunt operation surrounding the MistyIguana threat group, the operation should be limited to hunting for MistyIguana indicators.)
+
+
+Creating the Tactical Plan
+
+
+A comprehensive tactical hunt planning guide is included in Appendix C of the CWP, and includes several sections of detailed information to assist in the creation of a tactical hunt plan.
+
+
+Generally, tactical hunt planning consists of documenting the information listed under the above Tactical Planning Inputs section, planning the phases of the hunt operation, determining which evidence sources are needed to execute the hunt operation and acquiring CPT access to those evidence sources, and establishing contingency and communications plans with local network operators.
+
+
+Additionally, it is a good idea to plan out some initial hunting tasks that can be performed once access to the required evidence sources has been acquired. This can be done through the creation of hunt hypotheses, which describe how a CPT analyst might expect to encounter MistyIguana MCA if it exists within Alabaster Corp. Some sample hunt hypotheses based on the MistyIguana IOCs provided in the intelligence report are listed below.
+MistyIguana may be reusing known domain names (draxxpharma.com) or IP addresses (54.43.32.21) to attack the Alabaster Corp network. Evidence of these domain names or IP addresses within Alabaster Corp network logs may be indicative of MistyIguana MCA.Any MistyIguana malware that is located within the Alabaster Corp network is likely to be communicating out to MistyIguana-controlled C2 servers. If this is the case, the malware may showcase similar URL patterns as those seen within the Draxx Inc attacks. If similar URL patterns are visible in Alabaster Corp network logs, this may be indicative of MistyIguana MCA.HTTP POST traffic containing the key DAT01xd, or a key of similar structure, may be indicative of MistyIguana MCA.MistyIguana malware was seen using the HTTP protocol to communicate with malicious C2 servers. If anomalous HTTP traffic is discovered within the Alabaster Corp environment, it may be indicative of previously unknown MistyIguana MCA.
+Executing Hunts
+
+
+Once the tactical plan has been finalized and the CPT has access to the evidence they need, they are able to begin hunting. Each one of the hypotheses listed above is the starting point for an individual threat hunt. The execution of a hunt consists of using evidence from the network in order to prove or disprove the hunt hypothesis.
+
+
+For example, to execute a hunt looking for known MistyIguana domain names and IP addresses, a CPT analyst would perform searches within the Alabaster Corp network logs to determine if those domain names or IP addresses are present. If evidence of either of these indicators is found, the CPT analyst should perform additional investigation in order to determine if the evidence is truly an indicator that MCA is present in the Alabaster Corp network, or if it is a false positive that is better explained by some other possibility. For example, a single HTTP connection from the Alabaster Corp network out to the MistyIguana domain draxxpharma.com might be from a user who accidentally misspelled another website while entering it into their browser.
+
+
+Hunt Execution Outputs
+
+
+Regardless of whether an individual hunt was successful at identifying MCA, the actions taken during the hunt and any findings of the hunt should be well documented. These documents can be used to build SITREPs or other reports, and directly feed into the Assessment portion of the CPT Operational Process. The creation of a hunt playbook (a document that describes the steps needed to perform a hunt for a particular behavior or pattern) may also be useful, as it can provide a CPT with easily-referenced documentation to assist future hunting efforts.
+
+The final step of the OP is Assessment. During this step, the OP section assessment team analyzes MOPs to determine whether operational tasks were satisfied to create desired effects, and analyzes MOEs to determine whether creation of desired effects achieved operational objectives. The OP section assessment team reviews data and information reported by the CPT in accordance with the operational assessment plan. Additional inputs from the CPT, the supported organization, and potentially the intelligence community may be used to facilitate accurate operational assessments.
+
+
+As a result of operational assessments, the OP section may make recommendations for future actions. These actions may include, but are not limited to, additional hardening of the supported commander’s networks and systems; recapitalization or redesigning part or all of MRT-C; deployment of the CPT to other portions of a supported commander’s network, system, or asset not covered in the current mission; or CPT redeployment based on other priorities, contingencies, or crises.
+
+
+When permissible, and where feasible, products developed during all steps should be added to the Joint Lessons Learned System (JLLS) to enable future assessments and planning.
+
+mission reporting > mop > achieved op obj
+
+planord and the ma product = force allocation
+
+step3
+
+PLANORD → Input,
+
+MRT-C → Input,
+
+MA results → Input,
+
+Tactical mission statement and end state → Output,
+
+Force Allocation → Output,
+
+Rules of Engagement → Output,
+
+Initial Capabilities → Output,
+
+Initial Tactical Objectives → Output
+
+step 4
+PLANORD → Input,
+
+ROE → Input,
+
+Force Allocation → Input,
+
+TASKORD → Output
+
+step 5
+Tactical Mission Plan → Output,
+
+Assessment of tactical objectives and tasks → Output,
+
+A completed mission and reporting → Output,
+
+PLANORD/TASKORD → Input,
+
+Mission Analysis → Input,
+
+MRT-C → Input
+
+PLANORD
+preliminary objectives
+intended effects
+commander's guidance
+
+The CPT Capability Analysis and Force Allocation step involves determining the mission capabilities of each element. The elements included in this process are the CPT, mission partners, and the operational planning section.
+
+
+Capability Analysis and Force Allocation consists of the following stages:
+Capability planningForce availability, selection, preparationForce presentation and available effectsObjectives, effects, and guidance refinementCourse of action developmentCPT Rules of Engagement (ROE) developmentAssessment planService interruption coordinationOperational Impact Validation (OIV)
+
+
+
+
+
 
 
 
