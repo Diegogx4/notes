@@ -479,6 +479,1103 @@ SACOM's commander recently received threat intelligence briefing of a new threat
 
 SACOM has recently recovered from a data breach. The incident response team was able to remediate the breach, however SACOM's commander wanted to ensure such an event did not occur again. SACOM's commander requested CPT assistance in preventing similar future occurrences. == threat mitigation
 
+Local network defenders in SAMPLE COMMAND (SACOM), a Department of Defense organization, were made aware of cyber incident in their networks. On January 15th, a command-wide personnel notification was issued to provide situational awareness of recent phishing email attempts. This notification resulted in the submission of several security incident reports. Multiple command members provided statements explaining that they downloaded and opened the attachments provided in the emails, believing them to be legitimate. SACOM’s incident response team is fairly inexperienced, and requests CPT assistance in remediating the breach.
+
+DeTT&CT
+ to score logging coverage in SACOM networks by mapping detection capabilities to 
+MITRE ATT&CK
+ techniques.
+
+Upon configuring network sensors within SACOM networks, the CPT gained the capability to 
+Passively
+ gather log entries and packet capture data.
+
+The CPT 
+Actively
+ gathered data when they scanning devices within SACOM networks for vulnerabilities with NMAP.
+
+To find out more about threat actors that could be behind the phishing campaign, they turned to MITRE ATT&CK, which is an 
+Open source
+ knowledge base for adversary tactics and techniques.
+
+Network Sensor → Raw Packet Capture Data,
+
+Apache Server → HTTP Logs,
+
+Web Proxy Server → Connections Log,
+
+Domain Controller → Security Logs
+
+The most likely location that malware would be found from a phishing campaign is on the end user hosts as this is where users should be interfacing with their email clients, and the mail server as this is where emails are stored. The edge SMTP server typically does not store mail and acts as a forwarder. Users should not be checking emails and downloading email attachments from the web server, DNS server, or domain controller. It's possible that a user might save an attachment to a file server, but there are more likely locations.
+
+WP and CPT Threat Hunting
+Threat hunting — also known as cyber threat hunting or hunting — is one of the four core functions of a CPT. Chapter 3 section 2 of the CWP defines hunting as ...the process of proactively and iteratively searching through networks to detect evidence of Malicious Cyberspace Activity (MCA) to gain and maintain contact with an adversary and develop the situation.
+
+			
+
+Become familiar with the following quotes — from Chapter 3, section 2 of the CWP — for more context around how the CWP presents the threat hunting function. A copy of the CWP has been attached to this task to perform a more in-depth review of Chapter 3, section 2.
+
+Where traditional cybersecurity is passive or reactive, CPT hunt operations take the fight to the enemy by proactively searching out, identifying, disrupting, and defeating threats resident in networks and systems. (2.a.1)
+Knowledge of adversary presence is not a prerequisite for the conduct of CPT hunt operations. (2.a.4)
+Hunting is an operation to find, fix, and track MCA, and is often driven by data analysis, threat identification, or other anomalous activity. CPTs, in contrast to local defenders, focus on those threat subsets with Tactic, Technique and Procedure (TTP)-specific capability, perceived intent, and opportunity to bypass security layers emplaced by Cybersecurity Service Providers (CSSP) and local network defenders. CPT hunt operations are predicated on the assumption [that] threats already reside within networks. (2.a.5)
+The absence of security alerts does not indicate an absence of threats, and may instead indicate security mechanisms did not detect a threat or intrusion. ... Passive incident detection and threat hunting operations can, and should, be conducted simultaneously. (2.a.7)
+CPT hunt operations focus on narrowing MCA tactics to characterize the threat, and determine the threat's technical capability. (2.a.6)
+Successful hunt operations may require the CPT to establish a deliberate defense posture to further develop and coordinate detailed plans based on the adversary or MCA. (2.a.8)
+This information paints a relatively detailed picture about how threat hunting should be performed during a CPT threat hunting operation. A CPT analyst performing a threat hunting operation should proactively and iteratively seek evidence of MCA within an environment. CPT analysts should focus on hunting a subset of threats, specifically those with advanced TTP-specific capabilities, and should expect that these threats likely have the capability to avoid security controls that may already be in-place on a network. If, and when, a CPT analyst discovers evidence of MCA during hunting operations, they should gather additional data in order to determine the threat's technical capability; this data is used to help the CPT and local network defenders determine the actions that should be performed in response to the threat, which may include immediate clear operations, the creation of a deliberate defense posture, or other actions established via planning with local defenders and network owners. Threat hunting activities can, and should be, done alongside passive incident detection activities to increase the security posture of a network.
+
+﻿Recall the CPT Operations Process (OP) presented in the CWP (and earlier in this course during the M2L1 - Operations Process lesson). Figure 3.1-1 outlines the six steps of the CPT OP:
+Objectives, Effects, GuidanceTerrain Identification & PrioritizationCapability Analysis & Force AllocationOrders Production and DisseminationTactical Planning and Mission Execution
+
+
+Assessment
+
+
+The remainder of this section discusses the first four steps of the CPT OP as they pertain to a threat hunting operation.
+
+
+Triggers
+
+
+There are three triggers that generally initiate the CPT OP. These triggers are presented along with an example of how each might trigger a threat hunting operation.
+Threat Intelligence: Threat intelligence can trigger a hunt operation by warning of an imminent or already-realized cyber attack, or by reporting on new indicators or adversaries that were recently seen in the wild. For example, intelligence about an adversary beginning to actively target the energy sector may trigger a CPT to perform hunts that look for evidence of that adversary on energy sector networks.
+NOTE: Threat intelligence can also inform the Tactical Planning and Mission Execution phase of a hunting operation, by allowing a threat hunter to develop more informed or more targeted hunting hypotheses. The creation of hunt hypotheses is discussed later in this lesson.
+Campaign Plan: CPT employment in support of Combatant Command (CCMD) campaign plans is intended to increase critical asset protection prior to operational need. Hunting for evidence of MCA on an asset prior to that asset's use can prevent an adversary's ability to monitor, control, or render that asset unusable during critical phases of CCMD's campaign plans.MCA Detection: Detection of MCA within a network may prompt further hunting operations. These operations may be employed in an attempt to discover additional MCA which has evaded detection, or to maintain further contact with an adversary that has already been discovered.
+Planning
+
+
+Once a CPT threat hunting operation has been triggered, the planning phases of the CPT OP (Steps 1–4) take place. These steps include determining the objectives and scope of the operation, terrain mapping, determining the Mission Relevant Terrain in Cyberspace (MRT-C) and Key Terrain in Cyberspace (KT-C), documenting Rules of Engagement (ROE) for the CPT, beginning to coordinate system access for the CPT, publishing and disseminating orders, and other actions. As indicated in Figure 3.1-2, CPTs are heavily involved in these planning actions. Note that the blue diamonds indicate items where a CPT is directly involved.
+
+
+The planning phases of the CPT OP are crucial to set a hunting operation up for success. For example, a hunt operation tasked with looking for MCA related to a specific adversary group must rely on accurate threat intelligence and adversary analysis in order to prevent time from being wasted on hunting for things not related to that adversary. Additionally, information gathered during Terrain Mapping and Analysis can inform a CPT about the evidence sources that are currently available in an environment, and which of those evidence sources is most fruitful to hunt within. Lastly, knowledge about the MRT-C and KT-C within an environment can help a CPT focus its hunting efforts on the most relevant terrain in an environment.
+
+
+After the completion of the planning phases of the CPT OP, a CPT should be able to answer the following questions as they relate to the hunting operation:
+What is the scope and purpose of the hunting operation? — What triggered the operation? How long does the operation last? What is the intent and desired end state of the operation?What does the environment look like? — Has a network diagram been created that accurately documents the network? What applications, Operating Systems (OS), and hardware are in use in the environment? What security controls are already in place and potentially related to the operation?What evidence sources are available for a CPT to utilize during the hunt? — Is it necessary for a CPT to acquire evidence for itself, or can this be furnished by local defenders? Are there any visibility gaps that must be accounted for during evidence collection or investigation tasks? If the CPT requires access to additional data, what is the procedure to acquire this access?What are the ROEs that a CPT must adhere to within the environment? — Are there any actions that a CPT has been forbidden from taking? Are there any network segments, machines, or applications that are off-limits to the CPT? What actions are taken by the CPT if, and when, MCA is discovered?Who are the people that the CPT must keep involved during this operation? — Who are the Points of Contact (POC) that a CPT might need to reach out to? When should a CPT reach out to one or more of these POCs? What CPT actions need approval, and which POC can give this approval? How and when does the CPT share their results with appropriate POCs?
+This wealth of information is utilized by a CPT during the Tactical Planning and Mission Execution phase of a hunting operation. The next section of this lesson discusses how to conduct this step as it pertains to hunting operations.
+
+Tactical Planning for Hunt Operations
+A CPT that has completed the planning phases of the CPT OP is ready to begin the Tactical Planning and Mission Execution of the hunt operation. At this point, a CPT should understand the goals of their mission, the environment/network they are operating within, the individuals and groups that they need to communicate with during the operation, and any limitations, ROEs, or contingencies that exist or need to be planned for.
+
+﻿
+
+Creating a Tactical Plan
+﻿
+
+Appendix C of the CWP contains a Tactical Hunt Planning Guide that CPTs can reference when creating a tactical plan for a hunt operation.
+
+﻿
+
+For example, section b.1.a of the guide outlines Network Topology, and lists the following items that should be documented in the tactical plan:
+
+Physical layout
+Logical layout
+External connections (if applicable)
+Critical systems (i.e., MRT-C, or KT-C, if identified)
+Services and applications
+The items above can be answered with the information gathered during the earlier planning phases of the CPT OP. In fact, a large majority of the sections in the tactical plan can be documented in a similarly straightforward fashion. The sections that are not as straightforward are of particular interest to CPT hunting operations, however. Each of these important sections is detailed as follows:
+
+﻿
+
+Section b.1.d: Network Environment — Threat/Adversary Model
+
+This section of the tactical plan should contain information surrounding specific adversaries being targeted during the hunt, including those adversaries' TTPs, objectives, and other detailed intelligence about the adversary. For hunting operations, this section should be as thorough as possible, and might even include information on adversaries that are theorized to be targeting the mission partner's network, even if no tangible intelligence has been gathered to support this. Having this information allows a CPT to better focus their hunting efforts, and more accurately assess any suspicious indicators that arise over the course of the operation.
+
+﻿
+
+Threat modeling is especially important for CPT hunting operations. Threat modeling performed by intelligence operators can serve as a Campaign Plan trigger — a threat model suggesting an adversary targeting a particular environment can trigger a proactive hunting operation within that environment. Additionally, threat modeling is an important step for a CPT to perform during operations that were triggered via active MCA in an environment, as the adversary responsible for that MCA very likely still poses an active risk to that environment. Hunting for TTPs and other indicators belonging to that adversary are key steps in determining the full scope of a compromise.
+
+﻿
+
+Section c.1: Execution — Network/System Owner's Intent
+
+This section should clearly state the desired goals of the hunt operation, as determined by the network/system owner. A CPT should develop key tasks performed in order to achieve these desired goals. Many of the key tasks for a hunting operation should include high-level hunting topics; a CPT hunting operation likely consists of multiple individual hunts, each of which is aligned to a topic described in a key task.
+
+﻿
+
+Section c.12: Execution — Collection Plan
+
+This section documents the plan to collect data from the environment. This data can either be used to answer questions that arose during earlier planning steps, or can be used directly during the execution of an individual hunt. This section should also document any analytics present in the environment, such as any pre-existing automated detection/alerting platforms, and outline a plan for developing suspicious hunt findings into actionable analytics. Lastly, this section should establish a plan for the consolidation and analysis of the data a CPT needs access to in order to conduct the hunting operation.
+
+﻿
+
+Section c.13: Execution — Analysis Plan
+
+This section combines and further develops the items documented in Section C of the Tactical Hunt Planning Guide. At this point, a CPT should be developing the key tasks they have identified into individual hunts via the creation of hunt hypotheses, which are discussed later in this lesson. The plan for each hunt should include details on what a CPT is hunting for and which data sources are required to do so. This section should also document an overarching information sharing plan for any new adversary indicators or TTPs that are uncovered during the course of a hunt.
+
+﻿
+
+Section c.14: Execution — Response/Incident Response
+
+This section details what actions are taken if, and when, MCA has been identified in an environment. This information is extremely important, as it fully details the scope of the operation and further defines the ROEs that a CPT must abide by. For example, a CPT may be tasked with passing potential MCA findings to the local defender's Incident Response (IR) team for further investigation and confirmation that the finding represents an actual threat. In this case, the IR section of the tactical plan should detail the necessary requirements needed to engage the IR team, and how the details of the identified MCA are communicated between the CPT and the IR team.
+
+﻿
+
+There is no formally-defined format for tactical plans. However, the Tactical Hunt Planning Guide presented in the CWP serves as an excellent reference point to make sure all the information required to perform a hunting operation has been collected and clearly documented.
+
+dentifying and Collecting Data for Hunting
+During the creation of the tactical plan, a CPT identifies the key tasks that need to be performed in order to meet the goals of the operation as determined by the network/system owner. For hunting operations, these key tasks include high-level hunt topics that can be further broken down into individual hunts. For each hunt, a CPT must identify relevant data that exists within the environment, and develop a plan for acquiring access to this data or otherwise collecting it for themselves, if allowed.
+
+﻿
+
+In terms of collecting data from these data sources, a CPT must be prepared to adapt to a wide array of situations — due to the variety of data sources available, as well as differences between networks, no set plan can be established for collecting data from an environment. For example, a CPT might be able to gain access to a pre-existing data source owned by the local network operators, or could ask local defenders to configure a pre-existing data stream to send data into the CPT’s mission kit. Alternatively, a CPT might gather data for themselves via the deployment of a network tap or by collecting the data directly from endpoints, if the ROEs allow for it.
+
+﻿
+
+In general, a CPT should have knowledge of the different types of security-related data that can exist within an environment. This knowledge lets a CPT make informed decisions about which data sources are the most valuable during a hunt. Additionally, a CPT may be able to make additional requests of local network owners and operators in order to acquire access to other data sources.
+
+﻿
+
+As you proceed through the rest of this course, become intimately familiar with different data sources that may be applicable to threat hunting. The following broad categories serve as an introduction to the types of data sources that a Cyber Defense Analyst (CDA) should be familiar with.
+
+﻿
+
+﻿
+Host Logs
+﻿
+
+Host logs are generated by the OS installed on an individual host or endpoint. A wide array of host logs are available, but not all are usable for security-focused investigation activities. Additionally, different OSs contain vastly different types of host logs — cybersecurity analysts performing a host log investigation must learn to cope with many different sources, types, and qualities of logs generated across each investigated OS.
+
+﻿
+
+Generally, host logs contain granular information about events that occur on a host. Since these events are logged by the OS, they contain some unique information that can be very helpful to security investigations. The following events are a very small sample of the host logs that might be generated on an endpoint:
+
+A process was started or stopped
+A network connection was attempted
+A user logged in to or logged out of the machine
+A new device was plugged into the machine
+Examples of data sources that hold these types of logs include the Windows event log (on Windows systems), or the System Log (syslog) and System Daemon (systemd) logs on Unix systems.
+
+﻿
+
+﻿
+Network Logs
+﻿
+
+Network logs are generated by applications or devices that handle network connections in some fashion, and contain information about a connection such as its source, destination, associated ports, and amount of data being transferred. More advanced network logs may include additional details about each connection — for example, network logs from HTTP traffic usually include the type of HTTP request that is being made and the HTTP response code returned by the server handling the request.
+
+﻿
+
+Some network logs are generated as part of normal OS activity, and may be accessed in the same ways that an analyst might access host logs. Other network logs are generated by specific devices or networking appliances such as routers, firewalls, or proxy devices. How an analyst collects, parses, and analyzes logs from these sources may differ greatly depending on the specific source that is generating the logs.
+
+﻿
+﻿
+Security Appliance Logs
+﻿
+
+Security appliance logs are logs generated by a security appliance, an antivirus log indicating that potential malware was identified and removed, or an IDS identifying network traffic containing potential attack patterns. As the goal of many security appliances is to prevent or detect MCA, these logs are usually directly related to potential MCA.
+
+﻿
+
+﻿
+Application Logs
+﻿
+
+This broad category of logs simply means any logs generated by an individual application. Not all applications generate logs, and just because a log exists does not mean it is useful to a security investigation. Application logs can be incredibly useful in certain situations, however. For example, if an analyst needs additional information surrounding an attacker's direct interactions with an application, or when an attack vector is performed through exploiting a specific application, application logs may provide crucial insight into the attacker’s activity.
+
+﻿
+
+Application logs can also be utilized for security investigations as a backup source of evidence to fill potential visibility gaps or provide more context to an investigation. As an example of this, imagine a database server in an environment that contains no network logging solutions. If an attacker launched a network-based attack against the database server in this environment, how could the attack be identified by a CDA? In this case, the database application is likely logging incoming requests, including the attacker's requests — an analyst could potentially use these database logs as evidence to investigate the attack.
+
+﻿
+
+In actuality, the categories suggested above are rough approximations of various data sources that are likely to be present in an IT environment. Specific knowledge of the system or application that is generating a log is usually required in order to utilize the log to its full potential.
+
+Stone Panda Planning
+
+Using the provided threat intelligence product, answer the following questions about APT10 (also known as Stone Panda). Document your answers in Notepad on the cda-win-hunt VM, or by some other method of your choice.
+
+What method(s) has APT10 used to gain access to environments?
+What tools and/or malware has APT10 been known to deploy? 
+What method(s) has APT10 used to accomplish lateral movement?
+What exfiltration method(s) has APT10 used?
+Once this information has been documented, continue the planning process by developing key tasks that enable a mission element to hunt for APT10/Stone Panda.
+
+Planning Summary
+So far, you have learned how a CPT can perform the planning phases of the CPT OP to successfully prepare for a hunt mission. During these steps, a CPT collects a wealth of information about the mission and the environment in which the mission is conducted. For hunting operations, knowledge of the goals of the mission, adversary TTPs, and data sources present in the environment are crucial to the operation’s success. All this collected information can be further distilled into a tactical plan, which serves to communicate a CPT’s understanding of the mission and the environment in which the mission takes place. Within this tactical plan, a CPT should have identified individual hunts that can be executed upon in order to achieve the mission’s goals, along with the data sources present in the environment that contain data relevant to the hunt.
+
+﻿
+
+Now that the operation planning has been completed, a CPT is finally ready to execute upon an individual hunt. The following task chain details the process of executing a hunt based on the information documented within the tactical plan.
+
+Executing a Hunt
+During the creation of the tactical plan, a CPT breaks the operation's key tasks into high-level hunt topics, which can then be further broken down into individual hunts. After doing this — and collecting data relevant to each hunt — a CPT is ready to perform the data analysis and investigative tasks required to execute a hunt.
+
+﻿
+
+The Threat Hunting Loop
+﻿
+﻿
+
+Figure 3.1-4 — Sqrrl’s Threat Hunting Loop. Image credit to WHITE PAPER A Framework for Cyber Threat Hunting -  https://docplayer.net/55373115-White-paper-a-framework-for-cyber-threat-hunting.html ﻿
+
+﻿
+
+In The Threat Hunting Reference Model publication series, Sqrrl presents the Threat Hunting Loop as a way to tactically implement a hunt. It consists of four stages that guide an analyst or team of analysts through the execution of a hunt.
+
+﻿
+
+﻿
+Create Hypotheses
+﻿
+
+As stated earlier, a CPT hunting operation should consist of multiple individual hunts, each of which can be executed by following the Threat Hunting Loop. Each hunt poses a single hypothesis, then uses evidence gathered from the network to prove or disprove that hypothesis.
+
+﻿
+
+Creating a hypothesis is the first stage of the Threat Hunting Loop because a hypothesis is the foundation on which a hunt is built. As stated by Sqrrl in the Hunt Evil: Your Practical Guide to Threat Hunting publication:
+
+﻿
+
+A hunt starts with creating a hypothesis, or an educated guess, about some type of activity that might be going on in your IT environment. Hypotheses are typically formulated by analysts based on any number of factors, including friendly intelligence and threat intelligence, as well as past experiences.
+
+﻿
+
+An example hunting hypothesis gives you an idea of what a hypothesis might look like. Full understanding of the following hypothesis is not required to continue with this lesson.
+
+﻿
+
+Anomalies seen in [Hypertext Transfer Protocol] HTTP user-agent strings may be indicative of attacker…C2 activity over HTTP. These anomalies may include, but are not limited to, misspelled user-agent strings, uncommon user-agent strings, or user-agent strings associated with outdated versions of legitimate software.
+
+﻿
+
+More information surrounding the creation of hunt hypotheses is presented later in this lesson. 
+
+﻿
+﻿
+Investigate Via Tools and Techniques
+﻿
+
+During this stage, an analyst actually begins performing an investigation. Since the CPT has already created a tactical plan, they should know which evidence sources are present in the environment and relevant to the given hunt. A CPT should also have knowledge of the tools available within their mission kit that can be used to investigate these evidence sources.
+
+﻿
+
+This phase also makes reference to techniques — more specifically, this refers to hunting techniques. Hunting techniques are data analysis techniques that are used to investigate a set of data during a hunt. These can range from very basic techniques like running simple searches against a dataset, to incredibly complex techniques such as machine learning or advanced statistical analysis.
+
+﻿
+
+﻿
+
+Uncover New Patterns and TTPs
+﻿
+Once suspicious activity has been identified, an analyst must determine if the activity can truly be traced back to an attacker. This may be immediately evident upon initial discovery of a suspicious pattern, or may require a deeper investigation. This phase can also include further refinement of the hunting techniques used to initially identify the activity. 
+
+﻿
+
+This step often allows an analyst to refocus or reword the initial hypothesis, and may even generate new hunting hypotheses. An analyst should document these hypothesis ideas as they come up — investigating a second or third hypothesis may reveal instances of suspicious activity that the first hypothesis did not.
+
+﻿
+﻿
+Inform and Enrich Analytics
+﻿
+
+The last step of the Threat Hunting Loop involves informing and enriching automated analytics. The Sqrrl Hunt Evil: Your Practical Guide to Threat Hunting publication clearly states the goal of this step:
+
+﻿
+
+Don’t waste your team’s time doing the same hunts over and over. If you find an indicator or pattern that could recur in your environment, automate its detection so that your team can continue to focus on the next new hunt.
+
+﻿
+
+During this step, a CPT should document the suspicious pattern that was identified, the associated analysis techniques used to detect the pattern, and any analytics that were developed around this pattern, such as detection rules, searches, and code used for data analysis. It is not possible, or advised, to try to fully automate every hunt result. In certain environments, automated detection may not be feasible, or even possible. However, the investigative and analysis steps taken during each hunt should be well-documented, so that the hunt can be more easily repeated later.
+
+﻿
+
+Any automated analytics or hunt documentation created during this step should be placed within an appropriate knowledge management solution to help improve the operations of other CPTs. A version of this documentation can also be provided to local defenders and local network operators in order to help improve the network’s security posture.
+
+﻿
+
+Friendly intelligence — information about the normal operations of the environment that the hunt is being conducted within — can also be created during this step. Friendly intelligence can include items such as a software inventory, a catalogue of important server locations, and other details about the environment. Documenting friendly intelligence can be especially important during a long-term hunting operation, as it allows a CDA to more quickly recognize what normal looks like in a given environment.
+
+
+Threat Hunting Loop Summary
+﻿
+
+As described by the Threat Hunting Loop, a hunt starts with a hypothesis, which is then investigated using hunting techniques and associated tools in order to uncover patterns of potential attacker activity. These patterns are further analyzed to determine if they are related to attacker activity, effectively proving or disproving the initial hypothesis. Lastly, the knowledge uncovered during the hunt is documented and, if possible, used to improve automated analytics, detection, and future hunting operations.
+﻿
+
+The Threat Hunting Loop is a simple process that can greatly improve hunting capabilities by allowing hunts to be focused, effective, and iterative.
+
+
+Additional Resource
+
+Sqrrl — A Framework for Cyber Threat Hunting: https://docplayer.net/55373115-White-paper-a-framework-for-cyber-threat-hunting.html 
+Sqrrl — Hunt Evil: Your Practical Guide to Thr eat Hunting: https://www.threathunting.net/files/hunt-evil-practical-guide-threat-hu nting.pdf
+
+Hunting for CyberButler Activity
+In the rest of this lesson, plan and execute a hunt for MCA related to a fictional adversary known as CyberButler. Below is a tactical plan that was created during the CPT OP to support the hunting operation.
+
+﻿
+
+NOTE: In order to provide a concise scenario, many sections normally included in the tactical plan have been left out, as they are not directly related to the hunt being performed.
+
+﻿
+
+Tactical Plan
+﻿
+
+SITUATION
+﻿
+
+This CPT hunt operation was triggered by threat intelligence confirming that the adversary group known as CyberButler has recently been observed targeting defense contractors. The operation occurs within the network of defense contractor CDA Corp, who has been identified as a likely target for CyberButler attacks.
+
+﻿
+
+THREAT INTELLIGENCE
+﻿
+
+Several intelligence reports have tied CyberButler to multiple successful breaches of American private-sector companies, specifically those involved with the creation of consumer-grade solar energy technology. CyberButler’s end goal during these breaches has been to steal design and engineering documents related to various solar technologies.
+
+﻿
+
+The SilverPlatter malware, known to be associated with CyberButler, was recently found during a security investigation of a defense contractor, XYZ Industries, which indicates that CyberButler may have recently changed their preferred targets.
+
+﻿
+
+NOTE: From the high-level threat summary, the CPT’s planning team digs deeper into threat reports on CyberButler to extract the following TTPs. Those TTPs are critical as the mission elements conceive and execute their hunt hypotheses.
+
+﻿
+
+TTPs
+
+﻿
+
+The following TTPs have been positively attributed to prior CyberButler attacks:
+
+CyberButler gains initial access to a network via delivery of the SilverPlatter malware within a spearphishing email. These emails try to trick users into opening and executing the SilverPlatter malware by making the malware payload seem like urgent financial documents.
+After gaining initial access, CyberButler operators enumerate account usernames within the domain. Then, they perform brute force attacks against a small number of high-privileged accounts in an attempt to guess the passwords for the accounts.
+NOTE: All brute force attacks performed by CyberButler were performed against domain user accounts. These accounts generally provide access to resources across an entire network, and are not associated with any one specific application such as an email service or website.
+
+Once CyberButler successfully compromises a high-privileged account, they move laterally throughout the network in order to gather and exfiltrate important data and complete their operation.
+﻿
+MISSION STATEMENT
+﻿
+
+Hunt for any indicators of CyberButler MCA within the CDA Corp network, focusing specifically on known CyberButler TTPs. If MCA is discovered, information about the MCA is communicated to the CDA Corp IR team in order to affect the removal of CyberButler actors from the network.
+
+﻿
+
+KEY TASKS
+﻿
+
+These key tasks — individual hunts, in this mission — are derived from the TTPs identified in the tactical planning step. This process of getting high-level threat intelligence, drilling down into the intelligence to identify adversary TTPs, and then converting those into mission-relevant key tasks, is at the core of the tactical planning function.
+
+Hunt for CyberButler MCA:
+Topic: CyberButler spearphishing indicators
+Hunt for indicators found within subject lines in past CyberButler phishing emails
+Hunt for indicators matching known CyberButler sender addresses
+Topic: Brute force account compromise indicators
+Hunt for brute force attacks targeting domain accounts
+Friendly intelligence has indicated that domain accounts within the CDA Corp network follow the format firstname.lastname (e.g., john.doe)
+Topic: SilverPlatter malware indicators
+Hunt for known SilverPlatter malware hashes
+Hunt for SilverPlatter C2 indicators
+Hunt for SilverPlatter execution patterns
+Document any hunting actions performed
+Document any MCA identified during the hunts
+Communicate details surrounding any identified MCA to the CDA Corp IR team
+NOTE: After reading the remainder of the tactical plan, prepare to plan and perform the hunt for brute force account compromise indicators. The other hunts are included above to demonstrate that multiple hunts are necessary to fully complete this CPT operation. However, the rest of this lesson excludes these hunts, in order to keep things more concise.
+
+﻿
+
+DATA COLLECTION PLAN
+﻿
+
+Brute Force Attack Indicators
+
+﻿
+
+In order to identify brute force attack indicators, authentication logs from CDA Corp endpoints are required. As discovered during the site review of CDA Corp, host logs are automatically gathered from endpoints across the environment and are collected into CDA Corp’s Elasticsearch cluster. As CDA Corp endpoints primarily use the Windows OS, the host logs that are generated are from the Windows event log present on an endpoint, which contains authentication logs for that endpoint. The Windows event log is a suitable data source for hunting brute force attack indicators.
+
+﻿
+
+CDA are able to access these logs through a Kibana instance normally used by CDA Corp’s IR team.
+
+﻿
+
+INCIDENT RESPONSE
+﻿
+
+CDA Corp network owners want the CPT to focus its efforts on the discovery of potential MCA; further investigation of suspected MCA is undertaken by the CDA Corp IR team. In order to facilitate their investigation, the CDA Corp IR team requests that a summary of the suspected MCA and a list of the involved endpoints be sent to IncidentResponse@cda.corp upon discovery.
+
+﻿
+
+Now that you have reviewed the tactical plan, keep it in the front of your mind as you proceed through the hunting scenario.
+
+Creating a Password Guessing Hunt Hypothesis
+As stated earlier, a hunt hypothesis is an educated guess about some activity that may be occurring within an IT environment. However, not all hypotheses are created equal. A good hypothesis might accomplish any or all of the following:
+
+Direct analysts towards potential analysis methods
+Propose what attacker activity might look when found
+Identify likely sources of evidence to hunt within
+Provide a path for analysts to follow in order to prove or disprove the hypothesis
+Develop a hunting hypothesis surrounding the Brute Force Account Compromise hunt proposed within the tactical plan. Based on the threat intelligence described in the tactical plan, CyberButler is known to compromise domain user accounts by performing brute force attacks after gaining initial access to a network. These brute force attacks occurred against a small number of high-privileged accounts. Based on these patterns, it seems that CyberButler performs a specific subset of brute force attacks known as password guessing attacks. In many cases, a hunt topic such as Brute Force Account Compromise would have to be broken down further into multiple hunts — it is only because of known CyberButler TTPs that the Brute Force Account Compromise topic only requires one hunt.
+
+﻿
+
+Brute force attacks — as well as the sub-technique of password guessing attacks — are defined within the MITRE ATT&CK cyber adversary knowledge base. Though not necessary for this lesson, you can review the MITRE Brute Force technique T1110 page for more information on brute force attacks:  https://attack.mitre.org/techniques/T1110/ . The MITRE ATT&CK knowledge base and associated frameworks are discussed later in this course.
+
+﻿
+
+Password Guessing Attack Overview (MITRE T1110.001)
+﻿
+
+A password guessing attack is exactly as it sounds — if an attacker knows the username of an account, they can try to guess the password for that account. Successfully guessing the password should allow the attacker to log in as that user account. This attack can be performed against as many accounts as the attacker wishes to run it against, but is usually performed against a specific target account.
+
+﻿
+
+Usually, password guessing attacks are performed via an automated tool, which can guess many different passwords in a short amount of time. In practice, attackers often try to limit the number of passwords they need to guess by choosing passwords from a password list, which contains hundreds or thousands of commonly-compromised passwords that have been extracted from breach reports. This greatly increases the attacker’s chance of success, as many users choose simple, easy to remember passwords such as password, abc123, or letmein. Each of these common passwords shows up on many open-source password lists.
+
+﻿
+
+Password guessing attacks should be relatively easy for a defender to detect. Unless the attacker is extremely lucky, nearly all the passwords guessed by the attacker are incorrect.
+
+﻿
+
+Though not required for this lesson, see Brute Force: Password Guessing, Sub-technique T1110.001 - Enterprise | MITRE ATT&CK® for a deeper explanation of password guessing attacks.
+
+Password Guessing
+The best indication that the jane.doe account was the victim of a password guessing attack would be an abnormally high amount of login failure events for the jane.doe account. 
+
+﻿
+
+During a password guessing attack, the attacker is expecting to fail multiple logins as they attempt to guess the correct password for an account. Each of the logins that use an incorrect password generates a login failure event. Thus, a large amount of login failure events for the jane.doe account is the best indicator of this activity — it does not matter if these login failure events are spread across multiple systems or occur on only one system.
+
+﻿
+
+Password Guessing Hypothesis
+﻿
+
+Now that an indicator for password guessing activity has been identified, all that is left is to rephrase the indicator in the form of a hunting hypothesis. A fully-developed hunting hypothesis for the CyberButler password guessing hunt might look something like the following:
+
+﻿
+
+Because the attacker is simply guessing at passwords during a password guessing attack, most of their login attempts are likely to fail. Therefore, a high volume of login failure events for a single user account may be indicative of attacker password guessing activity.
+
+﻿
+
+The hypothesis presented above has been intentionally left generic. Regardless of the data source or threat actor involved, the hunt hypothesis above is a great one to use for any hunt on password guessing activity. However, a CPT may want to include additional knowledge within their hunting hypotheses to provide more details about a threat actor or the network they conduct their hunt within. An alternative version of this hypothesis that focuses on CyberButler’s use of password guessing attacks might look like the following:
+
+﻿
+
+CyberButler uses password guessing techniques to attempt to compromise a small set of high-privileged domain user accounts. Because of the password guessing techniques used, most of CyberButler’s login attempts are likely to fail. Therefore, a high volume of login failure events for a single domain user account may be indicative of CyberButler password guessing activity.
+
+Preparing for the Hunt
+﻿
+
+Perform the hunt for CyberButler password guessing activity.
+
+﻿
+
+Setup
+﻿
+
+The hunt is conducted via Kibana, an open-source interface that allows for searching over data stored in Elasticsearch. Familiarity with these tools is not required to conduct the hunt, as the instructions contain all the steps necessary to navigate the tools and complete the investigation. These tools are discussed in far greater detail later in this course.
+
+Executing the Password Guessing Hunt
+Identifying Data Sources
+﻿
+
+Recall the password guessing hunt hypothesis that was developed earlier:
+
+﻿
+
+CyberButler uses password guessing techniques to attempt to compromise a small set of high-privileged domain user accounts. Because of the password guessing techniques used, most of CyberButler’s login attempts are likely to fail. Therefore, a high volume of login failure events for a single domain user account may be indicative of CyberButler password guessing activity.
+
+﻿
+
+The hypothesis states that a high volume of login failure events for a single domain user account may be indicative of a CyberButler password guessing attack. The tactical plan has identified that host logs are needed in order to perform this hunt, and that Windows event logs seem to be the most likely source for these logs. Within Windows event logs, 4625 Login Failure events are generated on a host whenever an account fails to log in to that host.
+
+﻿
+
+NOTE: Throughout the rest of this lesson, Windows 4625 Login Failure events are referred to by the common shorthand phrase 4625 events.
+
+﻿
+
+The following fields are some of those present in 4625 events. The fields listed below are directly relevant to the hunt.
+
+﻿
+
+﻿
+
+Table 3.1-1
+
+﻿
+Hunt Analysis Steps
+﻿
+
+The ultimate goal of the hunt hypothesis is to identify domain accounts with a high volume of 4625 events, as these accounts may have been the victims of a password guessing attack. Perform the following steps along the way to accomplishing this goal:
+
+﻿
+
+1. Create a search to identify all 4625 events.
+
+﻿
+
+2. Identify any extraneous results present in the search results.
+
+﻿
+
+3. Filter out the extraneous results, as they may obscure actual results.
+
+﻿
+
+Keep these steps in mind as you proceed through the first half of this exercise.
+
+﻿
+
+Executing the Hunt
+﻿
+
+Follow the steps below to create a query to identify 4625 events. 
+
+﻿
+
+1. Double-click Last 24 hours inside the date-time picker to open it. Select Absolute, and change the start time to Jun 14, 2021 @ 00:00:00.000.
+
+﻿
+
+﻿
+
+Figure 3.1-9
+
+﻿
+
+2. Select Now from the date-time picker, and repeat the steps above to select Jun 15, 2021 @ 00:00:00.000 as the end time.
+
+﻿
+
+3. Enter the following query into the Search.
+
+﻿
+
+winlog.event_id:4625
+﻿
+
+The query searches for all Windows events with event ID matching 4625, and accomplishes the first step that was detailed earlier.
+
+﻿
+
+4. Select Refresh to run the query. The number of events returned is indicated above the Timeline Graph.
+
+﻿
+
+﻿
+
+Figure 3.1-10
+
+﻿
+
+Nearly 22,000 login failure events over a 24-hour period is quite troubling. In order to determine the cause of this large amount of events, do some additional investigation into the results.
+
+﻿
+
+5. Select > next to the first event to open it.
+
+﻿
+
+﻿
+
+Figure 3.1-11
+
+﻿
+
+6. Scroll down to the winlog fields present in the event. These fields are directly relevant to an individual login failure event, and can be used to assess whether the query is working as intended.
+
+﻿
+
+﻿
+
+Figure 3.1-12
+
+﻿
+
+In this case, the associated ComputerName appears to be CDA Corp’s mail server, and the TargetUserName that is listed appears to be an email address. Though it is possible to compromise email accounts with a password guessing attack, these accounts are out-of-scope for the hunt based on prior knowledge about CyberButler TTPs.
+
+﻿
+
+As stated within the tactical plan, CyberButler attempts to compromise domain accounts via their password guessing attacks — friendly intelligence included in the tactical plan indicated that domain accounts for CDA Corp follow the format firstname.lastname. Thus, the email address account that was identified in this event can be considered extraneous.
+
+﻿
+
+In order to remove the extraneous results, any 4625 events from the mail server can be filtered out. This filter is not completely accurate, as it also excludes domain accounts that were logging into the mail server, but it is suitable for the purposes of this task. 
+
+﻿
+
+7. Add a filter to remove all 4625 events that were generated by the mail server. Scroll up and select Add filter, and set the following options in the pop-up window. This action accomplishes Step 3 — filter out extraneous results — of the Hunt Analysis steps discussed earlier.
+
+Enter winlog.computer_name into the Field box, and select the first result from the list of three that pops up
+Set the Operator to is not
+Enter cda-mail.cda.corp into the Value field
+When finished with the filter, select Save.
+
+﻿
+
+﻿
+
+Figure 3.1-13
+
+﻿
+
+8. Select Refresh to run the query with the new filter applied. Note the number of hits returned now that the filter is included:
+
+﻿
+
+﻿
+
+Figure 3.1-14
+
+﻿
+
+The original number of events returned prior to adding the filter was 21,811 — the filter removed 19,952 extraneous events. This large volume of extraneous events can easily obscure the real results of a search.
+
+﻿
+
+Filtering out this noise — as demonstrated — is an important part of many hunt and investigation activities. Identifying and preventing extraneous results from appearing in search or analysis results is extremely helpful. During a real hunt, the identification and subsequent filtering of extraneous results may need to be performed multiple times in order to sufficiently reduce the amount of noise and to make sure that suspicious patterns can be easily identified in the results.
+
+﻿
+
+Speaking of suspicious patterns, take a look at the Timeline Graph.
+
+﻿
+
+Figure 3.1-15
+
+﻿
+
+There is a large spike in the number of 4625 events at ~17:00 on June 14. This spike in login failure events is incredibly suspicious because of the low volume of other results — an overwhelming majority of the login failures that occurred on June 14 happened during this very short time period.
+
+﻿
+
+Investigate this strange spike by using Kibana’s Visualize application, in order to accomplish the ultimate goal presented by the hunt hypothesis.
+
+﻿
+
+9. Select the Menu Button (three stacked lines) > Visualize.
+
+﻿
+
+﻿
+
+Figure 3.1-16
+
+﻿
+
+The Kibana Visualize application displays.
+
+﻿
+
+10. Select Create visualization.
+
+﻿
+
+﻿
+
+Figure 3.1-17
+
+﻿
+
+11. From the New Visualization menu, select Data Table.
+
+﻿
+
+﻿
+
+Figure 3.1-18
+
+﻿
+
+12. In New Data Table/Choose a source, enter 4625 into the search bar. Select the 4625 - Mail Server Filtered Out saved search. This is a pre-saved copy of the search run earlier, including the filter for the mail server.
+
+﻿
+
+﻿
+
+Figure 3.1-19
+
+﻿
+
+You are now viewing a Data Table of 4625 events. Currently, nothing special has been done to the table, so it only displays a count of how many events are returned in the results.
+
+﻿
+
+﻿
+
+Figure 3.1-20
+
+﻿
+
+Recall the password guessing hunt hypothesis that was developed earlier:
+
+﻿
+
+CyberButler uses password guessing techniques to attempt to compromise a small set of high-privileged domain user accounts. Because of the password guessing techniques used, most of CyberButler’s login attempts are likely to fail. Therefore, a high volume of login failure events for a single domain user account may be indicative of CyberButler password guessing activity.
+
+﻿
+
+Finally, the ultimate goal of this hunt hypothesis can be executed upon. The saved search successfully limits the results to 4625 events, and filters out the large number of extraneous results that occurred on the mail server. Domain users with a high volume of login events can now be identified via the creation of a bucket within the data table.
+
+﻿
+
+13. Select + Add in the Buckets section. Select Split rows from the Add Bucket pop-up menu.
+
+﻿
+
+﻿
+
+Figure 3.1-21
+
+﻿
+
+14. Select the following options for the new bucket.
+
+From the Aggregation drop-down, select Terms. Other fields now appear.
+Enter winlog.event_data.TargetUserName.keyword into the Field box and select the corresponding option in the list that appears.
+﻿
+
+Increase the Size to 30.
+
+﻿
+
+Figure 3.1-22
+
+﻿
+
+15. When finished, select Update to update the data table results. The update may take a view seconds.
+
+﻿
+
+16. View the results in the data table after updating the results to include the new bucket.
+
+﻿
+
+﻿
+
+Figure 3.1-23
+
+﻿
+
+Each unique winlog.event_data.TargetUserName value now has its own row in the data table. The Count column specifies the number of events containing a given TargetUserName value. Clearly, the jess.whitney account makes up the overwhelming majority of the 1,859 login failure events that occurred on June 14.
+
+﻿
+
+At this point, a sufficient amount of evidence has stacked up to indicate that this account was probably the victim of a password guessing attack. The evidence uncovered so far includes a large spike of logon failure events within a short time frame, and a small number of accounts making up a majority of the logon failure events (just the jess.whitney account in this case).
+
+﻿
+
+Now that likely MCA has been identified, further investigation needs to occur in order to determine if this activity can truly be traced back to an attacker. As stated in the tactical plan, this is the responsibility of the CDA Corp IR team. However, the IR team requested information about the endpoints involved in any MCA that was identified.
+
+﻿
+
+17. Add an additional bucket to the data table by selecting + Add below the bucket that you created. Select Split rows from the pop-up menu.
+
+﻿
+
+﻿
+
+Figure 3.1-24
+
+﻿
+
+18. Enter the following information into the fields of the new bucket:
+
+Select Terms for the Sub aggregation field. Other fields now appear.
+Enter winlog.event_data.IpAddress.keyword into the Field box. Select the first option in the list that appears.
+﻿
+
+Increase the Size to 10.
+
+﻿
+
+Figure 3.1-25
+
+﻿
+
+19. When finished, select Update to update the data table results. The update may take a few seconds.
+
+﻿
+
+The data table breaks results into different buckets based on unique TargetUserName and IpAddress values. 
+
+﻿
+
+﻿
+
+Figure 3.1-26
+
+﻿
+
+From the results displayed in the table, it is clear that all the login failures for the jess.whitney account occurred over the network (i.e., one endpoint attempting to log into another endpoint). The source of these login attempts was the remote IP address 172.16.3.3. (Any login failures that occurred locally, such as from a user incorrectly entering their password, show up with an IpAddress of 127.0.0.1 — the localhost IP address.)
+
+﻿
+﻿
+Hunt Technique: Stack Counting
+﻿
+
+The data table visualizations that you created are examples of a bread and butter hunting technique known as stacking, data stacking, or stack counting. Stack counting involves counting how many times each unique occurrence of a value occurs within a particular field in a dataset, then comparing these counts against each other. This is exactly the analysis that you performed when you created a bucket on the winlog.event_data.TargetUserName field — this bucket displayed the number of 4625 events that each account generated.
+
+﻿
+
+For more information on stack counting, read the following FireEye article that gives an in-depth explanation of the technique.
+
+Hunting Over a Larger Timeframe
+You started the password guessing hunt by narrowing the search timeframe to June 14, 2021. In real hunt operations, it is much more likely that a longer timeframe is established for a CPT to hunt over — perhaps the last 30 or 60 days worth of data. Storage concerns may also prevent organizations from keeping data older than a certain age. Large organizations with many thousands of endpoints may spend millions of dollars per year on hardware and software to collect, analyze, store, and retrieve security data. Increasing the number of logs that need to be stored can have a drastic effect on the cost of storing them. CPTs should be aware of these and other data retention issues that could prevent them from completing a hunt to the best of their ability.
+
+﻿
+
+Using the same data table visualization that was created for the password guessing hunt, expand the time range to see seven days worth of 4625 events.
+
+﻿
+
+Select the end date shown in the date-time picker. Change the end date to Jun 21, 2021 @ 00:00:00.000. Select Update once the new end time has been set in order to run the query.
+
+﻿
+
+﻿
+
+Figure 3.1-27
+
+﻿
+
+Looking at the results, it appears that a lot more 4625 events occurred later in the week.
+
+﻿
+
+﻿
+
+Figure 3.1-28
+
+﻿
+
+These events showcase a different pattern than the one identified originally. Instead of a large number of login failures for a single user account, there appear to be a relatively small number of login failures spread across multiple user accounts.
+
+﻿
+
+This pattern hints towards another type of brute force technique that is commonly used to compromise user accounts: Password Spraying.
+
+﻿
+﻿
+Password Spraying Attacks (MITRE T1110.003)
+﻿
+
+A password spraying attack is very similar to a password guessing attack, but offers one key advantage: the ability to subvert account lockout policies. Many networks have an account lockout policy in place to defend against password guessing attacks by automatically locking any accounts that have too many failed login attempts over a certain period of time. This effectively rate-limits any password guessing attacks that an attacker might attempt, rendering these attacks mostly useless.
+
+﻿
+
+In a password spraying attack, attackers spray a small number of common passwords against multiple user accounts. Usually, attackers who want to perform a password spray try to do so against an extremely large number of accounts, which greatly increases their chances of success. If the number of passwords being attempted for each account is less than the number of login attempts allowed by the account lockout policy, an attacker can avoid locking a large number of accounts out of the network — something that is sure to be noticed by the multiple angry users who can no longer log in.
+
+﻿
+
+Password spraying attacks are a little harder to identify than password guessing attacks. Attackers are intentionally trying to avoid the account lockout policy by spreading guesses across a large number of accounts, which means that the number of login failures for a single account is unlikely to look abnormal.
+
+﻿
+
+See Brute Force: Password Spraying, Sub-technique T1110.003 - Enterprise | MITRE ATT&CK for a deeper explanation of password spraying attacks.
+
+Identifying Password Spraying
+From the list of possible answers, the best indicator to identify a possible password spraying attack is an abnormal increase in the amount of login failure events across many user accounts. In a password spraying attack, an attacker could be trying as little as a single password across multiple accounts — while a single login failure for an account could be attributed to almost anything, a large increase in the overall number of login failures across many users is much more suspicious.
+
+﻿
+
+Hunt Technique: Baselining
+﻿
+
+The success of this indicator relies on a hunting technique called baselining. Put simply, baselining is a comparison of the current state of a network against some known-good state. This known-good state might be simple intuition that an analyst has built from their past experience, or it might be based on actual data that was collected from the network. This known-good state is referred to as a baseline — any large deviations away from this baseline can be investigated in order to determine if they are the result of MCA.
+
+﻿
+
+For a password spraying hunt, proper baselining requires an approximate knowledge of the expected amount of login failures in the network over a given time period — a number of login failures that deviates too far from this expected amount is suspicious and should be further investigated.
+
+﻿
+
+Building a Baseline
+﻿
+
+The data table visualization is unable to show when a particular set of events occurred, which makes it less than ideal for performing a baselining hunt. It is impossible to get a sense of what a normal amount of 4625 events might look like for the CDA Corp environment without looking at a larger time frame of activity.
+
+﻿
+
+Workflow
+﻿
+
+1. Navigate back to Discover by selecting the Discover - Elastic bookmark.
+
+﻿
+
+﻿
+
+Figure 3.1-29
+
+﻿
+
+2. Select Open.
+
+﻿
+
+﻿
+
+Figure 3.1-30
+
+﻿
+
+3. Enter 4625 into the Search within Open search. Select 4625 - Mail Server Filtered Out to open the pre-saved search.
+
+﻿
+
+﻿
+
+Figure 3.1-31
+
+﻿
+
+4. Using the date-time picker, set the start time to Jun 14, 2021 @ 00:00:00.000 and the end time to Jun 21, 2021 @ 00:00:00.000. Select Update when finished to rerun the query. It takes several seconds to complete.
+
+﻿
+
+﻿
+
+Figure 3.1-32
+
+﻿
+
+The Timeline Graph appears to show another, much smaller spike in 4625 events that occurred on June 15. This is likely the suspected password spraying attack that was identified in the Visualize application.
+
+﻿
+
+﻿
+
+Figure 3.1-33
+
+﻿
+
+Additionally, this graph shows that the only other occurrence of note is the large spike in login failure events on June 14, which has already been attributed to MCA. 
+
+﻿
+
+This full week’s worth of information serves as a good baseline. Other than the suspected attacker activity, it seems that almost no login failure events regularly occurred within the CDA Corp environment. In any case, login failures certainly do not occur frequently enough to account for either of these large spikes.
+
+﻿
+
+Assuming that this activity can be positively attributed back to CyberButler, it seems that the group has changed their tactics, and are beginning to use password spraying techniques in addition to password guessing techniques.
+
+Brute Force Account Compromise Hunt
+You completed a successful hunt for CyberButler password guessing and password spraying activity using Kibana’s Discover and Visualize applications. Recall that during the tactical planning phase, the following key tasks were selected for execution by your mission element.
+
+Hunt for CyberButler MCA:
+Topic: Brute force account compromise indicators
+Hunt for brute force attacks targeting domain accounts
+Friendly intelligence has indicated that domain accounts within the CDA Corp network follow the format firstname.lastname — for example, john.doe
+Document any hunting actions performed
+Document any MCA identified during the hunts
+Communicate details surrounding any identified MCA to the CDA Corp IR team
+During the hunt, you performed the following actions:
+
+Created a search to identify 4625 login failure events
+Identified and filtered out extraneous data by filtering out data that did not match CyberButler TTPs
+Identified a suspicious pattern in 4625 events using the Timeline Graph
+Used a data table visualization to determine the usernames associated with the 4625 events
+Further modified the visualization to determine the IP address of the endpoints performing the login attempts
+Expanded the search time frame and identified an additional suspicious pattern in the 4625 events
+Used the expanded search time frame to identify a known-good state for 4625 events in the environment 
+Overall, the actions that were taken during the hunt uncovered the following evidence:
+
+On June 14, a large spike in login failure events occurred within a very short time window.
+Most of these login failure events were attributed back to a single account, jess.whitney.
+On June 15, a smaller spike in login failure events occurred.
+These login failure events were attributed back to multiple user accounts within the CDA Corp domain.
+Both of these spikes were caused by remote login attempts from an endpoint with IP address 172.16.3.3.
+The evidence uncovered seems to line up with a password guessing attack against the jess.whitney account. Additionally, it seems that a password spraying attack was run against several CDA Corp user accounts.
+
+﻿
+
+﻿
+Mission Assessment
+﻿
+
+Though not discussed in this lesson, the Mission Assessment phase of the CPT OP assesses the overall effectiveness of the mission upon its completion. This is done by comparing the key tasks identified during the tactical planning step against the actions taken to meet those key tasks.
+
+﻿
+
+It is important to note that the effectiveness of a mission is not predicated upon detecting MCA, but rather on successfully executing key tasks and fulfilling the commander’s intent. In this example, you were highly successful at executing the mission in a manner consistent with the commander’s intent, fulfilling several key tasks and subtasks while identifying two types of MCA.
+
+﻿
+
+﻿
+Possible Alternative Explanations
+﻿
+
+When investigating suspicious activity, it pays to keep in mind possible alternative explanations for the activity. For example, the spikes in login failures for the jess.whitney account might have been caused by an incorrect password that Jess was using in an automated script — this explanation seems to explain the extremely high rate of login attempts, as well as why the login attempts were failures instead of successes. Just because a particular piece of evidence is suspicious does not necessarily mean it was caused by an attacker.
+
+﻿
+
+Ruling out alternative explanations is a crucial step when executing a threat hunt. Some alternative explanations can be investigated and ruled out via data available within a platform such as Kibana, but others may require a deeper investigation into forensics artifacts only present on the suspiciously-behaving host.
+
+﻿
+﻿
+Next Steps
+﻿
+
+Recall the steps defined in the Threat Hunting Loop.
+
+﻿
+
+Figure 3.1-34
+
+﻿
+
+Uncover New Patterns & TTPs
+﻿
+
+The hunts performed completed the Uncover New Patterns & TTPs step of the Threat Hunting Loop.
+
+﻿
+
+For the password guessing hunt, the pattern identified was a large increase in login failure events for a single user account. For the password spraying hunt, the pattern identified was an increase in login failure events across multiple users that deviated significantly from the baseline (i.e., the normal amount of 4625 events that regularly occurred in the environment).
+
+﻿
+
+The CDA Corp IR team needs to finish their investigation in order to determine if the patterns identified during the hunt were truly caused by MCA.
+
+﻿
+﻿
+Inform & Enrich Analytics
+﻿
+
+The Inform & Enrich Analytics step of the Threat Hunting Loop dictates that automated detections and analytics should be developed, if possible, to prevent analysts from running the same hunts over and over. Depending on the patterns or TTPs identified, different forms of automated analytics and detections can be implemented. For these hunts, a Saved Visualization could be created in Kibana in order to save all the search and bucket configurations that were set up during the password guessing hunt. Though this is not fully-automated, it still allows analysts to perform quicker hunts for suspicious login failure events in the future.
+
+﻿
+
+An idea for an automated detection rule might be to detect if an account has too many unsuccessful log in attempts over a short time period. The full implementation of such a detection rule relies heavily on the technology available to CDA Corp, so it is not discussed in detail in this lesson. 
+
+﻿
+
+Lastly, the steps taken during the hunt can be documented in a hunt playbook. A hunt playbook provides a step-by-step walkthrough of the actions taken to perform a hunt, including any useful queries, and descriptions and examples of the types of patterns that the hunt is trying to identify. A hunt playbook would look extremely similar to the instructions followed while working through this task.
+
+﻿
+﻿
+Mitigation
+﻿
+
+Though not directly included in the Threat Hunting Loop, it is important to discuss potential mitigation strategies for the brute force activity identified during these hunts. As stated earlier, most modern organizations implement an account lockout policy to prevent password guessing attacks from succeeding. Having this policy in place likely prevents an attacker from successfully compromising an account. Note that this mitigation does not stop an attacker from launching a password guessing attack — it simply reactively locks out any accounts that fail too many login attempts in quick succession.
+
+﻿
+
+After conducting this hunt, it is prudent to discuss the account lockout policy with local network operators to determine if this mitigation strategy can be implemented or has been already.
+
+Conclusion
+﻿
+
+﻿
+
+Threat hunting is a core function that every CDA must be comfortable performing. In this lesson, you learned about threat hunting as defined by the CWP, and saw how the information gathered during the planning stages of the CPT OP directly informs the creation of a tactical plan. This tactical plan charts the course for a hunting operation via the development of key tasks. After learning how to break these key tasks into hunt topics — and further into individual hunts — you were introduced to broad categories of data sources that serve as evidence sources for threat hunting and security investigation. You were also introduced to the Threat Hunting Loop, which guides an individual hunt to completion via the creation and investigation of threat hunting hypotheses.
+
+﻿
+
+You worked through a scenario to execute two hunts for brute force attacks performed by a fictional adversary. During these hunts, you developed hunting hypotheses, performed investigations using the stack counting and baselining hunting techniques, and identified suspicious patterns within the data in accordance with the Threat Hunting Loop. You learned about the types of automated analytics that could be developed based on the hunts you performed, which includes automated detection rules, saved Kibana visualizations, and hunt playbook documentation. Lastly, you learned about a mitigation strategy to help prevent successful compromises as a result of brute force attacks.
+
+﻿
+
+As threat hunting is a core function of the CPT, it is important to have a good base of foundational knowledge. As you perform other hunting and investigation tasks within this course, build on the foundations laid during this lesson.
+
 
 
 
