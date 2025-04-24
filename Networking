@@ -1,1 +1,254 @@
+OSI Layer 2 Devices
+
+
+Devices that operate on layer 2 of the OSI model, or the Data Link Layer in the TCP/IP protocol stack, perform switching operations on frames. Each frame contains addressing associated with a hardware Network Interface Controller (NIC) (Destination Media Access Control [DMAC] address and Source Media Access Control [SMAC] address), an indicator of the next — or encapsulated — protocol, and the data being sent. Most industry standards at this layer also include a preamble and checksum — also called an FCS — to detect errors that may have been introduced during the transmission of the frame. 
+
+
+The most common devices that operate at this layer are switches and bridges. Both of these devices include a Media Access Control (MAC) address table, known as a Content Addressable Memory (CAM) table, that tracks which MAC addresses are associated with each port on the switch. Layer 2 devices rely on broadcasts and the SMAC from transmitted frames to build the MAC address table. Bridges operate in the same manner as switches, but are used to connect two or more different transmission medium, linking them together into an aggregate network. A Wireless Access Point (WAP) that has a hard-wired connection as well as wireless is usually operating as a bridge as well — linking the Radio Frequency (RF) medium with the electrical or optical medium other devices may operate on. 
+
+
+Figure 1.3-2 shows an example MAC address table with the addresses changed for simplicity. MAC addresses are represented in a variety of formats for human readability by different applications, but are all identical when processed by the Operating System (OS). Some common formats are xx:xx:xx:xx:xx:xx, xxxx.xxxx.xxxx, xxxx:xxxx:xxxx, and xx.xx.xx.xx.xx.xx.
+
+
+
+
+
+Figure 1.3-2
+
+
+In this example, there are multiple MAC addresses associated with a single port on the switch. Since a switch normally only connects to a single device, this indicates that port Fa0/24 is connected to another network segment that has at least eight devices — one of which is likely another switch or bridge.
+
+
+When a frame reaches a switch, if the DMAC in the frame does not match a known MAC address in the CAM table, the switch forwards a copy of the frame to all ports/paths in order to attempt to reach the addressed device. Layer 2 devices separate collision domains. Collision domains can be compared to communications with a two-way radio where only one person can talk at a time. If more than one person — or device on the physical medium — tries to talk at the same time, the communications collide and is lost for all parties. A DMAC of FFFF:FFFF:FFFF is forwarded to all ports/paths by all layer 2 devices, except the port it was received on. This is called the broadcast address at layer 2, but it should not be confused with broadcasts on layer 3.
+
+
+Spanning Tree
+
+
+Multiple layer 2 devices may be connected together in such a manner that loops could be created. To prevent an overwhelming amount of transmitted frames — also known as a broadcast storm — most layer 2 devices use a protocol like Spanning Tree Protocol (STP) to identify themselves to the other devices they may be connected to. Layer 2 protocols do not have a Time To Live (TTL) value to indicate when a frame should no longer be forwarded so it is important to ensure there are no loops as a frame could be endlessly forwarded. 
+
+
+Through the use of STP, certain ports that are redundant or cause loops may be put into a blocking state to prevent loops and broadcast storms. This blocking port prevents the switch from forwarding out broadcasts on that port. STP has an election process where one device is designated as the Root Bridge. The lowest cost — or shortest path — to the Root Bridge determines if a port is designated as forwarding or blocking. There are additional states like Listening and Learning to allow for faster topology changes and to update MAC address tables. The lowest cost path from a switch’s port to the Root Bridge is designated to be a Root Port. 
+
+
+A designated port is a port on a switch with the lowest cost on a specific LAN segment to the root bridge. Each vendor has their own implementation of the standard, which operates slightly differently, but the end result is to create a logical layer 2 topology that prevents switch loops and duplicate frames. STP introduces a large amount of extra traffic on network segments as it has a very frequent update interval to check/verify if any loops still exist so it can make the appropriate changes to both allow traffic and prevent loops
+
+OSI Layer 3 Devices
+Devices that operate on layer 3 operate on packets. These packets are routed between networks. Recall that layer 2 devices separate collision domains; each of the colored ovals in Figure 1.3-4 is a separate network — or broadcast domain. Layer 3 devices separate broadcast domains — or networks. Any device that operates on layer 3 is a router. Other devices, like firewalls and proxy servers, operate on multiple layers, but if they separate — or route — between one or more networks, they are also considered a router on layer 3. The most common protocol on layer 3 is IP.
+
+IP Network Components
+
+
+IP networks have several components and terms:
+Network Identifier (ID) (also sometimes known as subnet ID): Portion — # of bits — of an IP address that designates the network on which a host resides — also the base IP address in a networkHost ID: Portion — # of bits — of an IP address that designates the host within its networkSubnet mask: Mask that specifies which bits are network (binary one) and which bits are host (binary zero)Broadcast address: Last IP address within a network that is reserved to address all hosts in the same networkGateway (also known as next-hop): IP address assigned to a layer 3 device — router — that connects multiple networks together and can route packets between themDefault gateway: Layer 3 device used for routing when there is not a more specific gateway specified in the routing table
+The vast majority of hosts on the internet still use Internet Protocol version 4 (IPv4) and have not yet migrated to the newer Internet Protocol version 6 (IPv6). Recall from prerequisite training that IPv4 consists of 32-bit addresses and IPv6 consists of 128-bit addresses. IPv6 is intended to resolve IP address exhaustion for publicly-assigned IP addresses in IPv4. 
+
+
+A configured gateway is not required for a host to communicate on a local network, but it is required to communicate with other networks. Gateways are used in building the host's local routing table. There is often a default gateway configured to handle routing communications to any network the local host does not have specifically configured in its routing table.
+
+
+Public and Private IP Addresses
+
+
+The Internet Assigned Numbers Authority (IANA) is responsible for defining and apportioning IP addresses. IANA apportioned large blocks of IP addresses to Regional Internet Registries (RIR) who then register — or assign — IP address ranges to large organizations. Typically these are registered to very large organizations, governments, and Internet Service Providers (ISP). The owners of the IP address ranges use them as needed for their networks. Due to the shortage of public IPv4 addresses, IANA reserved several network ranges and designated them for private use, and use Network Address Translation (NAT) — or something similar — to communicate with public addresses. This allows a network to have virtually unlimited private hosts and translate them to a much smaller range of public IP addresses for use on the internet
+
+Address Resolution Protocol (ARP)
+
+
+Since an IP packet is encapsulated in a frame to transport across a physical medium, hosts need to be able to find a remote host’s layer 2 address — or MAC address — in order to address the frame. ARP is used when a host has a known IP address and needs to know the associated MAC address. An ARP request — who has IP address x? — is sent with a DMAC of FFFF:FFFF:FFFF to ask the remote host to send back its MAC address. When the host that is assigned the IP address receives the ARP request, it sends an ARP reply — I have IP address x. — only to the original requester. 
+
+Dynamic Host Configuration Protocol (DHCP)
+﻿
+
+Figure 1.3-10
+
+﻿
+
+IP addresses can be assigned statically or requested dynamically from a centralized management server. DHCP uses UDP over port 67 for DHCP servers and port 68 for clients. DHCP operations fall into four stages:
+
+DHCP server Discovery
+IP address lease Offer
+IP address lease Request
+IP address lease Acknowledgement
+
+Discovery
+﻿
+
+When a client needs an IP address and is configured to use DHCP to get that address, it first broadcasts a discovery request using the destination IP address 255.255.255.255 and destination MAC address FFFF:FFFF:FFFF. A client may include in its request the last known IP address. If the client is connected to the same network — and that IP address has not been assigned to another host — the server may grant, ignore, or deny the request.
+
+﻿
+
+Offer
+﻿
+
+DHCP servers listen for any broadcast — or unicast — discovery requests on the networks for which they are configured. When the server receives a discovery request, it reserves an IP address out of its pool of addresses and makes a lease offer to the client. The offer is sent unicast, directly to the client’s MAC address and includes the offered IP address as the destination IP address. The DHCP message includes the client's MAC address, the IP address the server is offering, the subnet mask, the lease duration, and the IP address of the DHCP server.
+
+﻿
+
+Request
+﻿
+
+Once the client has received the offer from the DHCP server, the client again sends a broadcast packet to actually request the IP address offered. Multiple DHCP servers can operate on the same network, and the client may receive multiple offers. The broadcast includes the specific server the client is requesting the lease from. Since it is a broadcast, the other DHCP servers not handling the request also see the request and place any address reservations they sent back in the pool of available IP addresses. The client request also includes any options — or additional configuration settings — the server may be able to provide. This includes default gateway, Domain Name System (DNS) servers, and Network Time Protocol (NTP) servers.
+
+﻿
+
+Acknowledgment
+﻿
+
+Finally, the DHCP server sends an acknowledgment directly to the client with the full details of the lease and any additional items it is configured to provide.
+
+﻿Subnet Review
+This course assumes prerequisite training in the subnetting process and provides a review of the relevant terms and concepts. 
+
+﻿
+
+IPv4
+﻿
+
+Classful Networks
+
+﻿
+
+The classful networks were defined by the IP address’s leading bits in binary. The leading bits in Table 1.3-3 correspond with the decimal representation of the start address.
+
+﻿
+
+Classless Inter-Domain Routing (CIDR) 
+
+﻿
+
+Classless networks use the CIDR notation to indicate the number of bits that are used to define the network (bits that are ones).
+
+﻿
+
+﻿
+
+Table 1.3-3
+
+﻿
+
+Table 1.3-4 is a quick reference that converts the CIDR notation to the subnet mask and shows the number of addresses in that network. Each network has a designated broadcast address, which is the last IP address in that range. 
+
+﻿
+
+Many network topologies include point-to-point links between routers. Based on Table 1.3-4, a /31 or a /30 network are ideal for use in those cases where only two routers are connected to each other. Some network devices cannot use the network ID — the first address in a network — for an actual device. This means that /31 networks are used less often than /30 networks for links between routers in order to maintain maximum compatibility.
+
+﻿
+
+﻿
+
+Table 1.3-4
+
+﻿
+
+Subnets
+
+﻿
+
+Each link between routers in Figure 1.3-16 is a separate subnet. Recall from prior training that an IP address cannot exist in multiple networks — or subnets — at the same time. Each network has a defined start address and end address.
+
+﻿
+
+﻿
+
+Figure 1.3-16
+
+﻿
+
+Use Figure 1.3-16 to walk through this brief example. A /30 network (255.255.255.252 subnet mask) has a total of four addresses: a network ID, two assignable IP addresses, and a broadcast address. The /30 means that 30 bits are used for defining the network and 2 bits for the hosts, which is why there are only four available addresses for the hosts. An example of this is the 192.168.50.0/30 network. 
+
+﻿
+
+The range is 192.168.50.0 to 192.168.50.3. The last address is the broadcast address, in this case 192.168.50.3, and the two assignable IP addresses are assigned to the two routers: 192.168.50.1 and 192.168.50.2. Also notice that the router that is assigned 192.168.50.2 has two other networks that it is a part of: 172.16.0.0/16 (255.255.0.0 subnet mask) and 172.17.0.0/16.
+
+﻿
+
+There are 65,536 addresses in each of those two networks since there are 16 bits used for both the hosts and the network.
+
+﻿
+
+Finding a Network ID
+
+﻿
+
+Networking hosts and devices use logical operations to determine if a destination host is on the same network or not. Hosts perform a logical AND operation on the IP address and subnet mask. 
+
+IPv6
+
+
+IPv6 addresses use 128-bit addresses — represented in hexadecimal notation. The address space for IPv6 is large enough that the least significant 64 bits are used for hosts on subnets. The most significant 64 bits designate the network — or routing prefix. The most typical implementation of the network portion is 48 bits for the global routing prefix and 16 bits for the subnet ID, but this configuration is up to the registered owner of the routing prefix.
+
+
+
+
+
+Figure 1.3-20
+
+
+IPv6 addresses can be shortened in certain circumstances for clarity and readability:
+***One or more leading zeros from a group of hexadecimal digits can be removed (e.g., :0042: is shortened to :42:)
+***Consecutive sections of zeros are replaced by two colons (e.g., 2001:0db8:0000:0000:0000:ff00:0042:8329 is shortened to 2001:0db8::ff00:0042:8329)
+With both rules in place, 2001:0db8:0000:0000:0000:ff00:0042:8329 is shortened to 2001:db8::ff00:42:8329.
+
+NAT/Port Address Translation (PAT) Review
+NAT and PAT allow networks to use a limited number of public IP addresses to isolate and translate between a private IP addressing space that is used internally and the public IP addresses needed to communicate with hosts on the internet. NAT is intended as a one-for-one private-to-public address translation (e.g., 192.168.0.1 would always be translated to 200.200.200.1). PAT uses a combination of inside IP address and inside source port to build the translation table. Most devices performing NAT/PAT do not differentiate between the two, unless a specific one-to-one static translation is configured. PAT allows many inside hosts to share the same global address. 
+
+﻿
+
+This course uses Vyatta routers for most of the routing that occurs in the training range. Vyatta routers are similar to other vendor routers, but have a slightly different syntax. Most layer 3 devices have the ability to perform NAT/PAT operations. 
+
+﻿
+
+Figure 1.3-21 shows a rule that is configured to translate any source IP address (0.0.0.0/0) that is routed out interface eth1 to the global address 70.39.165.194. Notice there is no specific reference to PAT. As stated earlier, this is typical and the default for most devices.
+
+﻿
+
+﻿
+
+Figure 1.3-21
+
+﻿
+
+Figure 1.3-22 abstracts the cda-edge-router that is configured to perform address translation.
+
+﻿
+
+﻿
+
+Figure 1.3-22
+
+﻿
+
+The addresses in the Inside local section show the local address and the source port. The router modifies the packets leaving the eth1 interface to use the translated Inside global address and a source port that is available in the router’s pool of IP addresses and port numbers. The router uses the same source port on local and global sides, if available. If that source port is not available, another port number from the pool is used. This can be seen with the translations for the two local addresses that used source port 4292. Both PAT and NAT can be configured with multiple global addresses, and use all the IP addresses and ports in the configured pool to perform translations. If the pool is exhausted, no new connections can be made until older entries time-out, or the translation table is cleared.
+
+﻿
+
+Identifying the translation that was applied to captured traffic is often non-trivial. Often analysts do not have the correlation between local and global address, especially in complex, tiered-enterprise networks that are managed by several network owners or organizations. When planning for operations in these types of environments, care should be given to ensure that mission partners are aware of any requirements for translations and can support providing that information.
+
+Virtual Local Area Network (VLAN)
+﻿
+VLANs have several advantages over traditional network configurations, including: performance, reduced administrative burden, reduced cost, security, and logical workgroups. Multiple traditional networks can exist on a single switch, which reduces the number of devices an administrative group has to manage and purchase. Switches can perform VLAN switching at a higher speed than a router since they do not have to read as much of the frame/packet in order to make a decision about where to send the data. A common use for VLANs is to segregate the management protocols that network devices use for dynamic switching and routing updates from the rest of the user data that traverses a network.
+
+VLANs are a way to separate hosts on the same physical network — layer 2 — into two or more logical networks. Each VLAN has its own broadcast domain and communication between two VLANs require a router that is connected to both networks. Specific ports on a switch can be designated to a specific VLAN, known as VLAN tagging. VLANs are described by multiple standards, primarily based on Institute of Electrical and Electronics Engineers (IEEE) standard 802.1Q. In Figure 1.3-23, only the hosts in the same VLAN can communicate, unless one of the routers (NW9AP or NW9CL) sends the traffic to the other network. In this case, the voice devices are separated from the normal computers. There are not likely very many reasons for the voice devices to have direct communications with other host computers, so this makes it easier to identify anomalous connections, if network monitoring is appropriately positioned.
+
+NAT is intended as a one-for-one private-to-public address translation (e.g., 192.168.0.1 would always be translated to 200.200.200.1). PAT uses a combination of inside IP address and inside source port to build the translation table. Most devices performing NAT/PAT do not differentiate between the two, unless a specific one-to-one static translation is configured
+
+Notice that this ARP request is sent to the layer 2 broadcast address FF:FF:FF:FF:FF:FF and includes the sender’s IP address (192.168.121.253) and the target’s IP address (192.168.121.2), but the target MAC address is blank (all zeros).
+
+This is a partial output of the CDP section. CDP is sent to a vendor reserved multicast DMAC, 01:00:0C:CC:CC:CC. Notice there is a very large amount of data that this switch is advertising to its neighbors. Some of the interesting data are:
+Device ID: CCNP-LAB-S2.webernetz.netIP address: 192.168.121.20CDP sent out port GigabitEthernet0/2C2950 Cisco switchCisco Internetwork Operating System (IOS) Version 12.1(22)EA14, RELEASE SOFTWARE (fc1)
+Additional lessons cover switching, routing, and other network protocols more thoroughly. Network monitoring solutions can monitor networking protocols like CDP and alert if new devices are captured, or provide a baseline of the normal traffic on each VLAN. These tools make identifying anomalies — such as spikes or drops — in traffic easier to identify and start the initial investigation into what changed.
+
+Understanding networking basics and how different protocols operate with each other is a skill that is built upon during successive lessons. VLANs are a valuable tool to segregate devices and hosts that do not need to normally communicate with each other.
+
+
+In this lesson, you analyzed broadcast traffic, such as ARP, DHCP, CDP, and STP. VLANs can help limit the hosts that can see that broadcast traffic. A good practice is to place network infrastructure devices, network management protocols or hosts, and other high-value systems in separate VLANs away from other network traffic. If an attacker manages to gain access to a user’s computer, imagine all the additional targeting data they could use with something like CDP. With the model and version number of a Cisco switch, it is easy to search for publicly-released exploits to take advantage of that.
+
+
+Networking devices are sometimes afterthoughts for administrators conducting patch management. Layer 2 and 3 devices are harder to update as it is much harder to schedule downtime for critical components of a network. Special attention should be giv en to th ese devices since they are the keepers of the data, so to speak. They manipulate every frame and packet that traverses a network, so any compromise of them is much more serious.
+
+
+
+
+
 
