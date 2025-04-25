@@ -1,1 +1,790 @@
 
+This lesson covers the enable hardening Cyber Protection Team (CPT) core function. A core function of a CPT is the capacity to enable hardening of specified terrain in cyberspace from threat-specific unauthorized activities by reducing attack threat surfaces to increase difficulty of access and system exploitation. Trainees will learn about key concepts and tools they will use during the enable hardening function, examine a network’s security posture, and enable hardening of that network in this lesson.
+
+As described in Cyber Warfare Publication (CWP) 3-33.4,
+
+
+“For Official Use Only (FOUO) Adversary exploitation will require technology or process updates to mission partner networks and systems to mitigate them. CPTs will maintain and update network or system hardening recommendations for the duration of hunting and clearing operations. Commanders will be notified when critical vulnerabilities arise, and whether those vulnerabilities will be mitigated in stride to increase network or system security and resilience. Pre-approved actions, and those actions requiring further approval(s), will be identified and presented during pre-mission planning. CPTs will recommend hardening actions and report on network or system hardening recommendations to mitigate threat-specific risks to supported commanders, CyberSecurity Service Providers (CSSP), and local network and system protectors upon conclusion of operations.
+
+
+Department of Defense Information Network Area of Operation (DoDIN AO) commanders and directors, local network owners, local network defenders, and CSSPs maintain the responsibility to determine available data, develop plans to mitigate gaps, and implement required updates or hardening measures recommended by CPTs. CPTs will advise and assist, but should not be the primary entity performing protection duties expected of DoDIN AO commanders and directors, local network owners, local network defenders, or CSSPs.”
+
+
+Mission Relevant Terrain in Cyberspace (MRT-C) and Key Terrain in Cyberspace (KT-C) are an especially important focus during the hardening phase. MRT-C and KT-C will be determined during mission planning.
+
+
+"(FOUO) The end state of the hardening function is to mitigate risk of adversary exploitation, or reduce it to levels acceptable to network or system owners." CWP 3.33-4
+
+Relevant Cybersecurity Principles
+This lesson lays out general cybersecurity principles and publications and their relation to hardening DoDIN.
+
+﻿
+
+A Cyber Defense Analyst (CDA) needs to be aware of specific general cybersecurity principles and policies to be successful during the hardening function.
+
+﻿
+
+Federal Information Systems Management Act (FISMA) requires every federal agency to develop, document, and implement a security policy for information and information system assets throughout the agency. FISMA outlines a risk management based process for cost effective security.
+
+﻿
+
+Standards are formal, mandatory requirements an organization must meet for actions, processes, or configurations. A common collection of standards a CDA may encounter is the Federal Information Processing Standard (FIPS), which was developed by the National Institute of Standards and Technology (NIST) in response to FISMA. It defines the standards for non-national security systems. An example of a standard is the Secure Hash Standard (part of FIPS), that specifies which hashing algorithms organizations are allowed to use to generate message digests.
+
+﻿
+
+Baselines define minimum levels of security that every system within an organization must meet. The Defense Information Systems Agency (DISA) has several Security Technical Implementation Guides (STIGs) that Department of Defense (DoD) systems must comply with, which provide security baselines for Operating Systems (OS) and software. The STIG Viewer tool allows analysts to view STIGs that are applicable to specific systems running specific software. It is available on Windows, Linux, and MacOS.
+
+﻿
+
+Guidelines are recommendations on a course of action to best meet specified requirements. NIST has developed several guidelines in their Special Publications (SP), which lay out best practices for several processes. There are several SPs that a CDA may find useful while hardening within the SP 800 series including, but not limited to:
+
+SP 800-53: Catalog of security and privacy controls for federal information systems  
+SP 800-40: Relates to patch management
+SP 800-41: Relates to firewall configuration
+SP 800-123: Relates to central server security
+﻿
+
+Excerpt from SP 800-53
+
+﻿
+
+﻿
+
+Table 3.3-1
+
+﻿
+
+Defense-in-depth is a practical strategy developed by the National Security Agency (NSA) that employs a layered approach including people, technology, and operational capabilities that establishes barriers to attacks to achieve information assurance. Notice in NIST’s SP 800-53, hardening is achieved not just through technical controls such as assessment, authorization, and monitoring, but also accounts for personnel security such as training and program management as well as physical security. If one layer fails, then the next layer can still safeguard the systems and the networks from harm. In system and network hardening, defense-in-depth is a key concept employed extensively in DoDINs.
+
+﻿Assessing Security Posture and Making Recommendations
+In this discussion, learn how CPTs can assess a mission partner’s current security posture and the documents for making and recommending changes.
+
+﻿
+
+Observe the documentation below, which provides context and situational awareness for the mission partner and enables the CPT to make hardening recommendations:
+
+﻿
+
+Supported Organization Mission and Resources help the CPT gain a Common Operating Picture (COP) of the mission partner’s current security posture. This includes, but is not limited to, network and system logging, configuration, current security procedures, etc.
+
+﻿
+
+AO Logical Maps or Network Maps are the principal documents for terrain visualization of mission partner networks and systems (from CWP 3.33-4). Generally, this is a Microsoft Visio document or a Draw.io document.
+
+﻿
+
+Detailed Threat Assessment Reports cover the historical attacks against the mission partner, probable threat actors they would see in their AO, likelihood of threat activity/capability used against them, and the threat matrix (criteria/heat map) showing their ability to detect and counter them (from CWP 3.33-4).
+
+﻿
+
+CPTs issue or provide input to the following reports after hardening a mission partner network (from CWP 3.33-4):
+
+Detailed Host Vulnerability Finding and Corrective Actions Report: Covers patch management and outdated software vulnerabilities, services, and detailed vulnerability scanner results (e.g., results from Assured Compliance Assessment Solution [ACAS] and misconfigurations).
+Detailed Network Vulnerability Findings and Corrective Actions Report: Covers at least the following elements, if applicable — proper sensor placement, signature management, firewall implementation, firmware vulnerabilities, ports/protocols, access control lists, or infrastructure configurations. 
+Detailed Non-Technical Vulnerability Findings and Corrective Actions Report: Covers policy assessment from NIST SP 800-53 and mission partners utilizing intelligence to inform DCO.
+Risk Mitigation Plan (RMP): Documents all vulnerabilities identified during threat mitigation. This document includes recommendations for internal and external mitigation actions to reduce the overall risk to the secured network. This is further discussed in upcoming lessons.
+
+Identifying Host and Network Areas for Hardening
+This section discusses how and where analysts should focus their efforts during hardening.
+
+﻿
+
+CDAs may vet several areas for risks. NIST SP800-53 provides an overarching checklist for high-level categories as mentioned previously. However, CDAs primarily evaluate these areas:
+
+Web-facing Assets/Infrastructure: These devices contain resources that are accessible to an external and internal user. This duality means that devices in this network are untrusted. Internal users are allowed to connect in, but devices within the Demilitarized Zone (DMZ) are restricted from initiating connections into the private network.
+Network Boundary: A network boundary is where one logical network meets another. In the case of a private network and the open internet, this may be different organizational networks connecting, etc. It is generally wise to deploy boundary defense mechanisms in this area such as firewalls, Network Intrusion Detection System (NIDS), or Network Intrusion Prevention System (NIPS).
+Network Segmentation: In simple terms, network segmentation is grouping devices into zones, often by function or access requirements, and putting them in their own network. Access controls are often applied between segments to restrict access into more sensitive segments.
+Inventory of Systems: Organizations should have an inventory system to track their assets. This includes devices such as phones and printers. An accurate inventory is essential for implementing the correct security controls. 
+Domain Architecture and Services: In reference to Microsoft Active Directory (AD) service, AD hosts a number of Windows services facilitating centralized identity management, object access, and policy management across Microsoft AD trees and forests. Because of their orchestrating role, protecting critical components of domains (e.g., enterprise and domain administrators and Domain Controllers [DC]) is crucial.
+User Rights Management: Users should always be given the least amount of privilege necessary to complete their assigned work roles. This is often achieved by assigning users into groups depending on their job duties.
+Endpoint Configuration: Secure configurations on the endpoints rely on processes such as update and patch management, software management, etc. A good practice for endpoint configuration is developing a common secure baseline image. 
+Logging and Detections: Audit policy is dependent on regulation and organizational requirements. However, auditing is key in detecting incidents and determining the extent of damage. Without auditing, breaches would be excessively difficult, if not impossible, to assess.
+﻿
+
+In Windows environments with DCs, host hardening is done centrally in AD by using GPOs. GPOs govern access to services on the network, user rights management, endpoint configuration, firewall configurations, logging, and a plethora of other functionality. GPOs are covered in depth in a later lesson, however, a lab in this lesson allows you to experiment with GPOs locally.
+
+﻿
+
+Consult the NIST SP 800 series for guidelines and best practices for these devices as well as STIGs to ensure that systems and network devices meet security baselines. Once you understand the mission partner's operational cyberspace, recommend changes. The goal is to:
+
+Propose network architecture changes to improve security and reduce risk
+Ensure unnecessary services are disabled
+Ensure latest patches are installed
+Remediate insecure configurations
+Audit installed software
+Enforce an audit policy
+Enhance security systems and logging
+
+Tools
+This section discusses tools from the DMSS toolkit that are helpful during hardening. The categories covered are platforms, host utilities, vulnerability scanners, and Security Information Event Management (SIEM) solutions.
+
+﻿
+
+Platforms or distributions are base OSs with preinstalled software, typically for a specific purpose. Some specific cyber defense platforms that CDAs may encounter:
+
+Security Onion: A free and open source platform for network security monitoring, threat hunting, enterprise security monitoring, and log management. It comes with several tools mentioned in this lesson including Kibana, Zeek, Suricata, and other utilities. CDAs interacted with this platform in the previous lesson.
+Response Operation Collection Kit Network Security Monitor (ROCK NSM): ROCK NSM provides a robust platform for passive data acquisition, transit, and data storage and indexing. Like Security Onion, it comes with Kibana, Zeek, Suricata, and other utilities.
+﻿
+
+Windows hosts make up a large portion of many DoDIN networks. Due to Microsoft’s market dominance, CDAs should have a foundational understanding of how to harden Windows hosts. These tools help with the hardening process:
+
+Sysinternals: A suite of over 65 tools for troubleshooting Windows OS. CDA analysts may be familiar with Process Explorer, Process Monitor, and Sysmon.
+Windows PowerShell: Object-oriented scripting utility that is tightly integrated with the Windows OS and AD. Windows PowerShell is an incredibly useful tool when enumerating Windows ADs and Windows hosts.
+Microsoft Baseline Security Analyzer: A deprecated vulnerability scanner for Windows systems pre-Windows Server 2008 R2. Its capabilities include ensuring security updates are up to date, checking for Structured Query Language (SQL) Server and Internet Information Services (IIS) administrative vulnerabilities, and verifying password complexity. Its successor is the Windows Update service.
+﻿
+
+Network Security Monitors (NSM) detect and often respond to network attacks. CDAs need familiarity with:
+
+Zeek: Formerly known as Bro, Zeek is an open source network security monitor. It sits on a sensor in the network that observes network traffic and generates robust logging that is forwarded to a SIEM like Splunk or Elasticsearch. 
+Suricata: A free and open source robust network threat detection engine. It is capable of real time intrusion detection, in-line intrusion prevention, network security monitoring, and offline network capture processing.
+﻿
+
+SIEMs play an essential role in the hardening function as they enable rapid detection of future incidents.
+
+Splunk: A proprietary software platform widely used for monitoring, searching, and data visualization especially in relation to logging data in real time.
+Kibana: A data visualization tool generally deployed in a stack along with Elasticsearch and Logstash. Elasticsearch is a free and open source databasing and visualization tool used in conjunction with Security Onion or ROCK NSM. CDAs briefly interacted with Kibana in the previous lesson, and explore this tool in-depth later.
+﻿
+
+CDAs need familiarity with the following vulnerability scanners:
+
+ACAS: This is the mandated enterprise vulnerability scanning capability utilized for assessing DoDINs such as Non-classified Internet Protocol Router Network (NIPRNet) and Secret Internet Protocol Router Network (SIPRNet). 
+RedSeal: A security solution capable of assessing cloud environments as well as application-based policies and endpoints.
+Open Vulnerability Assessment System (OpenVAS): A successor to Nessus, OpenVAS is a robust open source vulnerability scanner that is part of the commercial Greenbone Security Manager. Its capabilities include authenticated and unauthenticated testing, industrial and internet protocols testing, and an internal programming language for implementing any type of vulnerability scan. 
+﻿
+Assessing Network
+The mission partner charged the CPT with hardening their network. The mission partner provided the network map and asked for recommendations for improving their perimeter and core network devices. As attacks from Advanced Persistent Threats (APT) became more frequent, the mission partner wanted to reduce their attack surface and reduce the amount of incidents occurring within their network.
+
+﻿
+
+NOTE 1: Please ignore anything that references the 10.10.0.0/16 network. This is a management network that is used for range configuration and is outside the scope of the lab.
+
+﻿
+
+NOTE 2: Typically the internet facing interface will have a public Internet Protocol (IP) address. Due to range configuration purposes, the internet facing interface has a private IP.
+
+﻿
+
+The first device investigated is the border router. As it is the only ingress point into the network, the cda-firewall Virtual Machine (VM) is a good place for perimeter security. As the DMZ is connected to an interface on this device, observe controls in place for accessing the web-facing assets and at the network boundary.
+
+﻿
+
+A good practice is to disable any unused interfaces on the device even if it is not connected to anything, especially in the case of routers and switches. This prevents attackers from plugging cables in and directly connecting to the device. 
+
+
+Everything is in order and reflects the information provided by the mission partner in the network map.
+
+
+4. Run the following command to check the firewall rules present on the border router. Since this device sits at the network boundary, access into the network should be enforced at this point. Rules restricting access to the DMZ and restricting access to the private network are displayed.
+
+
+
+No firewall rulesets are present on the core router, which is cause for concern. From the network map, there are assets that the public internet can access, but the rest of the network should be off-limits. Rules restricting access to the private network from the DMZ and from the internet are necessary. Firewall rules are lacking at the network boundary. 
+
+
+
+Notice a few things from the configuration:
+The interface block shows interface specific configurations.The interfaces have minimal configurations.There are no firewall rules applied to any interfaces, which is not a surprise considering there are no firewall rulesets configured.
+
+
+Source and destination Network Address Translation (NAT) are implemented. While the NAT’s primary purpose is not meant to be security, it has the added benefit of preventing internet devices from initiating connections with internal hosts, which greatly reduces the attack surface. 
+
+
+
+
+Simple Network Management Protocol (SNMP) and SSH are enabled. Remote administration is possible. The SNMP protocol should be disabled, if not in use, as it allows attackers to read configuration settings and gain various other information from the device. If not actively used, then extra services should be disabled. The mission partner mentioned administrators using SNMP to gather metrics on routing devices, and using SSH to remotely manage their devices.
+
+
+The router is logging events, but only locally. If the mission partner wants to be able to easily detect scanning and mapping activities, then enable remote logging. As this is the only device with an interface and a public IP in the network, most scanning happens here.
+
+
+
+While not included in this particular firewall configuration, NetFlow is another network monitoring capability that can be configured. NetFlow data is forwarded to a collector, then viewed in an application to allow an analyst to view traffic trends and statistical data. An example of SolarWinds — a popular NetFlow analysis tool — is shown below in Figure 3.3-9, but it is not available for use in this lab environment.
+
+
+8. Observe the interface status by running the command in the terminal. Notice the inactive interface.
+
+
+9. Revisit the network map, and note how the network is segmented. It is good practice to split workstations into different subnets to efficiently manage access in each subnet. This network is divided based on department. Run the following command in the terminal to check the firewall rules currently existing for these network segments:
+
+
+Notice this router has firewall rules in place. Each rule details a specific function:
+Rule 10 — Allows workstations to communicate with the CDA-SERVERsRule 20 — Prevents the Accounting (ACC) and Human Resources (HR) networks from communicating with each otherRule 30 — Allows both devices to communicate with the logging host in the security networkRule 40 — Allows all other types of traffic
+
+
+From the firewall output, recognize that rules exist governing access between the HR and the ACC network. However, for rules to enforce access, they must be applied.
+
+
+
+
+The interface output indicates that firewall rules are being used and that eth4 is administratively disabled. As a follow up to the last step, from this output, note that the network is segmented and access between them is secured properly.
+
+Remote logging is enabled on this device to the logging device in the security subnet, which is good.
+
+
+
+Examine the network boundary, internet-facing devices, and network segmentation in this task. You have the necessary information to propose some changes to improve the internet-facing assets and network boundary security.
+
+Remediating Network
+A few glaring issues are discovered in the mission partner’s security posture. A lack of firewall rules restricting access into the mission partner’s network meant that attackers could compromise the DMZ and move into the private network, or access the administration interfaces on the edge router. Additionally, the edge router is only logging locally, which makes it unlikely that those logs are used to detect network scanning or malicious activity. 
+
+
+
+4. Configure a firewall rule to drop traffic by default that was not initiated by the internal Local Area Network (LAN), and log the occurrences. 
+
+
+trainee@cda-firewall# set firewall name INTERNET-IN default-action 'drop'
+trainee@cda-firewall# set firewall name INTERNET-IN enable-default-log
+trainee@cda-firewall# set firewall name INTERNET-IN rule 10 action 'accept'
+trainee@cda-firewall# set firewall name INTERNET-IN rule 10 state established 'enable'
+trainee@cda-firewall# set firewall name INTERNET-IN rule 10 state related 'enable'
+
+
+
+This restricts all access from the public internet into the private network by default unless it was initiated by a host behind the router, and allows detection of scanning activities.
+Line 1 — Sets the default action to dropping traffic; if there is no rule matching the IP header, the packet is droppedLine 2 — Enables logging on the traffic coming in by defaultLine 3 — Creates a new rule that accepts traffic matching criteria listed in rule 10Line 4 — Creates a stateful rule allowing established connections (e.g., if a host initiated a connection to a server on the internet, the response would not be dropped)Line 5 — Creates a stateful rule allowing related traffic through (e.g., an Internet Control Message Protocol (ICMP) error response from a gateway to a ICMP echo destined for the internet) 
+
+
+5. Configure a firewall rule to drop connections initiated by devices within the DMZ, as these devices are not trusted. The ruleset performs the same actions as previous. This prevents attackers from pivoting from the DMZ into the private network in the event of a compromise.
+
+
+trainee@cda-firewall# set firewall name DMZ-IN default-action 'drop'
+trainee@cda-firewall# set firewall name DMZ-IN enable-default-log
+trainee@cda-firewall# set firewall name DMZ-IN rule 10 action 'accept'
+trainee@cda-firewall# set firewall name DMZ-IN rule 10 state established 'enable'
+trainee@cda-firewall# set firewall name DMZ-IN rule 10 state related 'enable'
+
+
+
+6. Configure a rule allowing connections to the mail server. This is a service that users on the open internet have access to, since the users within the network need to be able to receive emails. 
+
+
+trainee@cda-firewall# set firewall name VYATTA-LOCAL rule 10 action 'accept'
+trainee@cda-firewall# set firewall name VYATTA-LOCAL rule 10 destination port '25'
+trainee@cda-firewall# set firewall name VYATTA-LOCAL rule 10 protocol 'tcp'
+
+Line 1 — Configures rule 10 to accept trafficLines 2 and 3 — Specify traffic going to Transmission Control Protocol (TCP) port 25 is accepted
+
+
+7. Configure a rule to allow traffic to the Domain Name System (DNS) server. DNS is another service that the public needs access to if there are resources within the DMZ that need to be accessed by name.
+
+
+trainee@cda-firewall# set firewall name VYATTA-LOCAL rule 20 action 'accept'
+trainee@cda-firewall# set firewall name VYATTA-LOCAL rule 20 destination port '53'
+trainee@cda-firewall# set firewall name VYATTA-LOCAL rule 20 protocol 'udp'
+
+Line 1 — Configures rule 20 to accept trafficLines 2 and 3 — Specify traffic going to User Datagram Protocol (UDP) port 53 is accepted
+
+
+8. Apply the rules to the internet facing interface.
+
+
+trainee@cda-firewall# set interfaces ethernet eth2 firewall in name "INTERNET-IN"
+trainee@cda-firewall# set interfaces ethernet eth2 firewall local name "VYATTA-LOCAL"
+trainee@cda-firewall# set interfaces ethernet eth1 firewall in name "DMZ-IN"
+
+
+
+These commands are applied in and locally. Vyatta is different in the sense that typical routers have in and out directionality, but Vyatta routing devices have a local directionality as well, which applies to traffic destined specifically at the device. Since Destination Network Address Translation (DNAT)/port forwarding is necessary to reach the DMZ, implement rules for the devices in the DMZ network. The last rule applies the DMZ rule to the interface facing the DMZ.
+
+
+9. Configure remote System Logging Protocol (syslog) by running the following command:
+
+
+trainee@cda-firewall# set system syslog host 199.63.64.92 facility all level all
+
+
+
+This sets the syslog host to the logging host in the security domain for all facilities used by syslog (e.g., kern, user, auth, etc.). The logs enabled by the firewall rule are sent to the remote logging server as well.
+
+
+10. Commit the changes, save, and exit configuration mode.
+
+
+trainee@cda-firewall# commit
+trainee@cda-firewall# save
+trainee@cda-firewall# exit
+
+
+
+
+Take notice of the deficiencies at the network boundary and network logging. Implemented basic hardening on the network by changing configuration settings on the edge device, which improved the security posture at the network boundary and at the DMZ.
+
+Assessing Host for Hardening
+In this task, assess the security posture of a Windows 10 host on the mission partner’s network. The cda-acct-1 VM is on the previously provided network map. Utilize the command prompt, PowerShell, and the local group policy editor to view configuration settings present on the workstation. Note the deficiencies in the security settings to remediate in the next task.
+
+﻿
+2. Open a command prompt window, and run the following command:
+
+﻿
+
+C:\Users\trainee> systeminfo
+﻿
+
+This command obtains information about the current Windows OS installation and hardware. From the output, view the version, service pack, and hotfixes applied. This information is helpful in determining if the system is up to date. Update and patch management is an essential part of hardening, as an outdated system has more vulnerabilities.
+
+﻿
+
+3. Open the Local Group Policy utility by opening the Windows Start menu and entering Edit Group Policy.
+
+﻿
+﻿
+
+Recall that group policy is the set of configuration settings that governs several facets, including security, on Windows hosts. While group policy is typically configured centrally on a DC, it is possible to set group policy locally.
+
+﻿
+
+4. Select Computer Configuration > Windows Settings > Security Settings to view a number of security settings.
+
+﻿
+
+
+5. Select Account Policies > Password Policy.
+
+﻿
+
+Notice the password complexity requirement is disabled, which allows users on this workstation to have insecure passwords.
+
+﻿
+
+6. Select Account Policies > Account Lockout Policy.
+
+﻿
+
+Notice that there are no lockout requirements set, which allows brute force attacks.
+
+﻿
+
+7. Select Windows Firewall with Advanced Security > Windows Firewall with Advanced Security - Local Group Policy Object. Select Windows Firewall Properties under Public Profile in the Overview window.
+
+
+﻿
+
+Examine the firewall policy on the host. Host firewalls are another defense that protects devices connected to a network. Notice from the dialog window that the firewall is not configured.
+
+﻿
+
+8. Select Software Restriction Policies. From the Object Type pane, open Enforcement.
+
+﻿
+
+
+From the output, assess that all software restrictions apply to all users except local administrators, and certificate rules are enforced on the host. Software policies prevent users from installing pirated or malicious software.
+
+﻿
+
+9. Select Designated File Types. 
+
+﻿
+
+
+The output shows which file extensions have software restrictions applied.
+
+﻿
+
+NOTE: If the file extension is not on the list, the software restriction policy does not affect the extension.
+
+﻿
+
+10. Open a PowerShell command window and run the following command:
+
+﻿
+
+Get-WmiObject Win32_Product | Select-Object Name, Version
+﻿
+
+PowerShell is a powerful object-oriented scripting language tightly integrated into Windows OSs and is covered in depth in a later lesson. This command audits installed software. Software auditing is done to track licensing as well as ensure that installed software meets organizational requirements, (e.g., all software is digitally signed). This command queries the Windows Management Instrumentation (WMI) interface for installed windows products. Select-Object allows the user to select the attributes they want to see; in this case, the name and the version. A caveat is that WMI only shows 64-bit products installed. To get an accurate listing, examine both WMI Command-Line (WMIC) objects and the registry.
+
+
+11. Run the following command to get more information on installed software:
+
+﻿
+
+Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion
+﻿
+
+This command checks the properties of all the objects within the specified registry key, the Uninstall key, specifically under the Wow6432Node key. When software is installed, it also creates an associated entry in the Uninstall key. Check this; installed products are usually associated with an Uninstall key. The Wow6432Node key is associated with 32-bit software.
+
+﻿
+
+12. View the local auditing configuration. Expand Windows Settings > Security Settings > Advanced Audit Policy Configuration > System Audit Policies Local Group Policy and observe items being audited by selecting the individual policies. Observe that local auditing is enabled on some categories. Recall that auditing is especially helpful in incident detection and response. It is a key component of any hardening strategy. If events are not being logged, then it is near impossible to detect malicious activity or what happened during an incident.
+
+﻿
+
+Account Management includes policies such as password changes, account creation, change, and account deletion. Accounts are often abused or used as backdoor mechanisms so it is good practice to keep a handle on them.
+
+﻿
+
+
+Detailed Tracking helps in figuring out what an attacker did once they compromised a system, especially via process creation and termination.
+
+
+Policy Change logs information about changes to auditing policy. Attackers make changes to policy to prevent audit logs from being created to obfuscate their trail.
+
+
+
+Logon/Logoff is helpful in establishing pattern of life of users, which helps detect insider threats as well as malicious attackers. Notice the Account Lockout auditing policy is not enabled.
+
+﻿
+
+Privilege Use; “with great power comes great responsibility”, as well as greater logging requirements. If a user has the ability to compromise a system, then their actions should be monitored. In addition, attackers often compromise administrative accounts because they need elevated privileges to establish persistence, change settings, etc.
+
+
+
+System events include shutdowns, restarts, and other events that affect the security of the system. Exploits often cause a change in security state, and are associated with system logs.
+
+﻿
+
+
+This list is not all inclusive. Microsoft documents their event logs well and more information about their specific auditing policy is found on their website.
+
+﻿
+
+13. Record deficiencies observed from this task.
+
+﻿
+
+In this task, you examined concepts related to host hardening including patch management, endpoint configuration, password policy, firewall policy, and auditing policy. These are all elements of a host hardening strategy and contribute to a stronger security posture. Remediate some deficiencies found in this task in the next task.
+
+Remediating Host
+Previously, you analyzed a Windows 10 host to understand concepts of host hardening. You noticed deficiencies in areas of password policy, firewall policy, and auditing policy. Now, harden the Windows 10 host to reduce incidence of attacks and to mitigate vulnerabilities.
+﻿
+
+2. Open the Local Policy Group Editor and select Password Policy to revise the password policy. Enable password complexity by selecting Password must meet complexity requirements, and selecting Enabled. Save the policy by selecting OK.
+
+﻿
+
+3. Enable the lockout threshold by selecting Account Lockout Policy > Account Lockout Threshold. Enter 5 into the text box, and select OK.
+
+
+﻿
+
+A dialog box opens specifying that the Account Lockout Duration and Reset Account Lockout policies should be set, if Account Lockout Threshold is set. Select OK from the dialog, which automatically sets both settings to 30 minutes.
+﻿
+
+4. Select Windows Firewall with Advanced Security > Windows Firewall with Advanced Security-Local Policy Object. Select Windows Firewall Properties.
+
+﻿
+
+A dialog window appears. Select On (Recommended) from the Firewall state drop-down menu.
+
+This provides the host device some protection on the network.
+
+﻿
+
+5. Navigate to Advanced Audit Policy Configuration > System Audit Policies - Local Group Policy Object > Logon/Logoff. Select Audit Account Lockout and enable all the checkboxes. Select OK.
+
+
+This enables logging for logons and logoffs.
+
+﻿
+
+You examined some considerations for hardening Windows hosts, and remediated elements of password policy, firewall policy, and auditing policy.
+
+Which tools are specifically helpful in an environment with many Windows hosts?
+ Sysinternals
+ PowerShell
+
+What action could the local network defender undertake to ensure all Windows hosts meet a minimum level of security?
+ Create a baseline image
+Introduction
+﻿
+
+Learn the assess function as it relates to the core Cyber Protection Team (CPT) functions and how it relates to the assess mission, as well as a tactical assessment within the CPT Operations Process (OP). Utilize Measures of Effectiveness (MOE) and Measures of Performance (MOP) to perform a tactical assessment, and develop a report that publishes their findings on mission effectiveness. The lesson concludes by writing detailed tactical reports including a timeline of compromise.
+
+Topics
+Overview of the assess function
+Measures of effectiveness and performance
+Building a timeline
+Building the report body
+Gathering supporting documentation
+Writing the tactical report
+﻿
+
+Enabling Learning Objectives
+3.4.1: EXPLAIN how CPTs function when reporting on threat hunts and incidents in customer networks.
+3.4.2: IDENTIFY reporting tools and capabilities .
+3.4.3: DISCUSS reporting processes and procedures.
+3.4.4: PERFORM and report on a tactical assessment of a CPT mission.
+﻿
+
+Toolkit﻿
+Text Editor
+A text editor is used to edit plain text (i.e., no formatting). Some of the more popular programs include Notepad and TextEdit.
+
+﻿
+
+MITRE ATT&CK
+MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) is a knowledge base for cyber adversary behavior, It covers the multiple phases of an adversary's attack lifecycle and the systems they typically target.
+
+Overview of the Assess Function — FOUO
+The Assess Phase
+﻿
+(For Official Use Only [FOUO]) One of the core functions of a CPT is assessing the effectiveness of response actions against current and future risks to specified terrain in cyberspace. As per Cyber Warfare Publication (CWP) 3.33-4:
+
+﻿
+
+During operations, the CPT will simultaneously assess the effectiveness of clearing operations, hardening actions taken by local network defenders, and the overall network system security, and resilience.
+﻿
+
+(FOUO) As per CWP 3.33-4, the goal of assessing is to conduct Cyber Threat Emulation (CTE). CTE assesses the current security posture by emulating known adversary Tactics, Techniques, and Procedures (TTP) to validate the current defensive measures. CTE is outside the scope of this course.
+
+﻿
+
+However, there is another step within the CPT OP that addresses CPTs assessing the effectiveness of their other functions that do not involve CTE: Step 6, Assessment.
+
+﻿
+
+﻿
+
+Figure 3.4-1
+
+﻿
+
+Assessment takes the products from a mission execution and uses them to determine if operational objectives were met. Assessment is centered around indicators to track progress towards mission accomplishment.
+
+﻿
+
+The indicators that the trainee is concerned with as per CWP 3-33.4 are:
+
+﻿
+
+MOPs determine whether operational tasks were satisfied to create the desired effect.
+
+﻿
+
+MOEs determine whether the desired effect achieved operational objectives.
+
+﻿
+
+More concisely, MOPs track progress towards creating the desired effect, and MOEs evaluate if that desired effect achieved operational objectives. MOEs can be considered as bullets and MOPs can be considered sub-bullets.
+
+﻿
+
+While the CPT OP focuses on mission at an operational level, CPTs do not function at an operational level during day-to-day tasks. They do function at a tactical level however. When the Operational Control (OPCON) Headquarters (HQS) Operational Planning element provides operational level MOEs and MOPs, the CPT will use them by converting them into tactical level MOEs and MOPs. This involves turning operational level MOPs into tactical level MOEs, and developing new tactical MOPs that would correspond to the MOEs. The new tactical level MOEs and MOPs will be used by the CPT to conduct tactical assessments during and after the mission execution phase.
+
+﻿
+
+Tactical assessments can fulfill the objective of assessing the effectiveness of response actions, and therefore play a part during the assess function.
+
+OEs and MOPs
+MOEs and MOPs are utilized extensively throughout planning, execution, and assessment.
+
+﻿
+
+Consider the following scenario:
+
+﻿
+
+SAMPLE COMMAND (SACOM) local network defenders noticed an increase in scanning activities on their public-facing infrastructure devices. Intelligence reporting indicates an increase of activity from Advanced Persistent Threat (APT) 28, also known as FANCY BEAR, against Department of Defense (DoD) information networks. Concerned for the the state of their network, SACOM requested support from the CPT to clear out any existing compromises, and harden their networks against future Malicious Cyberspace Activities (MCA). The CPT received an Operations Order (OPORD) shortly after.
+
+﻿
+
+Mission Statement: The CPT conducts proactive Defensive Cyberspace Operations (DCO) and Incident Response (IR) in support of counter-APT28 operations throughout SACOM networks in order to prevent enemy forces from gaining a foothold in critical SACOM systems.
+
+﻿
+
+End State: Deny APT28 from access into SACOM networks with local network defenders capable of preventing future incidents. SACOM networks are secure and fully functional.
+
+﻿
+
+From this scenario, at an operational level, the MOEs are defined as the following (derived from the end state): 
+
+No compromises associated with APT28 TTPs within SACOM networks
+Implement countermeasures to prevent further intrusions in SACOM networks
+Disseminate findings to local network defenders and other DoD organizations
+﻿
+
+The key tasks outlined in the OPORD received by the CPT are listed as:
+
+Build a positive working relationship with local network defenders.
+Hunt for and contain existing compromises
+Implement effective countermeasures and policies in conjunction with local defenders
+Report findings to maintain a common operating picture
+﻿
+
+At the operational level, MOPs are the key tasks.
+Since CPTs only function at the tactical level, the MOPs become the new MOEs. Note that the MOPs in the above table populate the MOEs in the following table. The CPT decides how to accomplish their MOEs by developing new MOPs.
+
+
+The CPT continuously references these MOEs and MOPs during mission execution, and post-mission execution to ensure they effectively conducted operations and completed their key tasks. 
+
+﻿
+
+The Cyber Defense Analyst (CDA) may decide that a MOP should be broken down and converted into a MOE. New MOPs are developed to satisfy the MOE. For example, using the MOP from the second row of the above table:
+
+Building a Timeline 
+During the assessment function, validate that the CPT accomplished their MOEs. There are several documents to examine for this purpose. Examining external reporting and observing the Operation Notes (OPNOTE) of other analysts are critical tasks at this stage. Focus on aggregating the output of various intelligence and tactical products to ensure that the mission objectives were met.
+
+﻿
+
+Consider tactical output from mission execution:
+
+Situational Reports (SITREP): SITREPs are routinely generated to provide updates to higher elements on a daily, weekly, per-phase, or on request.
+Tactical Assessments: Tactical assessments are low-level assessments that often contain their own MOEs and MOPs
+OPNOTEs: OPNOTEs are in-depth and technical about the events that occur during mission execution. However, OPNOTEs contain very specific timestamps and events rather than a high-level summary. When more detail than a high-level summary is needed, consult the OPNOTEs.
+﻿
+
+In addition, OPNOTEs are helpful in developing a execution timeline including, but not limited to:
+
+Health and Status Reports: US government agencies publish health and status reports on a regular basis to aid with situational awareness of current operational activities, which enables the capacity to build, defend, and operate in cyberspace. These reports have a variety of functions, but they are useful in establishing past trends and assess their impact on the mission partner’s network.
+Cyber IR Reports: DoD agencies must abide by the cyber incident handling program defined in the Chairman of the Joint Chiefs of Staff Manual (CJCSM) 6510.01B. This document outlines a specific IR report template. The completed reports are stored in the Joint Incident Management System (JIMS) on Secret Internet Protocol Router Network (SIPRNet). Past incidents provide a historic picture of the network as well.
+Link: https://www.jcs.mil/Portals/36/Documents/Library/Manuals/m651001.pdf?ver=2016-02-05-175710-897
+﻿
+
+National Institute of Standards and Technology (NIST) Incident Response Report Format from the NIST Computer Incident Handling Guide
+
+﻿
+
+B.1     Basic Data Elements
+
+Contact Information for the Incident Reporter and Handler
+Name
+Role
+Organizational unit (e.g., agency, department, division, team) and affiliation email address
+Phone number
+Location (e.g., mailing address, office room number)
+Incident Details
+Status change date/timestamps (including time zone): when the incident started, when the incident was discovered/detected, when the incident was reported, when the incident was resolved/ended, etc.
+Physical location of the incident (e.g., city, state)
+Current status of the incident (e.g., ongoing attack)
+Source/cause of the incident (if known), including hostnames and Internet Protocol (IP) addresses
+Description of the incident (e.g., how it was detected, what occurred)
+Description of affected resources (e.g., networks, hosts, applications, data), including systems' hostnames, IP addresses, and function
+If known, incident category, vectors of attack associated with the incident, and indicators related to the incident (traffic patterns, registry keys, etc.)
+Prioritization factors (functional impact, information impact, recoverability, etc.)
+Mitigating factors (e.g., stolen laptop containing sensitive data was using full disk encryption)
+Response actions performed (e.g., shut off host, disconnected host from network)
+Other organizations contacted (e.g., software vendor)
+General Comments
+﻿
+
+See the complete NIST Computer Incident Handling Guide here: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-61r2.pdf
+
+﻿
+
+These documents surface during mission planning or mission execution. Keep in mind that supported mission partners may not always have the same reporting formats and documents.
+
+﻿
+
+Extract the relevant information from the supporting documentation and build a timeline to fit it with the MOEs and MOPs.
+
+Assess vulnerabilities in the network
+run a vunerability scan
+examine versions of services on the network for outdated software
+Which MOP(s) satisfy the following MOE?
+
+
+Eradicate traces of malware from infected systems
+kill any malicous process
+remove malware from disk
+remove persistance
+
+Which MOP(s) satisfy the following MOE?
+
+Request documentation of SACOM networks and systems
+aquire a logical network map from local defender 
+request a baseline info of system and networks
+ Examine the MOEs and MOPs. The MOPs become the assessment criteria.
+
+
+NOTE: This is the working checklist for the remainder of the lesson.
+
+
+Assessment is a team function, and different work roles are more involved with other MOEs/MOPs than others. For this mission, focus primarily on MOEs 2 and 3, as highlighted below.
+
+Developing the Report Body
+The report body contains a narrative about the events that transpired during mission execution and is built from the timeline. To determine if the necessary actions were taken to achieve each MOP, tie corresponding events from the timeline to the appropriate MOP. The completed report body includes the assessment criteria and a description about if/when the criteria was fulfilled. Use the MOEs/MOPs as the assessment criteria and the timeline to determine when that criteria was met. 
+
+﻿
+
+Examine timelines and create a palatable narrative of the events that transpired during mission execution. This narrative becomes the report body which is used to derive the rest of the assessment report. 
+
+Re-imaging has the dual function of restoring to a functional baseline as well as removing the vast majority of malware, so these lines satisfy both MOEs. Restoring the backups is just for restoration, so it needs its own line.
+
+Gathering Supporting Documentation
+While working on a tactical assessment of MOE/MOP completion, the main concern was the documentation that supports the report body. There are various documents that can go in the report body, but remember that mission execution results in large amounts of data. Select documentation that appropriately supports the written narrative
+
+Logs: Log entries often support the conclusion that an intrusion occurred.
+Configurations: Configurations shed light on vulnerabilities from bad configurations. If a weakness in configuration exists, then including the configuration can support the report body.
+Command output: Was something noticeable only because a specific command was run? For example, was there malware initiating a connection to the internet reflected in Network Statistics (netstat) output?
+Screenshots: At times, include a screenshot instead of text as there may be a visual elements to the data (e.g., Kibana dashboards).
+File inventory: Since binary files are not well represented in text, rather than including the binary file output, include a list of files that came up during the mission, their file hashes, and where to find the file. Files to inventory include packet captures, malware, images, and memory snapshots.
+﻿
+
+This list is not inclusive and is a guideline of documents to include.
+
+Reference Report_Body.doc from the previous steps and the Sample Report Body to determine the documentation that needs to be collected to support the narrative in the report body.
+
+Some documents that would support the narrative and are beneficial to include in the final assessment report include:
+
+Kibana log entries that demonstrate a TCP SYN scan
+Kibana log entries indicative of a SQL injection attack
+Event logs relating to administrator workstation compromise
+Screenshot of the registry entry for malware persistence
+﻿
+Files from CDA1 to include in the file inventory:
+
+egg.exe, if it existed
+backdoor.exe
+packet captures containing the intrusions, if they exist
+
+Writing the Tactical Report
+﻿
+
+There are multiple sections in an assessment report. The sections should be included in the following order:
+
+﻿
+
+Point of Contact (POC): Include the CPT designation and a POC for the report in case there are any questions about the content.
+
+﻿
+
+Assessment Summary: This is an evaluation summary and is the most important part of the report. Often, the reviewer only needs to read this section of the report. If they read further, it is because they determined they needed more in-depth information about the contents of the summary. Information to include in the Assessment Summary include the OPORD the mission was supporting and if the MOEs and MOPs were met. If the MOE/MOP was not met, then briefly discuss which MOE/MOP was not met and why. The summary is a final assessment of whether the CPT met their objectives. It is not to discuss the details of what transpired during mission execution. This section is also referred to as Bottom Line Up Front (BLUF).
+
+﻿
+
+Report Body: The report body includes the assessment criteria and a narrative detailing when the criteria was (or was not) fulfilled. Use the MOEs/MOPs as the assessment criteria, and use the timeline to determine when that criteria was met. Technical details relating to mission execution go here.
+
+﻿
+
+Recommendations and Mitigations: While building the timeline, take notice if the CPT did not fulfill a MOE/MOP. This information is included in the Recommendations and Mitigations section of the assessment report. Alternatively, further recommendations on how to accomplish a certain MOP may be included. For example, the CPT may be using an outdated tool, or a more effective approach for accomplishing an MOP may be possible. This section of the report includes that information.
+
+﻿
+
+Appendices: Supporting documentation for the report body is included in this section. If mission output indicates that a MOP/MOE was met, it should be included here: labelled and referenced appropriately.
+
+﻿
+
+References: Include supporting documentation for the mission, including but not limited to the OPORD, threat intelligence reports, health and status reports, etc. If it was used during mission planning or execution, then a good rule of thumb is to include it in the list of references.
+
+﻿
+
+The order in which the report should be populated is:
+
+Report Body/Appendices: Discuss what actually happened during mission execution in a little more detail. 
+Recommendations and Mitigations: Includes any unmet MOPs discovered while writing the report body; this section is developed after the report body.
+Assessment Summary: Summarizes the rest of the report; this needs to be done last.
+POC/References: The order in which these sections are added is not important as they are not dependent on other sections.
+﻿
+ssess Function
+Based on the scenario outlined in Measures of Effectiveness and Performance, populate the Assessment Summary, Report Body, and Recommendations and Mitigations sections of the assessment report for tactical MOE 3. Follow this workflow:
+
+Create a timeline of events relevant to the MOE being assessed
+Create the Report Body from the timeline
+Determine if the CPT successfully achieved their MOEs/MOPs
+Complete the Recommendations and Mitigations appropriately based on the CPT’s performance.
+Write the Assessment Summary to evaluate the CPT’s performance.
+Save the assessment report
+﻿even if not found anything they still accomplished their mop and moe
+
+The completed report should discuss if the CPT was able to implement effective countermeasures and policies in conjunction with local defenders. The Assessment Summary is brief and to the point stating whether the CPT met expectations for tactical MOE 3 or not. If they did not, explain why. If the CPT did not meet expectations, the Recommendations and Mitigations section should explain why and what should be done to remediate their deficiencies. If the CPT accomplished their objectives, then provide input on how to improve their processes.
+
+
+
+
+
+
+
+
+
+
