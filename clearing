@@ -1,0 +1,818 @@
+Clear is the Cyber Protection Team's (CPT) core function in which the threat is identified and a response is necessary. This phase is often preceded by a hunt operation, which is initiated by intelligence or indicators that Malicious Cyberspace Activity (MCA) is present in a mission partner’s network. The confirmation of this activity in a hunt operation leads directly to a clearing operation in which all traces of adversary presence and persistence must be eradicated to return the network to a safe and stable state.
+Clearing is an operation to target and engage MCA to eliminate or neutralize it from a network or system. Cyber Warfare Publication (CWP) 3-33.4:
+
+
+Clear is normally used relative to the removal of barriers or obstacles in mobility operations or the deconfliction of targets for engagement. In the context of CPT operations, clear is defined as an operation to target and engage MCA in order to eliminate or neutralize it from a network or system, and may include actions to interdict, contain, disrupt, or degrade MCA. The CPT clear function occurs when the supported or supporting commander directs the CPT to eliminate or neutralize the identified threat on the network or system. CPTs may also be directed to take other actions against identified threats rather than clearing them.
+
+
+The process of conducting a clearing operation through mission partner networks and systems occurs after a hunt operation or threat intelligence identifies MCA. Prerequisite to conducting the clearing operation, a CPT should determine the full scope of the intrusion, both functionally and physically, so that the threat and damage is fully characterized prior to recommending that the clear operation proceed.
+
+
+According to National Institute of Standards and Technology (NIST) Special Publication (SP) 800.61r2, the IR lifecycle consists of four phases.
+PreparationDetection and AnalysisContainment, Eradication, and RecoveryPost-incident Activity
+
+
+
+
+
+Figure 3.2-1 — The NIST IR lifecycle
+
+
+Prior to execution of a clear operation, the planning process consists of the following steps. These steps correspond to the Preparation and Detection phases of an IR cycle:
+Gain and maintain contact with the MCAConsult with Subject Matter Experts (SME) to determine methods and intent behind MCAEngage with mission partner Cybersecurity Service Providers (CSSP) to assist with an IR planMake a risk mitigation decision based on the benefits or consequences of continuing hunt operations versus initiating clear operations
+
+
+Once a clear operation is approved, a CPT performs the following, as directed or tasked:
+Contain affected systems and networks simultaneously to prevent adversary repositioning.Neutralize and eradicate adversary activities in each network or systemObserve and characterize adversary behavior and Tactics, Techniques, and Procedures (TTP) to enable follow-on operations (i.e., enable hardening)Enable recovery or restoration of affected systems and networks
+
+gain and Maintain Contact
+During the prerequisite phase of clearing operations, which corresponds to the Preparation and Detection steps of the IR lifecycle, Cyber Defense Analysts (CDA), in a deliberate hunt operation or after given actionable threat intelligence, use a working knowledge of normal operations and patterns in an organization to determine deviations from that baseline, and characterize those anomalies as incidents or not. A variety of tools and techniques are employed, such as monitoring software, log and error message aggregation, querying platforms, and security systems (e.g., Network Security Monitors [NSM], firewalls, and Intrusion Detection Systems [IDS]). 
+
+﻿
+
+If an event appears to be an incident after identification and analysis, it is important to report it quickly and respond according to organizational procedures and standards. 
+
+Detect Malicious Compromise Through Kibana and Winlogbeat Logs
+The MCA is detected as part of the Detection and Analysis step of IR. While these steps are taken prior to a clear operation occurring, they provide the CDA performing the containment and eradication important knowledge which is used during the operation. In this case, Sysmon and winlogbeat have been deployed on the mission partner’s network for log collection and aggregation, and those logs have been ingested into Kibana — as an analytic platform. 
+
+﻿
+
+Perform queries on Kibana to identify unusual activity that is likely MCA.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Log in to the cda-win-hunt Virtual Machine (VM) using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. Open Google Chrome.
+
+﻿
+
+3. Select the Security Onion bookmark and log in to the Security Onion web console using the following credentials:
+
+﻿
+
+Username: onion@cda.corp
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+NOTE: In analyst workstations where users have previously logged in to Security Onion, these credentials may be cached and the browser proceeds directly to the web interface in the next step.
+
+﻿
+
+﻿
+
+Figure 3.2-2
+
+﻿
+
+4. Select Kibana from the Menu Button (three stacked lines).
+
+﻿
+
+﻿
+
+Figure 3.2-3
+
+﻿
+
+When Kibana loads, the landing page is known as a dashboard. It is helpful both now and in future lessons to be familiar with this interface, so take the time to select a variety of views and see what data is returned using that filter.
+
+﻿
+
+﻿
+
+Figure 3.2-4
+
+﻿
+
+5. To see which events have been collected about processes created on individual hosts in this domain, an analyst could search through data in the Hosts dashboard, Sysmon events dashboard, and process.create Sysmon events dashboard.
+
+﻿
+
+﻿
+
+Figure 3.2-5
+
+﻿
+
+6. Navigate to the Discover dashboard by opening the navigation menu in the top left hand corner.
+
+﻿
+
+﻿
+
+Figure 3.2-6
+
+﻿
+
+﻿
+
+Figure 3.2-7
+
+﻿
+
+This Discover view is a query platform allowing powerful searches of all logs collected by the Security Onion nodes deployed in the mission partner’s network. 
+
+﻿
+
+All source analysts supporting this CPT have informed the team that Advanced Persistent Threat (APT) 19, which is known to use phishing scams to steal valid credentials and employ PowerShell to execute malicious payloads, may be at work in this environment. Reporting indicates that this attack occurred between 17 May 2021 and 21 May 2021.
+
+﻿
+
+7. Set the query date range by selecting Show Dates. The default setting is the Relative range A day ago to now. 
+
+﻿
+
+8. Change Relative to Absolute, and set the date range from May 17, 2021 @ 21:05:00 to May 21, 2021 @ 21:06:00. 
+
+﻿
+
+﻿
+
+Figure 3.2-8
+
+﻿
+
+9. Search through the dataset of logs collected during this date range to find instances of PowerShell running on domain machines. Run the following query to perform the search:
+
+﻿
+
+process.executable: “PowerShell.exe”
+﻿
+
+NOTE: The process.executable field is specific to the Sysmon logs sent to Security Onion by host winlogbeat agents in the domain.
+
+﻿
+
+﻿
+
+Figure 3.2-9
+
+﻿
+
+While the results may not be normal user activity, they are within the realm of possibility for scheduled tasks or administrative updates. However, any instance of PowerShell making outgoing network connections is suspicious, especially if they are outside the protected private network.
+
+﻿
+
+10. Run the following query to determine if there are any other questionable actions occurring:
+
+﻿
+
+process.executable: “PowerShell.exe” and event.action: "Network connection" 
+﻿
+
+﻿
+
+Figure 3.2-10
+
+﻿
+
+Even this query produces too much noise.
+
+﻿
+
+11. Filter out destination Internet Protocol (IP) addresses corresponding to the mission partner network (as this may be friendly network administrator activity) and known safe hosts (such as the Windows private IP address range).
+
+﻿
+
+process.executable: PowerShell.exe and event.action: "Network connection" and not destination.ip:169.254.0.0/16 and not destination.ip:174.16.0.0/16 and not destination.ip:172.16.0.0/16
+﻿
+
+﻿
+
+Figure 3.2-11
+
+﻿
+
+The results display a log entry that is suspicious and bears further investigation on the cda-acct-1 VM.
+
+﻿
+
+12. Open the questionable item, and examine the IP address where the machine is connected:
+
+﻿
+
+﻿
+
+Figure 3.2-12
+
+﻿
+
+The 210.210.210.0/24 subnet is outside this organization. A possible network compromise has been detected using monitoring tools. Contain the breach.
+
+ontain Affected Systems and Networks Simultaneously
+After detection has confirmed a likely incident, the system should be contained for further investigation and remediation. Containment limits the extent of any damage a breach may have already initiated, such as data exfiltration or damage to production systems. 
+
+﻿
+
+Containment isolates a known compromise. If the adversarial actors have proceeded no further than the affected systems, the remainder of the network is protected. When this affects production servers, backup plans need to be initiated in parallel with network containment. 
+
+﻿
+
+Systems may be so fully affected by a breach that the only option to contain the compromise is to never restore the system to production. Instead, a full system restore from backup is conducted, so only a clean image is returned.
+
+﻿
+
+Workflow
+
+﻿
+
+If cda-acct-1 is indeed affected by MCA, the first step is to contain the MCA by taking the affected system off the network. This requires physically going to the terminal for that system and unplugging any network cables. Since that physical separation is not possible in this task, turn off networking from the lab view of the machine that is available.
+
+﻿
+
+1. Log in to the cda-acct-1 VM using the following credentials:
+
+﻿
+
+Username: Administrator
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+NOTE: Notice upon login that several windows are automatically opening without user interaction. This is indicative of automated events occurring in the background. Further investigation into the system, specifically the Windows Registry, will shed light on why this is happening.
+
+﻿
+
+2. From the Start menu, enter PowerShell in the Search bar. Right-click PowerShell and select Run as administrator. 
+
+﻿
+
+﻿
+
+Figure 3.2-13
+
+﻿
+
+2a. Alternatively, right-click PowerShell and select Run as Administrator:
+
+﻿
+
+﻿
+
+Figure 3.2-14
+
+﻿
+
+3. Disconnect from the internet by issuing the following command in PowerShell:
+
+﻿
+
+PS C:\Windows\system32> Disable-NetAdapter -Name "Ethernet0"
+﻿
+
+4. Select [Y] Yes.
+
+﻿
+
+﻿
+
+Figure 3.2-15
+
+﻿
+
+The machine can no longer communicate with any other network devices, which also means the adversary is likewise unable to communicate.
+
+﻿
+
+5. Enter the following PowerShell command to view the command history:
+
+﻿
+
+PS C:\Windows\system32> Get-History
+﻿
+
+﻿
+
+Figure 3.2-16
+
+﻿
+
+There is nothing listed other than the commands in the current session.
+
+﻿
+
+Adversaries often wipe history records to subvert attempts like these to discover their methodology, but it is worth trying to catch ill-prepared attackers.
+
+﻿
+
+NOTE: If this operation was a formal investigation and the necessary tools and accesses are available, one would create a full disk image and a memory dump for forensic investigation. The process for making such a forensic copy of the hard disk is covered in future lessons.
+
+Neutralization and Eradication of MCA from Affected Systems
+The objective of a clear operation is the quarantine, withdrawal, or destruction of identified threats from the network or system. This is the key phase in accomplishing that objective.
+
+﻿
+
+After a system is contained, responders conduct the actual removal of compromised artifacts and any persistence that an attacker may have left behind. In this task, documentation is vitally important. If a threat actor is targeting the organization, the actor may use similar tools and techniques elsewhere. Identifying how the actor is working on this system may provide clues as to how they intend to attack others.
+
+﻿
+
+This is also an exhaustive process and should never be done from memory or through pure intuition. Use established organizational Standard Operating Procedures (SOP) and industry-proven checklists in investigating the system.
+
+﻿
+
+This task helps understand the steps necessary in removing malware from a system. However, the surest and most thorough cleaning is through a complete reimaging of the affected system.
+
+dentifying Malware on Infected Hosts
+Workflow
+
+﻿
+
+While in the cda-acct-1 VM, perform the following analysis.
+
+﻿
+
+1. From the Start menu, enter cmd in the Search bar. Right-click Command Prompt and select Run as administrator. 
+
+﻿
+
+﻿
+
+Figure 3.2-17
+
+﻿
+
+Administrator terminals in both the Windows Command Line (CMD.exe) and PowerShell should be open on the desktop.
+
+﻿
+
+﻿
+
+Figure 3.2-18
+
+﻿
+
+To examine the processes currently running, use both administrator interfaces and become familiar with the syntax particular to each one.
+
+﻿
+
+2. Enter one of the following commands in the appropriate terminal:
+
+﻿
+
+CMD.exe
+
+﻿
+
+C:\Windows\system32> tasklist
+﻿
+
+﻿
+
+Figure 3.2-19
+
+﻿
+
+PowerShell
+
+﻿
+
+PS C:\Windows\system32> Get-Process
+﻿
+
+﻿
+
+Figure 3.2-20
+
+﻿
+
+Windows has a number of processes running in the background by default to create a fluid and functioning Operating System (OS). With time and familiarity with the OS, an analyst becomes familiar with what looks normal and what looks out of place. In future lessons, many of these under-the-hood processes and services are explained more fully. For now, only a rudimentary understanding of what normal looks like is necessary.
+
+﻿
+
+Note that among the process list, the Firefox web browser is listed.
+
+﻿
+
+Web browsers normally have UI windows associated with them so that the user can browse the internet. This process running in the background is suspicious because it is acting outside of its normal behavior. Threat actors often hide their own malicious activity under the name of a familiar and seemingly innocuous process that is likely to be running on a victim system. Since Firefox was not opened by the normal user, kill it.
+
+﻿
+
+3. Kill any suspicious process using its Process Identifier (PID) with the command:
+
+﻿
+
+CMD.exe
+
+﻿
+
+C:\Windows\system32> taskkill /pid [Process ID] /F
+﻿
+
+PowerShell
+
+﻿
+
+PS C:\Windows\system32> Stop-Process -Id [Process ID] -Confirm -PassThru
+﻿
+
+4. In this case, kill the suspicious Firefox process (if its Identifier [ID] is 1920) with the command:
+
+﻿
+
+PS C:\Windows\system32> Stop-Process -Id 1920 -Confirm -PassThru
+﻿
+
+﻿
+
+Figure 3.2-21
+
+﻿
+
+Remove Implant-related Files
+
+﻿
+
+Files can be found with specific keywords.
+
+﻿
+
+1. Enter the following command in PowerShell to search for these keywords:
+
+﻿
+
+PS C:\Windows\system32> Get-Childitem -Path C:\ -Include *[keyword]* -File -Recurse -force -ErrorAction SilentlyContinue
+﻿
+
+2. Enter the following command in PowerShell to look for any named backdoors:
+
+﻿
+
+PS C:\Windows\system32> Get-Childitem -Path C:\ -Include *backdoor* -File -Recurse -force -ErrorAction SilentlyContinue
+﻿
+
+This command has several parts:
+
+﻿
+
+Get-ChildItem: The principle command; it obtains references to each object in the remainder of the query
+
+﻿
+
+-Path C:\: The filepath in which to search
+
+﻿
+
+-Include *backdoor*: Indicates that the form of results must adhere to the regular expression any character and any file extension before or after the keyword “backdoor”
+
+﻿
+
+-File: Indicates that only file objects are accepted
+
+﻿
+
+-Recurse: Allows the query to continue to search through subfolders of the primary filepath
+
+﻿
+
+-ErrorAction SilentlyContinue: Prevents the screen from being filled with possible errors
+
+﻿
+
+﻿
+
+Figure 3.2-22
+
+﻿
+
+An analyst can view the American Standard Code for Information Interchange (ASCII) contents of the file with the following commands:
+
+﻿
+
+CMD.exe
+
+﻿
+
+C:\Windows\system32>type "[filename]"
+﻿
+
+PowerShell
+
+﻿
+
+PS C:\Windows\system32> Get-Content “[filename]”
+﻿
+
+NOTE: These commands only work well with ASCII data. Attempting them with files formatted differently results in a unreadable output to screen.
+
+﻿
+
+3. Since this file is an unknown PowerShell script (and terminals sometimes handle valid terminal commands unusually), it is safest to open it with Notepad.
+
+﻿
+
+PS C:\Windows\system32> notepad.exe "C:\Users\Administrator\Favorites\backdoor.ps1"
+﻿
+
+﻿
+
+Figure 3.2-23
+
+﻿
+
+This appears to be a script for restoring a network connection with the offending IP address.
+
+﻿
+
+If a filename is unknown, but a particular file type is suspected, search for all files of that type created or modified since the known time of compromise.
+
+﻿
+
+4. Run the following command in PowerShell to view the questionable files:
+
+﻿
+
+PS C:\Windows\system32> $FindDate=Get-Date -Year 2021 -Month 05 -Day 17
+﻿
+
+Choose at least one day before the compromise (in this scenario, before 18 May 2021) to ensure all possibilities are captured.
+
+﻿
+
+5. The attacker has shown a propensity to use PowerShell, so search for PowerShell scripts created in the attack window. Run the following command in PowerShell:
+
+﻿
+
+PS C:\Windows\system32> Get-ChildItem -Path C:\ -Include *.ps1 -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $FindDate }
+﻿
+
+This command has several parts:
+
+﻿
+
+Get-ChildItem: The principle command; it obtains references to each object in the remainder of the query
+
+﻿
+
+-Path C:\: The filepath in which to search
+
+﻿
+
+-Include *.ps1: Indicates that the form of results must adhere to the regular expression any filename (“*”) with a PowerShell extension (“.ps1”)
+
+﻿
+
+-File: Indicates that only file objects are accepted
+
+﻿
+
+-Recurse: Allows the query to continue to search through subfolders of the primary filepath
+
+﻿
+
+-ErrorAction SilentlyContinue: Prevents the screen from being filled with possible errors
+
+﻿
+
+ |: A pipe; sends all the output of the command prior to it to the command following it
+
+﻿
+
+Where-Object { $_.LastWriteTime -ge $FindDate }: A filter that returns only objects that fall within the time windows that were previously established.
+Removing Malware from Infected Host
+A new PowerShell script was found. An innocuous profile script related to the default PowerShell configurations was also found. Opening this file in Notepad shows that it also contains a script to call back to the malicious IP address. It also has a creation time and date in close proximity to the other malicious script. It appears that the threat actors added innocuous padding to the file to prevent its signature from being identical to the first, but analysis of the code reveals that it accomplishes the same intent.
+
+﻿
+
+﻿
+
+Figure 3.2-24
+
+﻿
+
+Workflow
+
+﻿
+
+To delete the files, use CMD.exe or PowerShell.
+
+﻿
+
+1. From the Administrator command prompt, enter the following command:
+
+﻿
+
+CMD.exe
+
+﻿
+
+C:\Windows\system32> del "[filename]"
+﻿
+
+PowerShell
+
+﻿
+
+PS C:\Windows\system32> Remove-Item “[filename]”
+﻿
+
+﻿
+
+Figure 3.2-25
+
+﻿
+
+NOTE: Multiple files can be deleted at once, but must be comma separated.
+
+﻿
+
+Remove Hosts Entries
+
+﻿
+
+The hosts file is the first point of lookup for DNS hostname resolution, so a common adversarial technique for exploitation and re-exploitation is to modify the endpoint hosts file, in order to route traffic to malicious infrastructure. Examine the file to determine whether the malicious actor tampered with it.
+
+﻿
+
+1. From the Administrator PowerShell prompt, run the following command to open the local Domain Name System (DNS) cache:
+
+﻿
+
+PS C:\Windows\system32> notepad C:\Windows\System32\drivers\etc\hosts
+﻿
+
+Notice that the attacker added an entry to the file.
+
+Cleaning Windows Hosts File
+The adversaries associated their own IP address with the locahost domain which is clearly a misspelling of localhost.
+
+﻿
+
+﻿
+
+Figure 3.2-26
+
+﻿
+
+Hiding the entry as a misspelling of the very common localhost is a weak form of obfuscation applied to this technique. It also exploits the human vulnerability of mistyping domains. This is often exploited in the technique Domain Squatting, in which a threat actor obtains the domain of a slight misspelling of a common object of normal web browsing activity in the target domain.
+
+﻿the threat actor may squat — if the domain is available — on the common misspelling:
+
+Attackers like to hide persistence mechanisms in Autorun registry keys.
+
+
+Autorun keys are locations in the Windows registry, which is a database of settings that the OS uses. These indicate which processes or services automatically start when a system boots or a user logs in. They are particularly valuable because if a user restarts the machine, an attacker does not lose access, like they would if they only existed in memory. The Windows boot process restarts their access by running processes stored in the Autorun keys.
+Remove Registry Entries
+Having discovered a number of persistence mechanisms which the adversary has left behind in the Windows registry, eradicate the adversary foothold by deleting the malicious entries. 
+
+﻿
+
+Workflow
+
+﻿
+
+To delete unwanted registry values, use CMD.exe or PowerShell.
+
+﻿
+
+1. From the administrator command prompt, enter the following command:
+
+﻿
+
+CMD.exe
+
+﻿
+
+C:\Windows\system32> reg delete "[Registry Key]" /v "[Value Name]"
+﻿
+
+﻿
+
+Figure 3.2-29
+
+﻿
+
+PowerShell
+
+﻿
+
+PS C:\Windows\system32> Remove-ItemProperty -Path "[Registry Key]" -Name "[Value Name]"
+﻿
+
+﻿
+
+Figure 3.2-30
+
+﻿
+
+NOTE: Query the value again after deleting to ensure that the registry is in a planned state.
+
+﻿
+
+Another persistence location in the Windows registry is the userinit value of the winlogon key.
+
+﻿
+
+2. Check the userinit value of winlogon using PowerShell:
+
+﻿
+
+PS C:\Windows\system32>Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+﻿
+
+Normally, this runs userinit.exe to execute logon scripts, reestablish network connections, and start Explorer.exe. An adversary can manipulate this key to ensure that their malicious script or executable is run first.
+
+﻿
+
+A normal entry looks like this:
+ecovery
+Return the compromised systems to the production environment, but do so while continuing to closely monitor all network and host activity on the machine in case something was missed or the system is reinfected.
+
+﻿
+
+If the initial compromise was the result of a software or OS vulnerability, then the vulnerability needs to be patched before bringing the system back online to prevent future exploitation.
+
+﻿
+
+Ultimately, the production system owners and stakeholders set the timeline and priority for reintegration, but where a responder is able to advocate, it should be for maximum testing, extensive monitoring, and thorough validation prior to any restoration.
+
+﻿
+
+The primary goal in this phase is to prevent re-compromise of the organization.
+
+﻿
+
+Return Machine to the Network
+﻿
+
+Workflow
+
+﻿
+
+1. Add a firewall rule to block the offending address from the machine (and duplicate this on all machines in the network) using the following PowerShell command:
+
+﻿
+
+PS C:\Windows\system32> New-NetFirewallRule -DisplayName "Block Adversary IP address" -Direction Outbound –LocalPort Any -Protocol TCP -Action Block -RemoteAddress 210.210.210.9
+﻿
+
+﻿
+
+Figure 3.2-34
+
+﻿
+
+NOTE: This firewall rule should be duplicated at the network border as well. In the mission partner network, which uses Vyatta routers and firewalls, the appropriate commands are:
+
+﻿
+
+configure
+set firewall name MCA-DENY default-action 'drop'
+set firewall name MCA-DENY rule 1 source address 210.210.210.0/24
+set interfaces ethernet eth2 firewall in name "MCA-DENY"
+commit
+save
+exit
+﻿
+
+This creates a new policy, a new rule for that policy, and applies that policy to the existing internet-facing interface — all of which is explained further in the next lesson on Hardening
+
+﻿
+
+2. After all persistence mechanisms of the attack are effectively removed and the attackers blocked, restore connectivity using the following PowerShell command:
+
+﻿
+
+PS C:\Windows\system32> Enable-NetAdapter -Name "Ethernet0"
+﻿
+
+﻿
+
+Figure 3.2-35
+
+﻿
+
+The machine is back online and capable of standard operation. Remember that this is often only a technique to return mission critical systems to production in a timely manner. The safest way to restore a system is to revert to a clean snapshot or clean image, and restore data from backup servers. After a breach such as this, these systems must continue to be closely monitored to detect any further adversarial activity.
+
+A successful clearing operation swiftly and precisely contains MCA, eradicates that activity and any of its artifacts or references, and returns all affected systems to a clean state or fully restores that system from a known good backup if necessary eradication is not possible in place.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
