@@ -1576,6 +1576,50 @@ You worked through a scenario to execute two hunts for brute force attacks perfo
 
 As threat hunting is a core function of the CPT, it is important to have a good base of foundational knowledge. As you perform other hunting and investigation tasks within this course, build on the foundations laid during this lesson.
 
+Detailed Threat Assessment Overview
+﻿
+
+﻿
+
+A detailed threat assessment report is a tool utilized by organizations to properly measure organizational readiness for probable threat actors, based on historical attacks. Detailed threat assessments are granular and can be assembled in preparation of, or after, a security breach. Cyber Protection Teams (CPT) typically create detailed threat assessment reports during the mission planning and mission analysis phase of a mission. The goal of a detailed threat assessment report is to identify assets and information that might be affected during a cyber attack. Included in the report is information regarding:
+
+Threat actors 
+Events
+Anomalies
+Vulnerabilities 
+Assets of interest to be compromised 
+﻿
+
+Timeline of Events
+﻿
+
+An important feature of threat assessment is a timeline of events. Threat assessment includes investigative findings over a period of time. The assessment takes the findings and plots the points on a timeline. Plotting key points and events on the timeline allows readers to easily see and digest a compromise or attack. Figure 4.3-2 details a sample timeline of the events of the 2020–2021 SUNBURST and SUPERNOVA SolarWinds cyber attack:
+
+
+Key Components Detailed Threat Assessment Report
+﻿
+
+A key function of a detailed threat assessment is the ability to determine the amount of risk an organization can expect to take on. A detailed threat assessment describes the risk through assessment of identified threats, vulnerabilities, and compensating controls to determine the likelihood a vulnerability could be exploited and the potential impact should the vulnerability be exploited. National Institute of Standards and Technology (NIST) Special Publication 800-30 and the United States Cyber Command (USCYBERCOM) risk assessment methodology are good examples of risk assessment processes. This section of a detailed threat assessment should be a synopsis of risk analysis, as completed in the risk assessment report. A general depiction of the analysis is shown in Figure 4.3-3, where risk is the intersection of a threat and vulnerability, influenced by likelihood and impact. 	
+
+Mapping Detailed Threat Assessment Report Information to Mitre ATT&CK Framework
+MITRE ATT&CK is a curated knowledge base and model for cyber adversary behavior, reflecting the various phases of an adversary’s attack lifecycle and the platforms they are known to target. ATT&CK originated out of a project to enumerate and categorize post-compromise adversary TTPs against Windows Operating Systems (OS) to improve detection of malicious activity. It now includes Linux and MacOS and covers pre-compromise tactics and techniques, and technology-focused domains like mobile devices. 
+
+﻿
+At a high level, ATT&CK is a behavioral model that consists of the following core components:
+
+Tactics: Denoting short-term, tactical adversary goals during an attack (the columns)
+Techniques: Describing the means by which adversaries achieve tactical goals (the individual cells)
+Documented adversary usage of techniques and other metadata (linked to techniques)
+﻿
+
+NOTE: ATT&CK is not an exhaustive enumeration of attack vectors against software.
+
+﻿
+Surrounding and linking to the central topic are subtopics. Subtopics are large steps or events taken during the breach or investigation. Subtopics can range greatly in number based on the central topic, though typically there are only a few per mind map — it is all based on the complexity of the mind map. Information in subtopics is more detailed than the central topic, however, they are still more general than an operational note. In the cybersecurity context, the operational notes taken during an investigation would provide the information needed to populate subtopics. Those subtopics only require a subset of information found in a particular operational note.
+
+
+Connecting each subtopic is the information related to the events. Related events share attributes and are the result of an action. They have a specific detail connecting them; these attributes would be granular-level details. Connecting events is one of the single most important aspects of a mind map as it represents a pathway. From this pathway, a theory of intent is extracted with the expectation to predict future behavior.
+
 
 
 
