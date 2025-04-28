@@ -1,0 +1,43 @@
+As discussed previously, the Cyber Protection Team (CPT) Operations Process (OP) includes six steps. The second step is Terrain Identification and Prioritization, which details the mission objective as it relates to the initial goals, final outcomes, and instructions provided by the commander. The Planning Lifecycle step of the CPT OP enables Terrain Identification and all subsequent steps. The Planning Lifecycle step takes Task Orders (TASKORDS) and combines them with data collected during site surveys and customer interactions, leading to developing a mission strategy. 
+
+
+This lesson details analyzing key components of TASKORDS and data collected from the customer to determine if a Request for Information (RFI) is needed. This lesson provides an overview of RFIs and how to prepare an RFI in support of planning operations.
+MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK®) is a globally-accessible knowledge base of adversary tactics and techniques based on real-world observations. The ATT&CK knowledge base is used as a foundation for the development of specific threat models and methodologies in the private sector, in government, and in the cybersecurity product and service community. ATT&CK is open and available to any person or organization to use at no charge.
+Draw.io  is a free online diagram software for making flowcharts, process diagrams, mind maps, and network diagrams.
+The Planning Lifecycle lesson focuses on the planning process, prior to the Terrain Identification and Prioritization step as shown in the CPT OP diagram in Figure 4.1-1. 
+
+
+Three possible triggers initiate the CPT operations process:
+Threat IntelligenceThreat intelligence reporting or warning intelligence may trigger hunt, clear, enable hardening, and assessment functions by the CPT.
+Campaign PlanCPT employment in support of Combatant Command (CCMD) campaign plans is intended to increase critical asset protection prior to operational need.
+Malicious Cyberspace Activity (MCA) DetectionWhether discovered by local network protection assets, network owners, or indicated by threat intelligence reporting, CPT hunting and clearing entails conducting reconnaissance and counter-reconnaissance on supported commanders’ networks or systems to gain and maintain contact with an adversary or further develop a situation.
+
+The first step of the CPT OP is Objectives, Effects, and Guidance. When conditions or requirements trigger a CPT mission, the operational planning section determines the appropriate CPT functions and capabilities before developing preliminary objectives, intended effects, and commander’s guidance. The operational planning section is also responsible for assessing existing command relationships and making recommendations for potential additions or changes to facilitate and enable the CPT mission.
+
+
+Once a trigger has been identified a determination for mission need is required. If a mission is required, a PLANORD and TASKORD is developed. 
+
+
+Objectives, intended effects, and commander’s guidance are disseminated via a Planning Order (PLANORD) – or other similar service-specific orders document – to the CPT, the supported commander, and the local network protectors, if applicable. PLANORDs are followed by a TASKORD. According to DoD Joint Publication (JP) 1-02 a TASKORD is, “A method used to task and to disseminate to components, subordinate units, and command and control agencies projected targets and specific missions. In addition, the tasking order provides specific instructions concerning the mission planning agent, targets, and other control agencies, as well as general instructions for accomplishment of the mission.” Accordingly the TASKORD documents the supported commander’s or organization’s requirement to collect initial network diagrams, terrain information, design documentation, previous operational and penetration test results, and configuration information for CPT use in the next step of the OP. 
+
+
+In some instances, this information is not readily available or is out of date. A TASKORD should clearly communicate intent and requirements to ensure the operational level planning element, CPT, and supported command have the necessary information to drive accurate and effective CPT mission planning. When more information is needed the CPT can develop a Request for Information (RFI). RFIs are covered later in the lesson.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
