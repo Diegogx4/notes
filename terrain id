@@ -114,6 +114,118 @@ How local users interrelate with the physical network and logical network layers
 Usernames, permission levels, email addresses, chat names, etc.
 
 
+ details a sample terrain map. The terrain map includes critical nodes and access points for the Fort Drum Office network. The Fort Drum Office is the front office to Fort Drum. The office provides administrative and information technology (IT) support to Higher HQ. The terrain map provides an overview of the subnets, clients, servers, and network devices. 
+
+To start the analysis of the Fort Drum Office terrain, identify who connects to the network and where the network itself connects. First, look at the top portion of the terrain map:
+
+The Fort Drum Office network is connected via a gateway — gw-fw (labeled 1 in Figure 4.2-5) — to a cloud infrastructure. The cloud infrastructure is denoted by a cloud shape. The cloud offers three connection points, represented by three routers as shown in Figure 4.2-6: 
+
+The cloud infrastructure acts as a storage and transport location for data. The data is moving to and from three distinct entities. The first entity includes the three remote workers, designated by the computer and house logo. The second entity is the Fort Drum Office. The Fort Drum Office acts as a front office for the large Fort Drum Enterprise. The third entity is Higher Headquarters (HQ). Higher HQ is where commanders operate and large, enterprise-wide decisions are made. Higher HQ maintains large amounts of sensitive data. 
+
+Additional connections in this network are through two VPNs. As shown in Figure 4.2-7, remote workers are able to access the Fort Drum Office network remotely via a VPN — circled in red. Additionally, the Fort Drum Office is able to access Higher HQ network remotely via VPN. 
+The second items to identify are the subnets. Subnets are networks embedded in the enterprise network. Typically, subnets are smaller than the enterprise network and are created to make networks operate more efficiently. The subnets in the Fort Drum Office network are circled in red in Figure 4.2-9:
+
+breaks down all the components of each subnet. While the Demilitarized Zone (DMZ) is part of the network, it provides a more specialized function that is covered in the next task.
+
+Fort Drum Office DMZ
+A DMZ is a perimeter network that protects an organization's internal Local Area Network (LAN). The DMZ protects the enterprise network by offering a layer of separation between internet-facing services and more sensitive internal-only subnets. The Fort Drum Office’s DMZ is outlined in green in Figure 4.2-10: 
+
+The DMZ devices consist of:
+A web server
+A Domain Name System (DNS) server 
+A VPN server
+Additionally, the DMZ utilizes Dynamic Host Configuration Protocol (DHCP) via Internet Service Provider (ISP). While this concept is covered in detail later in the course, DHCP via ISP is when a DHCP server assigns IPs by modem Media Access Control (MAC) address. When the modem is powered on, it communicates to the network indicating it is looking for an IP address. The DHCP server listens to this communication and starts talking to the modem. The modem then transmits its MAC address to the server. At that point, either an IP has been reserved for the modem or one is assigned at that time. 
+
+Identifying Key Terrain
+Key Terrain
+﻿
+Key terrain associated with cyberspace can be considered a physical node or data that is essential for mission accomplishment. Examples include major lines of communications, key waypoints for observing incoming threats, domain name services, network OSs, switches, spectrum-dependent devices (such as sensors), main ISP inputs, and mission-critical parts of the threat information network. Determining key terrain in cyberspace can be achieved by overlapping the threat’s critical asset list, mission, and intent. 
+﻿
+Domain Controllers 
+﻿
+The Fort Drum Office terrain is a Windows domain network, utilizing Active Directory (AD). AD is a database and set of services that connect users with the network. The DC is the terminal that controls AD. The DC manages many of the services running on the network, tracks which users are active/inactive on the network, and controls access to critical information. The DC is the most critical portion of this network. The Fort Drum Office terrain contains two DCs — a primary and a backup. Both of these terminals are key assets in the terrain. 
+
+Below are resources to review how adversaries may attempt to gain access to and leverage the use of a DC:
+
+﻿ https://attack.mitre.org/techniques/T1098/ ﻿   ﻿
+https://attack.mitre.org/techniques/T1207/ 
+h ttps://attack.mitre.org/techniques/T1078/0 0 2/   
+﻿
+ACAS Server
+﻿
+ACAS is a suite of security software responsible for assessing the network and determining if it meets the defined security objectives. ACAS utilizes Nessus to scan software to identify vulnerabilities and weak spots on the network. Nessus actively scans the network in an effort to detect defined vulnerabilities. ACAS also uses the Passive Vulnerability Scanner (PVS) to monitor network traffic at the packet level. PVS discovers new hosts added to a network, identifies ports that are passing traffic, and identifies when applications might be compromised. Administrators on the network are able to view the output from the ACAS server in a centralized software called Security Center (SC). Within SC, administrators make necessary adjustments and modifications to the ACAS and the network. The goal of the ACAS server is ultimately to make the environment as secure as possible. The Fort Drum Office terrain contains an ACAS server — a key asset in the terrain. The ACAS server holds information on potential vulnerabilities that exist in the network, and is, therefore, a good target for adversaries. 
+
+Below are resources to review how adversaries may attempt to gain access to and leverage vulnerabilities persisting in a given terrain:
+﻿ https://attack.mitre.org/techniques/T1595/002/  
+﻿ https://attack.mitre.org/techniques/T1046/  
+﻿ https://attack.mitre.org/techniques/T1423/  
+
+VPN Server
+﻿
+The VPN server acts as a secure tunnel connecting two networks. For the Fort Drum Office, the VPN server allows connections between the Fort Drum Office and the Higher HQ network. If an adversary infiltrates the Fort Drum Office terrain and is able to gain access to the VPN Server, they could potentially leverage the server to move within the terrain and access Higher HQ. The Fort Drum Office terrain contains a VPN server — a key asset in the terrain. 
+
+Below are resources to review how adversaries may attempt to gain access to and leverage VPN services in a given terrain:
+﻿ https://attack.mitre.org/techniques/T1428/  
+﻿ https://attack.mitre.org/techniques/T1133/  
+Additional Resources:
+Each of the following techniques is from the MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) framework.
+DCs
+Account Manipulation — T1098:  https://attack.mitre.org/techniques/T1098/   
+Rogue Domain Controller — T1207:  https://attack.mitre.org/techniques/T1207/  
+Valid Accounts: Domain Accounts — T1078.002:  https://attack.mitre.org/techniques/T1078/002/  
+ACAS Server
+Active Scanning: Vulnerability Scanning — T1595.002:  https://attack.mitre.org/techniques/T1595/002/  
+Network Service Scanning — T1046:  https://attack.mitre.org/techniques/T1046/  
+Network Service Scanning — T1423:  https://attack.mitre.org/techniques/T1423/  
+VPN Server
+Exploit Enterprise Resources — T1428:  https://attack.mitre.org/techniques/T1428/   
+External Remote Services — T1133:  https://attack.mitre.org/techniques/T1133/  
+﻿
+Analyzing a Terrain Map
+﻿
+displays the Cyber Defense Analyst - Basic (CDA-B) terrain map. The CDA-B terrain is a relatively small corporate enterprise network. The terrain includes corporate departments: Accounting, Executive, and Human Resources (HR). The terrain also includes some supporting functions: DMZ, servers, and security — all of which are located behind their own respective firewalls. The supporting functions include AD services, domain name services, and Security Onion. 
+
+NOTE: Security Onion is a free and open-source platform for threat hunting, network security monitoring, and log management. Security Onion includes best-of-breed open-source tools such as Suricata, Zeek, Wazuh, the Elastic Stack, and others. Security Onion will be introduced and utilized later in this course. 
+The most critical service in the servers subnet is the DC (cda-dc). 
+
+﻿Developing a Terrain Map
+In this task, develop a terrain map based on the information provided to your CPT by the mission customer.
+
+﻿
+
+Network Brief
+1 Palo Alto PA-3200 firewall
+1 Juniper NX 5 router 
+Provides routing to a WAP, a switch, and a file server
+Supports three subnets:
+Analyst subnet: 10.10.1.0/24
+Server subnet: 10.10.2.0/24
+Management subnet: 10.10.3.0/24
+1 file server 
+Name: file1
+Static IP address: 10.10.2.10
+Accessed by Analyst and Management Subnets for file storage and retrieval 
+Contains all files shared in the network 
+1 NETGEAR WAC104 WAP providing wireless access to the Analyst subnet:
+6 HP Windows 10 laptops
+10 Dell Windows 10 laptops
+2 HP MFP
+16 iPhoneX smartphones
+1 Juniper EX440 switch providing connections to the Management subnet:
+3 HP Windows 7 Personal Computers (PC)
+5 Dell Windows 7 Personal Computers (PC)
+6 Cisco 8000 Voice over IP (VoIP) phones
+2 Avaya J100 Voice over IP (VoIP) phones
+Permissions:
+Two management accounts with administrator-level access 
+Access is used to configure network devices (firewall, switch, and WAP)
+Analyst and Management users do not have access to each others subnets
+Other Notes:
+Slack: Office’s internal messaging service application is housed in the file server
+Contains data regarding users' names and messages
+No VPN is utilized from the Analyst subnet 
+The subnet contains wireless devices that may be used remotely
+Firewall is the only network defense device for network
 
 
 
