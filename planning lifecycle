@@ -22,6 +22,372 @@ Objectives, intended effects, and commander’s guidance are disseminated via a 
 
 
 In some instances, this information is not readily available or is out of date. A TASKORD should clearly communicate intent and requirements to ensure the operational level planning element, CPT, and supported command have the necessary information to drive accurate and effective CPT mission planning. When more information is needed the CPT can develop a Request for Information (RFI). RFIs are covered later in the lesson.
+The Planning Lifecycle lesson focuses on the planning process, prior to the Terrain Identification and Prioritization step as shown in the CPT OP 
+
+
+Three possible triggers initiate the CPT operations process:
+Threat IntelligenceThreat intelligence reporting or warning intelligence may trigger hunt, clear, enable hardening, and assessment functions by the CPT.
+Campaign PlanCPT employment in support of Combatant Command (CCMD) campaign plans is intended to increase critical asset protection prior to operational need.
+Malicious Cyberspace Activity (MCA) DetectionWhether discovered by local network protection assets, network owners, or indicated by threat intelligence reporting, CPT hunting and clearing entails conducting reconnaissance and counter-reconnaissance on supported commanders’ networks or systems to gain and maintain contact with an adversary or further develop a situation.
+
+The first step of the CPT OP is Objectives, Effects, and Guidance. When conditions or requirements trigger a CPT mission, the operational planning section determines the appropriate CPT functions and capabilities before developing preliminary objectives, intended effects, and commander’s guidance. The operational planning section is also responsible for assessing existing command relationships and making recommendations for potential additions or changes to facilitate and enable the CPT mission.
+
+
+Once a trigger has been identified a determination for mission need is required. If a mission is required, a PLANORD and TASKORD is developed. 
+
+
+Objectives, intended effects, and commander’s guidance are disseminated via a Planning Order (PLANORD) – or other similar service-specific orders document – to the CPT, the supported commander, and the local network protectors, if applicable. PLANORDs are followed by a TASKORD. According to DoD Joint Publication (JP) 1-02 a TASKORD is, “A method used to task and to disseminate to components, subordinate units, and command and control agencies projected targets and specific missions. In addition, the tasking order provides specific instructions concerning the mission planning agent, targets, and other control agencies, as well as general instructions for accomplishment of the mission.” Accordingly the TASKORD documents the supported commander’s or organization’s requirement to collect initial network diagrams, terrain information, design documentation, previous operational and penetration test results, and configuration information for CPT use in the next step of the OP. 
+
+
+In some instances, this information is not readily available or is out of date. A TASKORD should clearly communicate intent and requirements to ensure the operational level planning element, CPT, and supported command have the necessary information to drive accurate and effective CPT mission planning. When more information is needed the CPT can develop a Request for Information (RFI). RFIs are covered later in the lesson.
+
+Section 2A of the TASKORD defines the intent, purpose, method, and end accomplishment(s) of the task. The Commander’s Intent is the overview of the mission and the applicable actions the CPT takes in the task. The Purpose defines the goals and objectives of the task. The Method defines how the task is executed. The End State defines what constitutes completion of the task. 
+
+TASKORD: Section 2B
+Section 2.B of the TASKORD provides a list of sub-tasks that are required in support of the overall goal of the TASKORD. 
+Section 3 of the TASKORD defines administrative and logistical information. Section 3 can include anything noteworthy pertaining to the specific site or mission funding.
+
+
+TASKORD: Section 4
+
+Section 4 of the TASKORD defines the primary command and control for the mission. 
+
+
+TASKORD: Section 5
+Section 5 of the TASKORD defines the ROE. The ROE are parameters that the CPT must follow, and includes parameters such as areas of the network that should not be accessed and tools that can/cannot be used on the network. 
+
+The CPT coordinates with the operational planning section and support commander’s staff to coordinate mission ROE informed by the initial capabilities analysis. ROE in the context of CPT operations refers to the constraints and limitations under which the CPT hunts and/or clears when MCA is encountered as agreed upon by the supported network owner and the supporting commander. For example, the CPT needs to know if they are allowed to employ agent-based solutions, deploy compiled code to hosts, or interrupt service(s) during mission conduct. CPT leadership also conducts a troops-to-task assessment to determine personnel requirements based on mission scope and scale.
+
+
+By adding enriching data and graphical control measures to network maps produced during the previous step, the CPT further improves terrain visualization during planning and operations to enable a common operating picture to emerge, and create shared situational awareness between the CPT, the supported commander, and local network protection assets. The network map forms the basis of the CPT’s visualization tools and must scale appropriately to the situation. As a critical input, the network map forms the foundation on which courses of action are developed based on the operational approach and analytic scheme of maneuver employed by the CPT.	
+
+What information is covered in the TASKORD Header?
+the name of the mission
+subject field
+the name and goal of the mission
+
+What information is covered in the TASKORD Section 1?
+what and why the task is being issued
+
+What information is covered in the TASKORD Section 2?
+intent,purpose, and method of the task
+
+
+section 3
+admin and logic info
+
+section 4
+command and control for the mission
+
+section 5
+roe
+Data Collection
+﻿
+
+After the issuance of the PLANORD and TASKORD, the next step in the OP is the planning phase.
+
+The planning phase includes data collection of artifacts, such as:
+
+Network Diagrams
+Terrain Information
+Configuration Information
+﻿
+Network Diagrams
+﻿
+
+Network diagrams are a visual representation of the systems and connections the CPT operates on during the mission. Network diagrams streamline the mission by cutting out the time or effort to make assumptions about the network. A sample network diagram is provided in Figure 4.1-10:
+
+Terrain Information
+
+Terrain, which covers all of cyberspace, includes the logical and physical components. When defining terrain, Defensive Cyberspace Operations (DCO) team members should use Key Terrain in Cyberspace (KT-C), MRT-C, Task Critical Asset (TCA), and Defense Critical Asset (DCA) as outlined in United States Cyber Command (USCC) Operational Guidance on Identification of Mission Relevant Terrain in Cyberspace. 
+
+Terrain analysis is the collection, analysis, evaluation, and interpretation of geographic (physical) and digital (virtual) information on the natural and man-made features of the terrain — combined with other relevant factors — to predict the effect of the terrain on military operations. Within DCO, it involves the study and interpretation of features of the terrain and their effects on military operations. 
+
+
+Step 2, Terrain Identification, during the planning lifecycle of the CPT OP utilizes the collection portion of terrain analysis. Terrain information including terrain identification is covered in a lesson later in this course. 
+﻿
+Configuration Information
+
+Configuration information refers to the details and settings of the machines and devices used on the network. Configuration information can refer to both physical and logical details and settings. Physical configuration information can include data points such as the location of servers, machines, or network devices and the type of hardware making the connection between machines. Logical configuration information can include data points such as Operating Systems (OS), firmware and firewall versions, and Active Directory (AD) users and groups. Configuration information can also include data points containing the Points of Contact (POC) that are responsible for the configurations. 
+
+Which artifacts are part of the data collected during the Planning phase?
+terrain, configuration information
+network diagram
+
+Request for Information Overview
+Throughout the Planning process, questions may arise pertaining to details and specifics about the mission. An RFI is a document that an organization sends to customers to request specific information or clarification on information regarding the mission. While not always necessary for every mission, an RFI provides clarity for the information in question that is both technical and/or non-technical. During the planning lifecycle of the CPT OP, CPTs collect a vast amount of data points and information. Some of the collected information may not be complete, which leads CPTs to make assumptions based on the need for more clarification to make the collected information complete. Assumptions are things not known, which need to be known to accomplish the plan or mission. Assumptions are validated through the use of RFIs to appropriate organizations, and evaluated for contingencies if invalid. 	
+
+﻿
+
+RFI Format
+﻿
+
+RFIs do not need to follow a specific format or template. RFIs need to include requests for information that impacts how an operation is executed. The information in the request can pertain to any of the topics covered in the TASKORD or in the operation as a whole, topics can include: intent, purpose, end state, tasks, logistics, command, or control. The RFI will include the contact information for the site personnel responsible with receiving and processing the RFI. The personnel is typically the network or system owner, or directly connected to the owners, at the site of the operation.
+
+Operation 33 Summary
+
+
+CPT Operation 33 is in the Planning phase of the CPT OP. The operation is set to be conducted in September of 2021 at the Southern Coastal Agency (SCA) Headquarters (HQ) site located in Charleston, South Carolina. SCA is a federal agency tasked with management of United States (U.S.) infrastructure systems. HQ is the central collection, management, and monitoring of SCA’s two water management sites and the entire Supervisory Control and Data Acquisition (SCADA) network for the southern region of the U.S. 
+
+
+The operation is a coordinated hunt to discover if MCA occurred on the network. Based on initial data provided to the CPT, it is believed a drive-by compromise is responsible for the adversary's initial access into the network. Once it was determined if and how the MCA occurred, the CPT is tasked with clearing the network of any adversarial and/or malware presence. The last action to occur in the Planning phase was a site survey conducted by four members of the CPT. Information collected during the site survey is aggregated in the Data Collection section. 
+
+The following TASKORD was issued for the operation:
+
+
+SUBJ/ CPT OPERATION TASKORD 001 IN SUPPORT OF OPERATION 33//
+
+
+OPER/CYBER OPERATION 33//
+
+
+MSGID/ORDER/TASKORD/001//
+
+
+REF/A/OPORD/OPERATIONS ORDER 21-001//
+
+
+ORDTYPE/TASKORD/HUNT//
+
+
+TIMEZONE/Z//
+
+
+NARR/This TASKORD directs the CPT to provide support to SCA through the use of DCO capabilities to hunt and clear the identified terrain from MCA.//
+
+
+GENTEXT/SITUATION/1.
+
+
+1.A OPERATION 33 TASKORD 21-001 conducts intelligence-driven hunt operations, counter and clear adversary activity from specified terrain with the supported entity, enable hardening of specified terrain from threat-specific unauthorized activities by reducing the attack surface, and assess the effectiveness of response actions and the risk to current and future mission. Supported entity is provided with an overall risk to mission based on threat, vulnerabilities, and implemented cybersecurity programs in order to provide their commanders/directors with improved Situational Awareness (SA) of their organization’s cybersecurity defensive posture.
+
+
+1.B. AREA OF CONCERN.
+
+
+1.B.1. AREA OF OPERATIONS (AO). The AO is bounded by SCA’s mission, network architecture, Cybersecurity Service Provider (CSSP), program management, and mission supporting services. SCA continuing operations is top priority. 
+
+
+GENTEXT/EXECUTION/2.
+
+
+2.A. CONCEPT OF OPERATIONS.
+
+
+COMMANDER'S INTENT. CPT conducts hunt operations to illuminate the adversary and, when directed, clear the adversary with the support of SCA. In order to identify and characterize the assign terrain, the team assesses the security posture and effectiveness of the security system deployed to increase understanding of defensive postures, validate network assets, and correct local defender's network map, if applicable. Share and assist in synthesizing intelligence on threats, force dispositions and vulnerabilities to secure and defend regional and functional critical information, critical assets, and critical infrastructure/key resources. If an adversary is identified on the network, attempt to identify adversary intentions, collect intelligence, and monitor adversary activity.
+
+
+2.A.1.A PURPOSE. Identify an adversary presence, if it exists, identify the extent of adversary actions, and create a suggested IR plan. Assess SCA’s DCO posture to identify vulnerability mitigation opportunities and reduce the risk of vulnerabilities. 
+
+
+2.A.1.B METHOD. The hunt operations include identification and characterization of MRT-C and KT-C, identification of threats to the assigned terrain, and provide mitigation options to enable hardening based on the identified threat. The operation leverages the Intelligence Community (IC), MITRE ATT&CK tactics and techniques, assessments of cyber threats, and potential adversaries — friendly forces — to evaluate the readiness and effectiveness of SCA’s boundary.
+
+
+2.A.1.C END STATE. Identification of adversary presence and, when directed, clear from the terrain. SCA is provided with a Risk Mitigation Plan (RMP) to improve defenses to degrade adversary ability to maneuver or conduct actions against SCA.
+
+
+2.B. TASKS.
+
+
+2.B.1 SOUTHERN COASTAL AGENCY.
+
+
+2.B.1.A Provide primary site POC for mission coordination of all efforts. Submit POC information (name, title, phone, and email) to POC identified within 48 hours from release of this TASKORD.
+
+
+2.B.1.B Ensure AO and/or Chief Information Officer (CIO) approve friendly forces to operate on SCA cyber terrain. Approval for CPT’s execution of IR No Later Than (NLT) 01 SEP 21.
+
+
+2.B.1.C Provide friendly forces with operational support, physical access, network/system access to include any required network/host credentials; network configuration data; and current network topology diagram to include, but not limited to, the Critical and Defended Asset Lists (CAL/DAL), and Critical Infrastructure and Key Resources (CIKR) to SCA's location, as required.
+
+
+2.B.1.D Coordinate with and provide support to CPT POCs identified through end of mission in order to synchronize DCO execution efforts and ensure mission success.
+
+
+2.B.2 CPT.
+
+
+2.B.2.A. Identify and characterize the terrain to understand the cybersecurity posture of SCA.
+
+
+2.B.2.B. Conduct a hunt mission to detect any adversary presence traversing on network.
+
+
+2.B.2.C Security stack/countermeasures capabilities to provide White cell an understanding of what countermeasures are feasible to direct.
+
+
+2.B.2.D Traffic flow including email, web, and Domain Name System (DNS) traffic to provide insight into how traffic is routed through security stack and enterprise protections.
+
+
+2.B.2.E Logging and analytics to provide insight into information capture and environments into which analysts can query data.
+
+
+2.B.2.F Indicators of Compromise (IOC) to compare and improve existing signatures.
+
+
+2.B.2.E Submit RMP to customer.
+
+
+GENTEXT/ADMIN AND LOGISTICS/3.
+
+
+3.A. SCA funds site survey and follow on hunt mission. CPT does not provide funding.
+
+
+GENTEXT/COMMAND AND CONTROL (C2)/4.
+
+
+4.A. SCA is the supported command. 
+
+
+GENTEXT/ROE/5.
+
+
+5.A. Monitoring Network
+
+
+5.A.1 The entire 10.1.3.X subnet is off-limits. This network is in production operation including managing and monitoring of SCA assets that are geographically dispersed.
+
+
+5.A.2 Timeframe of data relevant to operation 15 AUG – 24 AUG 21.
+
+
+5.B. KIT
+
+
+5.B.1 All CPT software and tools included in the kit are approved for use on the network.
+
+
+5.C. SYSTEM ADMINISTRATION
+
+
+5.C.1 Remote Desktop Protocol (RDP) and Secure Shell (SSH), remote agents, and all other remote access tools must be approved by the system engineering and network development team prior to implementation.
+
+
+5.C.2 Compact Discs (CD), Universal Serial Bus (USB), hard disks and other removable media are approved for use.
+
+
+5.C.3 OneWORLD is the monitoring and managing platform used by the monitoring team on the monitoring network. OneWORLD is off-limits and operates on the 10.1.3.X network.
+
+Terrain Information 
+
+
+HighCloud
+
+
+HighCloud uses cloud management software supporting SCA’s operations. HighCloud contains access to all files, profiles, and data from users, computers, and applications found on the network. HighCloud acts a one-stop shop for all critical information and data about SCA. 
+
+
+Direct Repository Backup 
+
+
+Direct Repository (DR) Backup is an offsite data center that collects and manages a second copy of all data on the network. DR Backup maintains systems and servers that can be utilized in the event that SCA’s network is compromised and cannot be used. DR Backup is located offsite from SCA HQS and is not accessed during the hunt operation. 
+
+
+
+
+Configuration Information
+
+
+Virtual Private Networks
+
+
+HighCloud and OpenVPN are utilized as Virtual Private Network (VPN) providers. SCA utilizes VPNs to access each of their sites. The SCADA network utilizes OpenVPN to reach back to SCA HQ. The SCADA network sends a large quantity of data in its communication with HQ; OpenVPN can accommodate the quantity better than HighCloud. Remote workers utilize the HighCloud VPN to facilitate daily tasks and communications with SCA HQ. 
+
+Preparing Questions for RFIs
+Upon review of TASKORDs and information collected from the customer, questions and assumptions may arise. Information that is not answered in the TASKORD, the data collection artifacts, or in a site survey should be the foundation for these questions. The TASKORD and supporting data included during Mission Analysis, step 2 of the CPT OP, define the critical points and strategy in the operation. Questions that directly impact the topics covered in the TASKORD must be asked and included in RFIs. 
+
+Preparing an RFI for Operation 33
+The information provided during data collection provides insight into SCA’s operations, terrain, and network. The information is used to strategize and make decisions regarding Operation 33. The information provided is not complete, however. In order to help CPTs complete the mission, more information is required. Requests for more information are submitted through the use of an RFI to the main POC at SCA HQ. After reviewing the information collected during the Planning phase, questions are included and sent to SCA in the RFI:
+
+Can the CPT develop an Unclassified (UNCLASS) Persistent Cyber Training Environment (PCTE) that mirrors SCA’s network? 
+Who are the users and users' accesses on the network? 
+How does the CPT communicate end state and findings of the mission? 
+What is the process of getting RDP and SSH approved by system engineers and network developers? 
+NOTE: The bulleted list is not an exhaustive list. The questions are only a few of the potential questions that are submitted with the RFI. As the operation is explained to the CPT, each member has the opportunity to ask the customer for details and clarification in the RFI. Additionally, as discussed earlier in this lesson, there is no formatting standard for RFIs. Frequently a bulleted list of questions, concerns, and/or points of clarification are sent to the main customer POC. 
+
+﻿
+
+﻿
+
+Question by Question
+﻿
+
+Below are explanations for each question. The explanations are designed to answer why the question is relevant, its importance, and why it should be included in the RFI sent to the customer.
+
+﻿
+
+Can the CPT develop an UNCLASS PCTE that mirrors SCA’s network? 
+﻿
+
+Creating a cyber range that mimics SCA’s environment and network allows the CPT to train and study on the range that actual operation is executed on. The training kickstarts the CPT’s initial assessments of SCA’s DCO operations and security posture. Prior to building the cyber range, it must be approved by the SCA. Customers may not make replicas of their presence available if not under their control. While no user data or information is included in the range, the inclusion of the architecture, applications, and software may not follow policies set by the customer. 
+
+﻿
+Who are the users and users' accesses on the network? 
+﻿
+
+Network diagrams often include the physical network layer but do not include the cyber-persona layer. 
+
+﻿
+
+The physical network layer consists of the tactile Information Technology (IT) devices and infrastructure in the domains that provide storage, transport, and processing of information within cyberspace. The layer includes data repositories and the connections that transfer data between network components.
+
+﻿
+
+The cyber-persona layer is a view of cyberspace created by pulling artifacts and data from the logical network layer to describe actors and entities that utilize the network. The cyber-persona layer consists of network or IT user accounts — whether human or automated — and their relationships to one another.
+
+﻿
+
+To assess if user accounts or credentials were leveraged by adversaries, the CPT needs information pertaining to the list of users and their respective accesses on the network. This helps correlate adversary activity, for instance, if an account accessed a portion of the network or a system that it is not expected to access, this could be a sign of the adversary leveraging the account’s credentials. The CPT needs information about the users so they can flesh out the cyber-persona layer of their mission relevant terrain in cyberspace (MRT-C).
+
+﻿
+
+NOTE: Each layer of cyberspace: physical network, logical network, cyber-persona is covered in detail later in this course. 
+
+﻿
+How does the CPT communicate end state and findings of the mission? 
+﻿
+
+The TASKORD defines the end state for the operation. Operation 33 ends when there is identification of adversarial presence, clearing the presence from the terrain, and providing SCA with an RMP to improve defenses to degrade adversary ability to maneuver or conduct actions against SCA. The TASKORD and data collection does not answer how end state is communicated and to which SCA personnel. The SCA might expect a certain style of RMP or a presentation/meeting to discuss the findings of the operation. 
+
+﻿
+What is the process of getting RDP and SSH approved by system engineers and network developers? 
+﻿
+
+SCA requires RDP and SSH approval prior to any implementation on the network. RDP and SSH may be required to fulfill the objective of the operation. The CPT needs a defined path for approval of tools. Who should be contacted? How long should the approval take? How is the approval delivered (email, instant message, etc.)?
+
+Develop an RFI
+In support of an upcoming hunt mission, the CPT has been tasked with planning and analyzing artifacts. The hunt mission’s objective is to search for and identify potential MCA that may be present on the network, as a result of malware that was implanted on the network.
+
+﻿
+
+In this task, analyze and review the documents collected from the Fort Drum site survey. After your review and analysis, develop a list of questions in Sublime Text to be included in an RFI for the operation.
+
+CPT Operation STARDUST
+
+CPT Operation STARDUST is in the Planning phase of the CPT OP. The operation is set to be conducted in the near future at the Fort Drum Army base located 30 miles from Canada in upstate New York and home of the 10th Mountain Division (Light Infantry). The Fort Drum office is an office for a company within the fort, the office is identified as a Headquarters Company (HHC). The office supports the company’s G1 (personnel), G2 (intelligence), G3 (operations), G4 (logistics), and G6 (signal). The warehouse offers supply to the company. 
+
+
+The operation is a coordinated hunt to discover if MCA occurred on the network. Based on data provided to the CPT by the Information Systems Security Office (ISSO) station at Fort Drum, it is believed that malicious code was injected into a workstation, and it replicating itself in the network. Once it was determined if and how the MCA occurred, the CPT is tasked with clearing the network of any adversarial and/or malware presence. A TASKORD was issued for the this operation. Additionally, a site survey was recently conducted with remembers of the CPT and Fort Drum ISSO personnel. 
+
+2. Open the Operation STARDUST folder located on the desktop. The folder includes the following documents:
+
+Operation STARDUST TASKORD: TASKORD_Operation_STARDUST
+Physical network map for the Fort Drum Office network: Office_Network
+Terrain information: Terrain_Information
+Configuration information: Configuration_Information
+3. Open Sublime Text from the taskbar:
+4. Using Sublime Text, review each document provided in the Operation STARDUST folder. To open files in Sublime Text, select File > Open File…
+
+NOTE: Sublime Text allows for opening of multiple documents in one window. The documents are placed in separate tabs within the window:
+
+5. In Sublime Text, select File > New File..., develop an RFI for Operation STARDUST. Include questions and points that need clarification from Fort Drum. Save the RFI as Operation_STARDUST_RFI to the Operation STARDUST folder on the desktop. 
+
+Operation STARDUST RFI
+Compare the newly-developed RFI
+NOTE: The RFI is not an exhaustive list. As the operation moves through the phases of the CPT OP, questions and a need for additional RFIs may arise. Collaboration within the CPT and the customer paves the path for the best possible outcome of the operation. 
+
+Mission success depends on a well executed CPT operations process. Essential to that process is the successful execution of the planning lifecycle. In this lesson you learned about the planning lifecycle and how to analyze a TASKORD to identify critical junctures in the mission. From there you developed RFIs that ensure that CPT Mission Elements (ME) have the information and intelligence support necessary to carry out their missions at the highest level possible.
 
 
 
