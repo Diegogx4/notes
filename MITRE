@@ -325,29 +325,20 @@ NOTE: The ja3 hash value is essentially a Secure Sockets Layer (SSL) fingerprint
 MITRE ATT&CK Techniques in the Mordor Project | Packet Filters
 Techniques for Discovery and Persistence
 ﻿
-
 Continue identifying MITRE ATT&CK techniques in the network capture of APT29 activity to determine ways in which the threat actor is evolving so that the matrix of techniques associated with that APT can be updated.
 
 1. Identify traffic between the infected endpoint and the C2 server by executing the following filter:
 
-﻿
-
 ip.src == 10.0.1.5 && ip.dst == 192.168.0.4
-﻿
 
 By default, the HTTP protocol communicates over port 80. Another common port for HTTP communication is port 8080, which is frequently used as an alternate port and by web proxies. HTTP traffic between the infected endpoint and C2 server could indicate delivery of additional malicious payloads or exfiltration of data from the victim network.
 
-﻿
-
 2. Examine port 8080 traffic between the infected host and C2 server by adding an additional filter. The final filter should be the following:
-
-﻿
 
 ip.src == 10.0.1.5 && ip.dst == 192.168.0.4 && tcp.port == 8080
 
 3. Expand the session by right-clicking on any of the packets and selecting Follow > TCP Stream.
 ﻿
-
 The Transmission Control Protocol (TCP) Stream view shows all the data that was transferred during the selected connection. Data highlighted in red indicates data traveling from the UTICA machine (the source) to the attacker-controlled server (the destination). Data highlighted in blue indicates data transferred from the attacker-controlled server back to the UTICA machine.
 
 Examining the data in the TCP Stream indicates that a large amount of data was sent from the attacker-controlled server to the UTICA machine. While the data transferred is mostly binary data, there are some indications in the strings of the binary as to what the tool is. For example, the strings MZ (known as a magic number or magic string) and This program cannot be run in DOS mode. indicate that this data might be a Windows executable file (.exe or .dll).
@@ -355,7 +346,6 @@ Examining the data in the TCP Stream indicates that a large amount of data was s
 NOTE: It is helpful to show the data in different encodings, which allows more information to be gathered from the TCP Stream. Select UTF-8 and UTF-16 under the Show data as drop-down menu in order to see the same data in different encodings.
 
 This binary appears to be Mimikatz, a tool for obtaining valid credentials and creating a means for lateral movement, privilege escalation, and persistence within the network. The use of this tool correlates to MITRE Technique ID T1003.001 - OS Credential Dumping: LSASS Memory. Finding the possible identity of this file can be seen by scrolling to the bottom of the TCP Stream and scrolling up several pages to see the string mimikatz.
-
 
 Note that this technique was not on the original APT29 matrix. Adversaries are constantly evolving their tactics, and are not necessarily constrained to using tactics previously tied to their previous campaigns.
 
@@ -370,7 +360,6 @@ If the threat actor successfully obtained valid credentials, they likely tried t
 Since this authenticated traffic occurs after the download of Mimikatz and originating from the compromised host, the following syntax has been prepended to each protocol filter, as the PCAP timestamp 441.285283 marks the end of the Mimikatz transfer. 
 
 frame.time_relative >= 441.285283 
-﻿
 
 This timestamp is found by examining the relative time in the filtered TCP stream that was applied in Step 3 and looking at the time shown for the last packet. Any packets captured before Mimikatz was transferred are now filtered out.
 ﻿
@@ -409,11 +398,9 @@ frame.time_relative >= 441.285283 && (ip.src == 10.0.1.5 || ip.dst == 10.0.1.5) 
 ﻿
 5. Though there is still a lot of traffic, select one of the packets and expand Kerberos on the bottom pane.
 ﻿
-
 NOTE: You can see the account name that originated the request (in the cname field) and the resource that the account requested access to (in the sname field). In Figure 10-40, the account is dschrute and the resource is LDAP on the Domain Controller (DC) NEWYORK.dmevals.local. Once expanded, you can move from one packet to the next to look for additional accounts.
 
 During normal operations, a client authenticates and requests a Ticket Granting Ticket (TGT) from the Authentication Server (AS). The AS and Key Distribution Center (KDC) server — often the same Active Directory (AD) DC in Microsoft networks — verify the credentials and return an encrypted TGT and session key to the client, which can be used when the client requests access to a specific service or another network resource. 
-
 
 NOTE: Kerberos and Windows authentication are discussed in depth during a later lesson.
 
@@ -433,9 +420,7 @@ In this next task, you are tasked with mapping real-world threat actor activity 
 
 Homeland Security Analysis Report (AR) AR-17-20045 is a breach report of a specific attack. National Cybersecurity and Communications Integration Center (NCCIC) Report JAR-16-20296A is a joint NCCIC/Federal Bureau of Investigation (FBI) publication reporting on a range of activities undertaken by GRIZZLY STEPPE.
 
-
 Using these publications, map each group’s activities in new layers within ATT&CK Navigator. 
-
 
 1. Read pages 2-3 of NCCIC Report JAR-16-20296A. Map the techniques explicitly belonging to APT28 and APT29 on their own layers. Use a score of 1 for each technique identified in this way.
 
@@ -451,6 +436,85 @@ As necessary, utilize the descriptions of the techniques on the in-range MITRE A
 
 Valid Accounts
 Enumerated active directory accounts, and credential-harvesting
+
+RED
+Atomic Red Team Overview
+Atomic Red Team Background
+
+Briefly covered in the previous lesson, Atomic Red Team is an open-source project maintained by Red Canary that contains a collection of tests. Analysts use the tests to evaluate and detect certain TTPs mapped to ATT&CK techniques.
+
+The Atomic Red Team library of tests was written to be convenient for security teams. The tests are focused, have few dependencies, and are defined in a structured format that can be used by automation frameworks. Red Canary has also released an execution framework as a PowerShell module called Invoke-AtomicRedTeam that allows network defenders to run the tests. The tests are small and enable highly portable detection. Furthermore, the mapping to the MITRE framework provides network defenders with easily actionable tests to immediately evaluate their defenses against a broad spectrum of attacks. 
+
+Key Beliefs of Atomic Red Team 
+
+• Precision
+
+Cyber defenders need to be able to test everything from specific technical controls to outcomes and should not operate with a hopes and prayers attitude toward detection. Defenders need to know which of their controls a program can detect, and what it cannot. Network defenders may not be able to detect every adversary, but they do need to know where their blind spots are to be able to implement the correct mitigating controls.
+﻿
+• Speed
+
+Most Atomic Red Team tests were written with the ability to be completed in less than five minutes. Most security tests and automation tools take a tremendous amount of time to install, configure, and execute. Red Canary coined the term atomic tests to convey the fact that there was a simple way to decompose tests so most could be run in a few minutes.
+
+• Adaptability
+
+Cyber defenders need to continuously learn and adapt to how adversaries operate. Most network defenders do not have the ability to see a wide variety of adversary types and techniques crossing their networks. Defenders only come across a fraction of the possible techniques being used, which makes collaboration within the cybersecurity community essential for seeing more adversarial TTPs.
+
+Executing Atomic Red Team Tests
+Next, analyze two Atomic Red Team tests, manually execute them, then view their output in a Security Information and Event Management (SIEM) solution. 
+
+Sysmon is configured to generate logs, which are forwarded to the Elastic Stack instance in range. Sysmon is a component of the Sysinternals Suite that aids with detection of events. Sysmon logs can be tailored to correspond to specific events which allows for robust detection. Sysmon-Modular is a collection of logging configurations that allows for easy detection of specific events, such as actions that correspond to TTPs laid out as part of the MITRE ATT&CK framework.
+
+Scenario
+﻿
+Recent threat intelligence states that a certain threat actor, APT19, has been very active lately. APT19 is a Chinese-based threat group that has targeted a variety of industries including defense, finance, technology, and education. The mission partner wants the Cyber Protection Team (CPT) to gauge the mission partner’s detection capabilities in order to better defend against this threat actor.
+
+2. Open File Explorer from the taskbar. Navigate to the C:\atomicredteam\atomics\ directory.
+
+Analyze the two following techniques that APT19 uses:
+
+T1218.010 (Signed Binary Proxy Execution: Regsvr32): This technique has trusted and signed binaries execute malicious code on behalf of the malware to avoid triggering security alerts on a system. Regsvr32 is a Windows utility that registers Object Linking and Embedding (OLE) controls, ActiveX controls, or Dynamic Link Libraries (DLLs) and represents the sub-technique as denoted by the 010.
+T1547.001 (Boot or Logon Autostart Execution: Registry Run Key or Startup Folder): As the name implies, this technique has programs start on boot or at logon and is often used for persistence. There are a few Run keys in the Windows registry that allow a program to run at boot. Alternatively, placing an executable or script in a user’s Startup folder achieves similar functionality; the program runs at startup with the privileges of the user who owns the Startup folder.
+
+Notice there are two files; a Markdown (.MD) file and a YAML file. The markdown file provides further information about the test. The YAML file includes configuration information that is used to run the test.
+
+4. Select the T1218.010 YAML file. This spawns a Notepad++ window.
+
+YAML files are serialized data files that are meant to be human-readable and typically used for configuration files.
+
+This file specifies what occurs when a user wants to utilize actions associated with this technique against a system. 
+
+Atomic Red Team YAML files are broken out as follows:
+The first two lines are self-explanatory. They provide the attack technique and the display name.The third line begins with atomic test definitions which contains five atomic tests, listed below:Regsvr32 local COM scriptlet execution Regsvr32 remote COM scriptlet executionRegsvr32 local DLL executionRegsvr32 Registering Non DLLRegsvr32 Silent DLL Install Call DLLRegisterServer
+
+Notice the first test: Regsvr32 local COM scriptlet execution. This runs from lines 4-35.
+
+Breaking down this test, make note of the input_arguments which start at line 10. Input arguments provide parameters on how the test runs. It contains three entries: filename, regsvrpath, and regsvr32name. The default values generally suffice for testing purposes, but can be customized based on system configuration differences. The filename provided by default — PathToAtomicsFolder\T1218.010\src\RegSvr32.sct — is a scriptlet that runs Notepad (notepad.exe). 
+
+The regsvr32path provides the path to the regsvr32 binary which is C:\Windows\System32 . 
+
+The regsvr32name is a string value for the binary name, which is regsvr32.exe.
+
+NOTE: When executing tests, PathToAtomicsFolder needs to be replaced with the folder containing atomic tests, which is C:\AtomicRedTeam\Atomics for this host.
+
+Move on to the executor section, which starts at line 32. Command at line 33 contains the list of commands to run. The command listed takes the input arguments discussed earlier. In this instance, this generates a command like:
+
+C:\Windows\System32\regsvr32.exe /s /u /i:C:\AtomicRedTeam\Atomics\T1218.010\src\RegSvr32.sct scrobj.dll
+
+Based on the name field, this command is meant to be run with the command prompt.
+
+In a nutshell, a network defender can test detection capabilities of their network against Signed Binary Proxy Execution: Regsvr32 local COM scriptlet execution by running the command listed above.
+
+6. Open a command prompt as Administrator and execute the following command:
+
+C:\Windows\system32> regsvr32.exe /s /u /i:C:\AtomicRedTeam\Atomics\T1218.010\src\RegSvr32.sct scrobj.dll
+
+Use the system clock on the VM to note the time the command ran to be able to easily find the generated event later.
+
+This test opens a Notepad window. Close the window when it appears.
+
+Sysmon is configured to automatically log this.
+
+
 
 
 
