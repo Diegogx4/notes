@@ -1,0 +1,462 @@
+MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) is a knowledge base of common adversarial attack Tactics, Techniques, and Procedures (TTP) used against Windows networks. Currently, ATT&CK includes 14 tactics, which cover the why — the objective for performing the action, and over 180 techniques (with nearly 400 sub-techniques) that provide how the adversary is going to perform the action, and what they hope to gain from it.
+
+This lesson provides an overview of the MITRE ATT&CK framework and its use in Defensive Cyberspace Operations (DCO). Trainees are exposed to the history and philosophy of MITRE ATT&CK, and learn the practical aspects of how it is used to produce and disseminate threat intelligence. Practical aspects include hands-on experience with deploying and customizing ATT&CK Navigator, analyzing adversary attack data, and mapping that data to techniques in the ATT&CK Matrix.
+
+MITRE ATT&CK
+
+MITRE ATT&CK is a knowledge base for cyber adversary behavior. The knowledge within ATT&CK is split up by the phases of the attacker’s lifecycle, as well as by the systems they typically target. The ATT&CK Matrix is the most recognizable characteristic of ATT&CK, and includes information on defensive coverage of an environment, detection capabilities in security products, and incident response results.
+
+MITRE ATT&CK Navigator
+
+MITRE ATT&CK Navigator is an open-source web application that provides basic navigation and annotation of the Enterprise and Mobile matrices to visualize defensive coverage, red and blue team planning, and the frequency of detected techniques.
+
+The MITRE ATT&CK Framework
+What is the ATT&CK Framework?
+﻿
+
+MITRE’s ATT&CK is a framework for modeling cyber threat adversary behaviors in their varied complexity. It consists of a knowledge base of known behaviors, which characterizes those behaviors both at a high level for conceptual understanding and with the granular historical detail required to see how the model correctly fits actual attacks that have occurred. The model reflects the various phases of an adversary’s attack lifecycle and the platforms they are known to target, but is free from the rigidity of a linear attack chain.
+
+﻿
+
+At a high level, ATT&CK is a behavioral model that consists of the following core components:
+
+Tactics: Short-term, tactical adversary goals during an attack (the columns)
+Techniques: The means by which adversaries achieve tactical goals (the individual cells)
+Documented adversary usage of techniques and other metadata (linked to techniques). ATT&CK is not an exhaustive enumeration of attack vectors against software, but the documented operation can be used to contextualize the impact of an attack, the actors known to employ the technique, and other information.
+﻿
+
+The relationship between tactics and techniques is visualized in the ATT&CK Matrix (Figure 5.2-1).
+
+﻿
+
+﻿
+
+Figure 5.2-1 — Image from MITRE ATT&CK
+
+﻿
+
+History of MITRE ATT&CK
+﻿
+
+The first ATT&CK model was created in September 2013, and focused primarily on the Windows enterprise environment. It was further refined in May 2015, with 96 techniques organized under nine tactics. Since then, ATT&CK has experienced tremendous growth based on contributions from the cybersecurity community. Based on the methodology used to create the first ATT&CK model, a complementary knowledge base called PRE-ATT&CK was created to focus on left of exploit behaviors (i.e., techniques that attackers may perform prior to launching an actual attack). ATT&CK for Mobile was created to focus on behaviors in the mobile-specific domain. As of 2021, ATT&CK includes techniques that cover:
+
+Enterprise platforms: Windows, macOS, Linux, PRE, Azure Active Directory, Office 365, Google Workspace, Software as a Service (SaaS), Infrastructure as a Service (IaaS), Network, and Containers
+Mobile platforms: Android and iOS
+Industrial Control Systems (ICS)
+﻿
+
+﻿
+
+Figure 5.2-2
+
+﻿
+
+The set of individual techniques representing actions that adversaries perform to accomplish objectives forms the basis of ATT&CK. Those objectives are represented by the tactic categories the techniques fall under. This relatively simple representation strikes a useful balance between sufficient technical detail at the technique level and the context around why actions occur at the tactic level.
+
+﻿
+
+ATT&CK Matrix | Techniques
+﻿
+
+The ATT&CK Matrix is essentially a general overview of an attacker’s possible playbook. It describes how attackers get into an environment, how they move around in that environment, what actions they might perform, what their end goals are, and how those goals impact the environment. The ATT&CK Matrix currently lists 14 common tactics with a total of 180 known adversarial techniques and almost 400 sub-techniques. 
+
+Below are the tactics included in the ATT&CK Matrix:
+
+1. Reconnaissance: Techniques that involve adversaries actively or passively gathering information that can be used to support targeting (e.g., staff/personnel, infrastructure, etc.).
+
+2. Resource Development: Techniques that involve adversaries creating, purchasing, or compromising/stealing resources that can be used to support targeting.
+
+3. Initial Access: Techniques that use various entry vectors to gain an initial foothold within a network (e.g., spearphishing link). 
+
+4. Execution: Techniques that result in running attacker-controlled code on a local or remote system (e.g., PowerShell).
+
+5. Persistence: Techniques used to maintain persistent access to a system (e.g., logon scripts).
+
+6. Privilege Escalation: Techniques used to gain higher-level privileges on a system or network (e.g., process injection).
+
+7. Defense Evasion: Techniques used to avoid detection (e.g., Dynamic Linked Library [DLL] side-loading).
+
+8. Credential Access: Techniques for stealing credentials such as account names and passwords (e.g., Kerberoasting).
+
+9. Discovery: Techniques used to gain knowledge about the system and internal network (e.g., Network Sniffing).
+
+10. Lateral Movement: Techniques used to enter and control remote systems on a network from the already compromised host (e.g., Pass the Ticket). Attackers typically have to pivot through multiple machines — usually the weakest link in the chain of machines — to ultimately reach their end objective. 
+﻿
+11. Collection: Techniques used to gather information relevant to following through on the attacker’s objectives (e.g., input capture).
+
+12. Command and Control (C2): Techniques attackers may use to communicate with systems under their control; often disguised to look like normal Hypertext Transport Protocol (HTTP) traffic (e.g., domain fronting).
+
+13. Exfiltration: Techniques used to steal data from your network (e.g., exfiltration over web service).
+
+14. Impact: Techniques used to disrupt availability or compromise integrity by manipulating business and operational processes (e.g., firmware corruption). Impact is the result on your system after the attacker accomplishes their ultimate goal and is the most recently added tactic.
+
+A Comparison of Two Threat Methodology Models
+The Cyber Kill Chain
+﻿
+
+The alternate Lockheed Martin Cyber Kill Chain® does an excellent job of adapting a centuries-old military model of targeting and affecting the object of an attack to the modern landscape of cyberspace. It also correctly captures what has been the general attack process of most early cyber attacks. However, by adapting an old model, it carries with it that model’s shortcomings. By remaining linear in nature, the Cyber Kill Chain model struggles to characterize non-linear threats. The model also struggles to provide the granular detail that defenders in a world of rapidly changing technological landscapes require to implement effective mitigations and functional controls. These details include individual adversarial actions, connections between actions, relations between sequences of actions and tactical adversary objectives, and correlations with data sources, configurations, and other countermeasures used for the security of a platform and domain. High-level models such as the various adversary lifecycles, including Lockheed Martin’s Cyber Kill Chain, are useful at understanding high-level processes and adversary goals.
+
+The ATT&CK Framework
+﻿
+The ATT&CK framework is a dynamic model, evolving and updating to match the TTPs deployed by real-world threat actors. An adversary model like ATT&CK can be helpful in tying the various components of high-level adversary strategies together with highly granular security research. The TTPs in ATT&CK define adversarial behaviors within an attack lifecycle in a way that allows the behaviors to be more effectively mapped to corresponding defensive actions. The phases of the attacker kill chain are further broken down into more descriptive categories — tactics within the MITRE ATT&CK Matrix — where individual attacker actions taken against an environment can be defined and categorized. Exploits and malicious software are useful to an adversary’s toolkit, but to fully understand their utility, it is necessary to understand the context in which they can be used to achieve a goal.
+
+The ATT&CK model is also a useful construct to integrate threat intelligence and incident data together, in order to identify different threat actors and those actors' preferences for particular techniques. This reliance on developing research allows a defensive team to quickly respond to new events, such as an attacker shifting their strategy. As attack methods and situations evolve, so does the ATT&CK framework. 
+
+By maintaining such a dynamic model, ATT&CK struggles to provide a step-by-step blueprint for how attacks are conducted. This dynamism is chiefly a strength, but those who approach the framework expecting to encounter a linear model of attacker activity are likely to misuse or misunderstand the framework.
+
+Combining Models
+﻿
+ATT&CK and the Cyber Kill Chain can be complementary. The detail that ATT&CK provides when combined with the ordered phases Cyber Kill Chain uses to describe high-level adversary objectives creates a powerful combination for learning how threat adversaries operate in cyberspace, but familiarity with a model eventually reveals how it can and should be broken. The difference between these models is that ATT&CK is designed not to be broken, but rather adapted and updated.
+
+contains information about adversary actions and goals, including specific ways to defend against adversary actions
+MITRE ATT&CK
+How many tactics are encompassed in the ATT&CK framework? 14
+
+ATT&CK Navigator Overview
+
+The ATT&CK Navigator is a free and open-source tool provided by MITRE to visualize ATT&CK TTPs. It includes pre-loaded data for known attack group TTPs, as well as TTPs exploited by various pieces of malicious software. Each cell in ATT&CK Navigator can be scored and colored, allowing ATT&CK Navigator to be used by defenders for multiple purposes including:
+
+Visualizing sensor coverage and gaps by TTP
+Visualizing TTPs used by threat actors
+Comparing threat actor groups by TTPs
+Visualizing an organization’s risk by applying scores for impact or likelihood to a TTP
+In addition, ATT&CK Navigator supports multiple tabs or layers; each layer/tab provides visualization based on a different factor, which is combined into a full visualization that compiles the results of each layer/tab. Individual layers are exported as either JavaScript Object Notation (JSON) or into Microsoft Excel. JSON export can be useful for importing the data into other tools (including importing back into ATT&CK Navigator), while exporting to Excel can be useful for providing reports or for adding additional customization.
+﻿
+
+ATT&CK Navigator Controls
+
+The tools within ATT&CK Navigator are grouped into three segments: selection controls, layer controls, and technique controls. Selection controls modify how techniques are selected and selects/deselects techniques. Layer controls pertain to the current layer and affect the looks, behaviors, or export types. Technique controls modify the selected techniques including custom colors or applying scores.
+
+Selection Controls
+
+Lock multi-tactic technique selection: Toggles whether selecting techniques also selects the same technique in other tactics
+Search: Search for cells to be selected
+Multi-select: Selects multiple techniques based on pre-loaded data like threat groups
+Deselect: Deselects currently selected techniques
+﻿
+Layer Controls
+
+Layer information: Contains the name and description of the layer, which can be edited by the user
+Download layer as JSON: Downloads the current layer in JSON format
+Export to Excel: Converts the current layer to Excel format and downloads it
+Render layer to Scalable Vector Graphic (SVG): Generates an SVG image of the current layer
+Filters: Presents options for filtering the displayed techniques
+Sorting: Changes how techniques within each tactic are sorted
+Color setup: Changes background colors for techniques based on user-assigned score
+Show/hide disabled: Toggles whether or not disabled techniques are visible
+Toggle view mode: Toggles between various view modes
+﻿
+
+Technique Controls
+
+Toggle state: Disables or enables the selected technique
+Background color: Sets a background color for the selected technique
+Scoring: Specify a score for the selected technique
+Comment: Sets a comment for the selected technique
+Clear annotations: Clears any changes to the technique selected
+
+ATT&CK Navigator Access
+When deployed in the field, a Cyber Protection Team (CPT) is not guaranteed to have access to the external internet. Instead, a CPT should set up ATT&CK Navigator to allow for offline access while on a mission. A Docker container has already been deployed within the range to host ATT&CK Navigator. Other methods of deploying ATT&CK Navigator for offline use also exist. 
+
+﻿
+
+As this application is deployed and maintained for offline access during CPT operations, it is imperative to take advantage of ATT&CK’s frequent framework updates by reacquiring and reconfiguring newer versions.
+
+Public version of ATT&CK Navigator: https://mitre-attack.github.io/attack-na vigator/
+
+Using and Customizing ATT&CK Navigator
+In this task, become familiar with ATT&CK Navigator by reviewing and performing the following tasks:
+
+Creating and labeling new layers
+Selecting TTPs
+Assigning scores to specific TTPs
+Customizing the colors assigned to scores
+Reviewing TTPs used by various threat actor groups
+Creating new layers that combine data from previous layers
+Performing the above functions is useful when executing CPT mission tasks, such as analyzing TTPs used in a specific attack.
+
+﻿
+
+Adding and Comparing TTPs in ATT&CK Navigator
+﻿
+
+Workflow
+
+﻿
+
+To view the TTPs for APT29, follow these steps:
+
+﻿
+
+1. Right-click on the APT29 bookmark in Chrome, and select Open in New Tab to view the list of ATT&CK TTPs that have been associated with APT29.
+
+This is a static compilation of the group names, techniques, and software associated with APT29, identified in ATT&CK as Group G0016.
+
+﻿
+
+2. Scroll to Techniques Used to view a list of techniques known to be used by this APT. Select the ATT&CK Navigator Layers drop-down menu, and select download under Enterprise Layer to download the configuration of all techniques associated with APT29.
+
+3. Navigate back to the ATT&CK Navigator tab. Select Open Existing Layer > Upload from local.
+
+4. Navigate to the Downloads folder, and select G0016-enterprise-layer.json, which contains the APT29 techniques that were downloaded earlier. Select Open.
+
+5. Observe that all the techniques have been highlighted in the new APT29 (G0016) layer, and have been assigned a default score of 1. The score can be seen by hovering the cursor over the highlighted techniques.
+
+6. Detailed information about any TTP can be viewed via the in-range MITRE ATT&CK website. Right-click the desired technique and select view technique on CDA ATT&CK website or view tactic on CDA ATT&CK website from the menu.
+
+7. In order to fit more of the ATT&CK matrix in the browser page, from the layer controls menu, open the matrix layout control and select flat layout from the drop-down menu.
+
+8. Select + to open a new tab within ATT&CK Navigator. This creates a layer to compare against the APT29 techniques. Select Create New Layer > Enterprise.
+
+9. Import the pre-configuration of APT1 techniques by selecting the multi-select control from the selection controls menu. Select all techniques associated with APT1.
+
+﻿
+
+NOTE: If the items do not appear to be selected, zoom out or scroll right in the current window. The display resolution can make visual representation of selected items difficult. Items in the Discovery and Collection tactics columns show as selected — the selection is subtle and just an outline around the technique.
+
+Process Discovery, System Network Configuration Discovery, and System Network Connections Discovery among others are selected.
+
+﻿
+
+10. Having selected all the APT1 techniques, select the scoring control — under the technique control menu — to give all selected techniques a score of 2.
+
+﻿
+
+If desired, use the background color control in the technique control menu to modify the background color of selected items.
+
+ 11. Under the layer controls menu, select the layer information control to change the name of the tab to APT1.
+
+Comparing Threat Groups
+﻿
+
+To compare the two threat groups, open another tab to create a layer combining both APT29 and APT1.
+
+﻿
+
+1. Select + to create a new tab.
+
+﻿
+
+2. Select Create Layer from other layers.
+
+﻿
+
+3. Under domain, select Enterprise ATT&CK v9.
+
+﻿
+
+Under score expression, note that the APT29 and APT1 layers have highlighted letters associated with them. These letters are used to create the scoring expression, which indicates the score assigned to a given technique.
+
+4. Enter a + b into the score expression field, which adds the scores assigned in the APT29 and APT1 layers together and assigns the results to the new layer.
+
+5. Select Create from the Create Layer from other layers menu.
+﻿
+
+To highlight the higher-scored techniques as having a higher threat to the organization, change the color scheme of the matrix. The default color scheme sets lower-scored techniques as red.
+
+﻿
+
+6. From the layer controls menu, select the color setup control.
+
+7. From the presets drop-down menu, select green to red.
+
+
+8. To see all techniques, select the expand sub-techniques control from the layer controls menu.
+
+NOTE: For readability, it is recommended to select flat layout from the matrix layout control.
+
+In this new layer, all techniques used by both groups are displayed and scored together. All techniques with a score of 1 are marked in green and indicate APT29 activities; all techniques with a score of 2 are marked in yellow and indicate APT1 activities. All techniques with a score of 3 are marked in red and indicate techniques used by both APT groups — spearphishing-related attacks, in this example.
+
+ATT&CK Navigator is very helpful for determining the intersection between two adversary groups. This knowledge allows a defender to consolidate any efforts being undertaken to improve an organization’s security posture against these adversaries. In the example, APT29 and APT1 are both known to use spearphishing attacks — an organization can focus efforts on increasing defensive capabilities around phishing attacks in order to help combat both APT groups at once.
+
+Additionally, an organization can use these combined layers to assess the importance of an overall MITRE tactic when making defensive decisions. As an example, the Execution tactic in the combined layer shows that four of the twelve techniques have been leveraged across APT29 and APT1. An organization might use this information to focus defensive efforts around improving its security posture against the full gamut of techniques in the Execution tactic.
+
+
+ATT&CK Navigator can be used to shape the success of a CPT operation, as well. For example, a CPT might shape a hunt or clear operation by using ATT&CK Navigator to chart out TTPs identified by threat intelligence. A CPT on an assess operation might use ATT&CK Navigator to keep track of potential weaknesses found during a vulnerability assessment, and correlate them to known APT activity, in order to better identify any high-priority areas for improvement.
+
+MITRE ATT&CK — Spearphishing via Attachments: https://attack.mitre.org/techniques/T1566/001/ 
+MITRE ATT&CK — Spearphishing via Links: https://attack.mitre.org/techniques/T1566/002/ 
+
+Which Defense Evasion techniques and sub-techniques are scored on the combined matrix layer?
+ Pass the Hash
+ Pass the Ticket
+ Domain Accounts
+ Obfuscated Files or Information
+ Match Legitimate Name or Location
+
+Practical Uses of ATT&CK
+Since the creation and adoption of the original ATT&CK framework, there have been new adaptations and tools developed. Each of these seeks to implement the framework into neighboring domains (such as cyberspace defense) or into practical spheres (such as security controls auditing or threat emulation). 
+
+DeTT&CT
+﻿
+Detect Tactics, Techniques and Combat Threats (DeTT&CT) is a blue-team-focused adaptation of the ATT&CK framework. It is designed specifically to enable defenders to assess their own data source quality, network and endpoint visibility, and detection coverage. The tools provided by the product are used to score these areas, map coverage and likely threat actor behavior to an organization, and compare the areas to identify improvements and prioritize efforts.
+
+
+﻿
+Atomic Red Team
+
+
+
+Atomic Red Team is an automated adversary emulation framework used to test the effectiveness of security controls. According to the creators, Atomic Red Team tests are small, highly-portable detection tests mapped to the MITRE ATT&CK Framework. Each test is designed to map back to a particular tactic. This gives defenders a highly actionable way to immediately start testing their defenses against a broad spectrum of attacks.
+
+The Mordor Project
+
+The Mordor Project is a collection of pre-recorded datasets generated by simulating adversarial techniques to aid hunters in improving their detection abilities and decreases the number of false positives in an environment. The data is categorized by platforms, adversary groups, tactics, and techniques defined in the MITRE ATT&CK Framework. This data allows an organization to test a detection strategy or individual detection rule against simulated malicious events.
+
+DETT&CT GitHub repository: https://github.com/rabobank-cdc/DeTTECT/wiki 
+Atomic Red Team: https://atomicredteam.io/ 
+The Mordor Project : https://mordordatasets. com/introduction.html   ﻿
+﻿
+Exploring MITRE ATT&CK Techniques in the Mordor Project
+This section demonstrates how to use the ATT&CK framework to identify APT29 activity in Packet Capture (PCAP) files recorded by the Mordor Project. Identify the presence of techniques from the APT29 matrix to recognize the value of such a matrix in mapping likely threat activity. 
+
+Wireshark
+
+In this task, Wireshark is used to open and analyze a complete recording of all network communication on the mission partner’s network during the time of the compromise. Wireshark is a PCAP analysis tool ubiquitous within cybersecurity domains for analysis, forensics, testing, and research. It is used often in this and future lessons when a detailed inspection of network traffic at the packet level is necessary.
+
+There are a number of outgoing sessions from 10.0.1.5 (hostname UTICA) over port 443 to the external Internet Protocol (IP) address 192.168.0.4. 
+
+Having identified these connections, it is important to determine if these connections suggest that a compromise has occurred. If a compromise has occurred, it is also useful to identify any techniques that were employed by the adversary.
+
+5. Select the Client Hello packet that displays TLSv1.2 in the Protocol column. Expand the ja3/ja3s TLS/SSL fingerprint field and observe the ja3 hash value.
+
+NOTE: The ja3 hash value is essentially a Secure Sockets Layer (SSL) fingerprint of the Transport Layer Security (TLS) connection. It is calculated using a number of TLS fields that a client used to encrypt the Hypertext Transport Protocol Secure (HTTPS) communication sent to a server. JA3 fingerprinting is useful for identifying a number of bots, malware, and C2 implants.
+
+MITRE ATT&CK Techniques in the Mordor Project | Packet Filters
+Techniques for Discovery and Persistence
+﻿
+
+Continue identifying MITRE ATT&CK techniques in the network capture of APT29 activity to determine ways in which the threat actor is evolving so that the matrix of techniques associated with that APT can be updated.
+
+1. Identify traffic between the infected endpoint and the C2 server by executing the following filter:
+
+﻿
+
+ip.src == 10.0.1.5 && ip.dst == 192.168.0.4
+﻿
+
+By default, the HTTP protocol communicates over port 80. Another common port for HTTP communication is port 8080, which is frequently used as an alternate port and by web proxies. HTTP traffic between the infected endpoint and C2 server could indicate delivery of additional malicious payloads or exfiltration of data from the victim network.
+
+﻿
+
+2. Examine port 8080 traffic between the infected host and C2 server by adding an additional filter. The final filter should be the following:
+
+﻿
+
+ip.src == 10.0.1.5 && ip.dst == 192.168.0.4 && tcp.port == 8080
+
+3. Expand the session by right-clicking on any of the packets and selecting Follow > TCP Stream.
+﻿
+
+The Transmission Control Protocol (TCP) Stream view shows all the data that was transferred during the selected connection. Data highlighted in red indicates data traveling from the UTICA machine (the source) to the attacker-controlled server (the destination). Data highlighted in blue indicates data transferred from the attacker-controlled server back to the UTICA machine.
+
+Examining the data in the TCP Stream indicates that a large amount of data was sent from the attacker-controlled server to the UTICA machine. While the data transferred is mostly binary data, there are some indications in the strings of the binary as to what the tool is. For example, the strings MZ (known as a magic number or magic string) and This program cannot be run in DOS mode. indicate that this data might be a Windows executable file (.exe or .dll).
+
+NOTE: It is helpful to show the data in different encodings, which allows more information to be gathered from the TCP Stream. Select UTF-8 and UTF-16 under the Show data as drop-down menu in order to see the same data in different encodings.
+
+This binary appears to be Mimikatz, a tool for obtaining valid credentials and creating a means for lateral movement, privilege escalation, and persistence within the network. The use of this tool correlates to MITRE Technique ID T1003.001 - OS Credential Dumping: LSASS Memory. Finding the possible identity of this file can be seen by scrolling to the bottom of the TCP Stream and scrolling up several pages to see the string mimikatz.
+
+
+Note that this technique was not on the original APT29 matrix. Adversaries are constantly evolving their tactics, and are not necessarily constrained to using tactics previously tied to their previous campaigns.
+
+MITRE — OS Credential Dumping: https://attack.mitre.org/techniques/T1003/001/ 
+Digital Investigation — Magic Number File Types: h ttps://asecuritysite.com/forensics/magic ﻿
+﻿
+Techniques for Lateral Movement
+Since Mimikatz was likely used to gather valid domain credentials from the compromised machine, the next stages of the attacker’s actions involved performing techniques from the Discovery, Privilege Escalation, or Lateral Movement tactics in the ATT&CK matrix.
+
+If the threat actor successfully obtained valid credentials, they likely tried to use those credentials to authenticate into the compromised network. Thus, expect to see subsequent authentication protocol traffic from the compromised host (10.0.1.5), which represents the attacker trying to use the compromised credentials. Since the host was a Windows machine, investigate the New Technology Local Area Network (LAN) Manager (NTLM), Remote Desktop Protocol (RDP), Kerberos, and Server Message Block (SMB) protocols.
+
+Since this authenticated traffic occurs after the download of Mimikatz and originating from the compromised host, the following syntax has been prepended to each protocol filter, as the PCAP timestamp 441.285283 marks the end of the Mimikatz transfer. 
+
+frame.time_relative >= 441.285283 
+﻿
+
+This timestamp is found by examining the relative time in the filtered TCP stream that was applied in Step 3 and looking at the time shown for the last packet. Any packets captured before Mimikatz was transferred are now filtered out.
+﻿
+
+The next steps filter out each of these protocols to identify any attempts by compromised hosts using the various authentication methods.
+
+NTLM
+﻿
+1. Execute the following Wireshark filter to search for NTLM traffic:
+
+frame.time_relative >= 441.285283 && ip.src == 10.0.1.5 && ntlmssp
+
+There are no results, which means that the attacker did not perform authentication over NTLM.
+
+RDP
+﻿
+2. Execute the following Wireshark filter:
+
+frame.time_relative >= 441.285283 && ip.src == 10.0.1.5 && rdp
+﻿
+Again, no results. It is possible the adversary has not done anything with the credentials yet, but there are still several remaining protocols to investigate.
+
+Kerberos
+﻿
+3. Execute the following Wireshark filter:
+
+frame.time_relative >= 441.285283 && ip.src == 10.0.1.5 && kerberos
+
+This time, there is some traffic to investigate. Note that the presence of Kerberos traffic is not necessarily an indicator of attacker activity — the traffic may have been generated by someone legitimately authorized to use the machine.
+
+Much of the traffic displayed is extra traffic that occurred in parallel or immediately subsequent to the actual Kerberos authentication. Searching for Kerberos tickets is a fast way to narrow the traffic down further.
+
+4. Execute the following Wireshark filter to look at only the Kerberos tickets that were granted to the compromised machine — kerberos.tgs_rep_element is filtering for Kerberos Ticket Granting Service (TGS) responses:
+
+frame.time_relative >= 441.285283 && (ip.src == 10.0.1.5 || ip.dst == 10.0.1.5) && kerberos.tgs_rep_element
+﻿
+5. Though there is still a lot of traffic, select one of the packets and expand Kerberos on the bottom pane.
+﻿
+
+NOTE: You can see the account name that originated the request (in the cname field) and the resource that the account requested access to (in the sname field). In Figure 10-40, the account is dschrute and the resource is LDAP on the Domain Controller (DC) NEWYORK.dmevals.local. Once expanded, you can move from one packet to the next to look for additional accounts.
+
+During normal operations, a client authenticates and requests a Ticket Granting Ticket (TGT) from the Authentication Server (AS). The AS and Key Distribution Center (KDC) server — often the same Active Directory (AD) DC in Microsoft networks — verify the credentials and return an encrypted TGT and session key to the client, which can be used when the client requests access to a specific service or another network resource. 
+
+
+NOTE: Kerberos and Windows authentication are discussed in depth during a later lesson.
+
+6. Execute the following Wireshark filter to look at only the authentication request tickets sent by the compromised machine:
+
+frame.time_relative >= 441.285283 && ip.src == 10.0.1.5 && kerberos.as_req_element
+
+This pattern of behavior is consistent with MITRE ATT&CK Technique ID T1558.001 - Steal or Forge Kerberos Tickets: Golden Ticket. The creation of a Golden Ticket is one of the functions of the Mimikatz tool, so this is consistent with the previous findings. This technique is not currently highlighted in the APT29 ATT&CK Navigator layer. However, this evidence seems to line up with a Pass the Ticket attack (T1550.003), which allows the attacker to laterally move around the network.
+
+Reviewing MITRE ATT&CK
+MITRE ATT&CK Value
+
+The use of the MITRE ATT&CK framework for modeling threats and identifying that activity in real-world events is an invaluable resource to cyberspace defenders and responders. When CPTs become familiar with this framework, they more accurately assess impacts to the networks in which they operate. Finding evidence of an APT in post-mortem is an important role of a forensics team and even an early activity during CPT hunt operations when the threat remains active. However, a preemptive application of this knowledge to identify emerging trends in threat intelligence is to construct matrices for the next evolution of a threat prior to an attempted attack on a mission partner environment.
+
+Mapping GRIZZLY STEPPE Activity to MITRE ATT&CK
+In this next task, you are tasked with mapping real-world threat actor activity onto the MITRE ATT&CK matrix using ATT&CK Navigator. Review the attached GRIZZLY STEPPE documents. GRIZZLY STEPPE characterizes the combined efforts of two Russian cyber actors — APT28 (FancyBear) and APT29 (CozyBear).
+
+Homeland Security Analysis Report (AR) AR-17-20045 is a breach report of a specific attack. National Cybersecurity and Communications Integration Center (NCCIC) Report JAR-16-20296A is a joint NCCIC/Federal Bureau of Investigation (FBI) publication reporting on a range of activities undertaken by GRIZZLY STEPPE.
+
+
+Using these publications, map each group’s activities in new layers within ATT&CK Navigator. 
+
+
+1. Read pages 2-3 of NCCIC Report JAR-16-20296A. Map the techniques explicitly belonging to APT28 and APT29 on their own layers. Use a score of 1 for each technique identified in this way.
+
+For example, the report identifies that APT29 has employed spearphishing campaigns with web links.
+
+In the ATT&CK Navigator matrix being built, this intelligence merits the scoring of Spearphishing Link with one.
+
+As necessary, utilize the descriptions of the techniques on the in-range MITRE ATT&CK framework website to search for and understand the techniques. The in-range MITRE ATT&CK framework website can be accessed from the MITRE ATT&CK bookmark in Chrome.
+
+2. Read pages 4-6 of Homeland Security AR AR-17-20045. Score any techniques identified for GRIZZLY STEPPE on both APT28 and APT29 if not already scored on both.
+
+3. Combine each group’s activities into one layer, using separate colors for each.
+
+Valid Accounts
+Enumerated active directory accounts, and credential-harvesting
+
+
+
+
+
+
+
+
+
