@@ -1,0 +1,443 @@
+Risk Mitigation Plans (RMP) are practical options and actions provided to mission partners after Cyber Protection Team (CPT) assess operations and during CPT harden operations to reduce risk posed by threats to mission objectives or operational key terrain.
+
+In this lesson, conduct risk assessments and plan mitigation actions in a specified terrain as a step in the core CPT assess and harden functions. There is often not a one-size-fits-all vulnerability mitigation that matches the unique operating environments of each different network that CPTs operate on. The correct mitigation for one network may not meet the requirements of a different network for the same vulnerability. The ability to assess risk and identify the appropriate mitigation options to recommend to the network owner is a skill necessary for all CPT members.
+General guidelines for implementing risk mitigation measures are shown in Figure 5.4-1. Risk mitigation options are based on both the probability of occurrence and the severity of consequences for an identified risk. These guidelines are appropriate for most, but not all, CPT operations.
+
+Risk mitigation strategies include:
+Assume/AcceptAvoidControlTransferWatch/Monitor 
+Assume/Accept
+
+This risk mitigation strategy acknowledges the existence of a particular risk, and makes a deliberate decision to accept it without engaging in special efforts to control it (e.g., too costly to implement a mitigation, low severity consequence, etc.). Approval by mission partners and/or network owners is required to implement this measure.
+
+In order to successfully mitigate risk in this manner, mission partners must collaborate with the operational users to create a collective understanding of risks and their implications. Risks should be characterized as impacting traditional cost, schedule, and performance parameters and potentially degrading mission performance due to reduced technical performance or capability. The ability of stakeholders to understand the costs in terms of time, money, and mission impact determines whether accepting the consequences of a risk is acceptable. Ensure that they understand the vulnerabilities affecting a risk, countermeasures that can be performed, and residual risk that may occur. 
+
+Avoid
+
+This risk mitigation strategy adjusts operational requirements or constraints to eliminate or reduce the risk (e.g., remove software with known vulnerabilities from the required toolchain in a mission). This adjustment could be accommodated by a change in funding, schedule, or technical requirements.
+
+Again, to succeed with this mitigation, educate stakeholders to achieve a collective understanding of the implications of risks. Providing stakeholders with projections of adjustments needed to reduce risk associated with technology maturity and identifying any impacts resulting from dependencies on other efforts increases stakeholder buy-in. This information better enables mission partners and network owners to interpret the operational implications of an avoid option.
+
+Control
+
+This risk mitigation strategy implements actions to minimize the impact or likelihood of the risk (e.g., add a firewall rule to restrict access to a critical service to reduce attack surface).
+
+A mission partner successfully controls risks by performing analysis of various mitigation options. In developing options for controlling risk in an operation, seek out potential solutions from similar risk situations of other partner organizations, industry, and academia. When considering a solution from another organization, take special care in assessing any architectural changes needed and their implications. It is worth noting that when the severity of risk is high enough, controlling the risk is often the only appropriate strategy, as accepting or avoiding the risk results in unacceptable potential impact.
+
+Transfer
+
+In this strategy, reassign organizational accountability, responsibility, and authority to another stakeholder willing to accept the risk.
+
+Reassigning accountability, responsibility, or authority for a risk area to another organization has both benefits and drawbacks. It may make sense when the risk involves a narrow, specialized area of expertise not normally found in mission partner organizations. However, transferring a risk to another organization can result in dependencies and loss of control that may have their own complications. 
+
+Watch/Monitor
+
+This risk mitigation strategy requires monitoring the environment for changes that affect the nature and/or the impact of the risk, and is often employed in conjunction with other mitigation strategies.
+
+After a risk has been identified and a plan employed to mitigate it, there is a temptation to consider it resolved and not worth revisiting, particularly if the mitigation is executing seamlessly. Instead, mission partners should periodically reassess the basic assumptions associated with the risk. The environment should be routinely scanned to ascertain any changes that affect the nature or impact of the risk. The risk may have sufficiently changed such that the current mitigation is ineffective, or it may have diminished to where the resources devoted to it may be redirected.
+
+Each of these options requires developing an RMP that is implemented and monitored for adherence to the Measures of Effectiveness (MOE) created during CPT Mission Analysis (MA). 
+
+MITRE ATT&CK Enterprise Mitigations
+
+After the appropriate strategy is selected to fit the mission partner constraints and the severity of risk, an effective mitigation technique must be identified to fulfill that strategy.
+
+The following are standardized mitigations in response to known attack vectors. These mitigations do not provide a one-size-fits-all solution to mitigate risk. Rather they provide an outline and starting point to tailor mitigations to each system.
+M1036 Account Use Policies: Configure features related to account use like login attempt lockouts, specific login times, etc.M1015 Active Directory (AD) Configuration: Configure AD to prevent use of certain techniques; use Security Identifier (SID) filtering, etc.M1049 Antivirus/Antimalware: Use signatures or heuristics to detect malicious softwareM1013 Application Developer Guidance: Describes any guidance or training given to application developers to avoid introducing security weaknesses that an adversary may take advantage ofM1048 Application Isolation and Sandboxing: Restrict execution of code to a virtual environment on or in transit to an endpoint systemM1047 Audit: Perform audits or scans of systems, permissions, insecure software, insecure configurations, etc. to identify potential weaknessesM1040 Behavior Prevention on Endpoint: Use capabilities to prevent suspicious behavior patterns from occurring on endpoint systems; could include suspicious process, file, Application Programming Interface (API) call, etc. behaviorM1046 Boot Integrity: Use secure methods to boot a system and verify the integrity of the Operating System (OS) and loading mechanismsM1045 Code Signing: Enforce binary and application integrity with digital signature verification to prevent untrusted code from executingM1043 Credential Access Protection: Use capabilities to prevent successful credential access by adversaries; including blocking forms of credential dumpingM1053 Data Backup: Take and store data backups from end user systems and critical servers; ensure backup and storage systems are hardened and kept separate from the corporate network to prevent compromiseM1042 Disable or Remove Feature or Program: Remove or deny access to unnecessary and potentially vulnerable software to prevent abuse by adversariesM1055 Do Not Mitigate: Associate techniques that mitigation might increase risk of compromise and, therefore, mitigation is not recommendedM1041 Encrypt Sensitive Information: Protect sensitive information with strong encryptionM1039 Environment Variable Permissions: Prevent modification of environment variables by unauthorized users and groupsM1038 Execution Prevention: Block execution of code on a system through application control, and/or script blockingM1050 Exploit Protection: Use capabilities to detect and block conditions that may lead to or be indicative of a software exploit occurringM1037 Filter Network Traffic: Use network appliances to filter ingress or egress traffic and perform protocol-based filtering; configure software on endpoints to filter network trafficM1035 Limit Access to Resource Over Network: Prevent access to file shares, remote access to systems, unnecessary services; mechanisms to limit access may include use of network concentrators, Remote Desktop Protocol (RDP) gateways, etc.M1034 Limit Hardware Installation: Block users or groups from installing or using unapproved hardware on systems including Universal Serial Bus (USB) devicesM1033 Limit Software Installation: Block users or groups from installing unapproved softwareM1032 Multi-factor Authentication: Use two or more pieces of evidence to authenticate to a system; such as username and password in addition to a token from a physical smart card or token generatorM1031 Network Intrusion Prevention: Use intrusion detection signatures to block traffic at network boundariesM1030 Network Segmentation: Architect sections of the network to isolate critical systems, functions, or resources; use physical and logical segmentation to prevent access to potentially sensitive systems and information; use a Demilitarized Zone (DMZ) to contain any internet-facing services that should not be exposed from the internal network; configure separate Virtual Private Cloud (VPC) instances to isolate critical cloud systemsM1028 Operating System Configuration: Make configuration changes related to the OS or a common feature of the OS that results in system hardening against techniquesM1027 Password Policies: Set and enforce secure password policies for accountsM1056 Pre-compromise: Any applicable mitigation activities that apply to techniques occurring before an adversary gains initial access, such as reconnaissance and resource development techniquesM1026 Privileged Account Management: Manage the creation, modification, use, and permissions associated with privileged accounts, including SYSTEM and rootM1025 Privileged Process Integrity: Protect processes with high privileges that can be used to interact with critical system components through use of protected process light, anti-process injection defenses, or other process integrity enforcement measuresM1029 Remote Data Storage: Use remote security log and sensitive file storage where access can be controlled better to prevent exposure of intrusion detection log data or sensitive informationM1022 Restrict File and Directory Permissions: Restrict access by setting directory and file permissions that are not specific to users or privileged accountsM1044 Restrict Library Loading: Prevent abuse of library-loading mechanisms in the OS and software to load untrusted code by configuring appropriate library-loading mechanisms and investigating potentially vulnerable softwareM1024 Restrict Registry Permissions: Restrict the ability to modify certain hives or keys in the Windows registryM1021 Restrict Web-Based Content: Restrict use of certain websites, block downloads/attachments, block Javascript, restrict browser extensions, etc.M1054 Software Configuration: Implement configuration changes to software (other than the OS) to mitigate security risks associated with how the software operatesM1020 Secure Sockets Layer (SSL)/Transport Layer Security (TLS) Inspection Break and Inspect: SSL/TLS sessions to look at encrypted web traffic for adversary activityM1019 Threat Intelligence Program: Helps an organization generate their own threat intelligence information and track trends to inform defensive priorities to mitigate riskM1051 Update Software: Perform regular software updates to mitigate exploitation riskM1052 User Account Control: Configure Windows User Account Control to mitigate risk of adversaries obtaining elevated process accessM1018 User Account Management: Manage the creation, modification, use, and permissions associated with user accountsM1017 User Training: Train users to be aware of access or manipulation attempts by an adversary to reduce the risk of successful spearphishing, social engineering, and other techniques that involve user interactionM1016 Vulnerability Scanning: Find potentially exploitable software vulnerabilities to remediate them
+Additional Resource
+MITRE ATT&CK Enterprise Mitigations:  https://attack.mitre.org/mitigations/enterprise/  
+
+Which mitigation techniques involve the configuration or reconfiguration of existing technology rather than the addition or removal of it?
+ Review a Vulnerability Assessment and Determining Mitigations
+﻿
+
+Your CPT has been deployed to conduct a harden mission in support of a mission partner and network owner working in the healthcare research space. This partner recently assisted in research for the COVID-19 vaccine and continues to conduct research on variants.
+
+﻿
+
+The mission partner to which the CPT has been deployed is skeptical about the value that this team can provide. The network owners have provided CPT leadership with a vulnerability scan conducted by an inter-departmental security team on a database server in use by a poorly-manned research unit overseas, but is still logically connected to the network. A successful risk vulnerability analysis conducted here significantly increases mission partner buy-in.
+
+﻿
+
+They have provided the following constraints:
+
+Web, database, Domain Name System (DNS), and mail services must remain operational
+The Information Technology (IT) department must be able to remotely gauge the health and wellness of the server
+Given this situation, review the assessment.
+
+﻿
+
+NOTE: This is a scan conducted with the tool OpenVAS, an open-source Vulnerability Assessment Scanner (VAS). 
+
+﻿
+3. In the document, navigate to the vulnerability labeled Database Open Access Vulnerability:
+
+﻿
+NOTE: This vulnerability is found on page 26 of the vulnerability scan report. 
+
+﻿
+
+The risk this vulnerability exposes should be controlled, in accordance with the risk mitigation strategy discussed, because it is a service that the mission partner maintains and must remain available. A database that allows remote access is poorly-configured when it is only intended to be accessed from the localhost to support a web-based front-end. 
+
+﻿
+
+The appropriate mitigation technique to apply here is M1035 Limit Access to Resource Over Network. This risk mitigation should be included in a final plan/report for the mission partner, including the accompanying instructions to configure the PostgreSQL database to restrict access available to remote systems.
+
+﻿
+
+4. In the document, navigate to the vulnerability labeled DNS Server Detection:
+
+
+The risk this vulnerability exposes should be controlled and monitored, as the mission partner has indicated that this service must continue to run on the system. Since DNS is an essential service in an organization’s network, these logs must be closely monitored. Alerts should be configured to identify when an internal network client sends DNS traffic directly to an external server, as this is atypical behavior for a managed network, and can be indicative of malware, exfiltration, Command and Control (C2), or simple misconfiguration. Additionally, DNS requests to known malicious domains should also be alerted and firewall rules employed to drop traffic to known Indicators of Compromise (IOC).
+
+﻿
+
+The appropriate mitigation technique to apply here is M1031.004 Network Intrusion Prevention | DNS if an Intrusion Prevention System (IPS) is available to dynamically stop malicious DNS traffic. If this service is unavailable, then a continuous process of creating firewall rules as an employment of technique M1037 Filter Network Traffic and monitoring alerts and threat intelligence for new suspicious domains or IOCs is appropriate.
+
+﻿
+
+5. In the document, navigate to the vulnerability labeled ICMP Timestamp Detection:
+
+
+The risk this vulnerability exposes could be accepted because the sensitivity of data exposed or severity of successful exploitation is low, or controlled to limit the amount of information available through this technology vector. Additionally, leaving an Internet Control Message Protocol (ICMP) active allows one to remotely test if the server is active.
+
+﻿
+
+The appropriate mitigation technique here is M1055 Do Not Mitigate when the mitigation strategy is to accept or assume the vulnerability, as the cost of mitigation would not justify or achieve the ends sought. When the mitigation strategy is to control the risk, an appropriate technique could be M1037 Filter Network Traffic, by only filtering timestamp type ICMP packets and allowing other type ICMP packets to go through (e.g., echo reply and echo), or M1042 Disable or Remove Feature or Program, in which the service is turned off entirely or blocked by the host firewall, as is the case by default with Windows workstations.
+
+﻿
+
+This sort of decision is common when making risk mitigation decisions. Multiple courses of action may be appropriate and permitted. The limit is often the time, cost, or technology available to fully implement mitigation strategies.
+
+Risk Assessment | The NIST Risk Assessment Process
+According to National Institute of Standards and Technology (NIST) Special Publication (SP) 800-30 Guide for Conducting Risk Assessments, the steps for Conducting a Risk Assessment are shown in Figure 5.4-7.
+
+﻿
+
+Figure 5.4-7 — Image from NIST SP 800-30
+
+﻿
+
+﻿
+Identify Threat Sources and Events
+﻿
+
+CPTs must determine the types of threat sources, threat events, and level of detail to be considered during engagements that include a risk assessment. These can address all types of threat sources, from very broad (e.g., adversarial) to very specific (e.g., trusted insider). The descriptions of threat events can likewise be expressed in highly-general terms (e.g., phishing, Distributed Denial-of-Service [DDoS]) or in highly-specific terms (e.g., the names of specific information systems, technologies, organizations, roles, or locations). The MITRE ATT&CK framework is especially helpful in this threat framing and source description process.
+
+﻿
+
+In addition, CPTs should consider what representative set of threat events can serve as a starting point for the identification of the specific threat events in the risk assessment, and what degree of confirmation is needed for threat events to be considered relevant for purposes of the risk assessment. 
+
+﻿
+
+﻿
+Identify Vulnerabilities and Predisposing Conditions
+﻿
+
+In this step, CPTs determine the types of vulnerabilities that are to be considered during risk assessments and the level of detail provided in the vulnerability descriptions. The CPT and the supported organization discuss the supported organization’s vulnerability identification process. Vulnerabilities can be associated with organizational information systems (e.g., hardware, software, firmware, internal controls, and security procedures) or the environments in which those systems operate (e.g., organizational governance, external relationships, mission/business processes, enterprise architectures, and information security architectures).
+
+﻿
+﻿
+Determine Likelihood of Occurrence
+﻿
+
+During this step, CPTs determine the likelihood that an adversary exploits vulnerabilities discovered in the previous step.
+
+﻿
+
+NIST 800-30 describes this concept as follows:
+
+﻿
+
+The likelihood of occurrence is a weighted risk factor based on an analysis of the probability that a given threat is capable of exploiting a given vulnerability (or set of vulnerabilities). The likelihood risk factor combines an estimate of the likelihood that the threat event will be initiated with an estimate of the likelihood of impact (i.e., the likelihood that the threat event results in adverse impacts). For adversarial threats, an assessment of likelihood of occurrence is typically based on: (i) adversary intent; (ii) adversary capability; and (iii) adversary targeting. For other than adversarial threat events, the likelihood of occurrence is estimated using historical evidence, empirical data, or other factors. Note that the likelihood that a threat event will be initiated or will occur is assessed with respect to a specific time frame (e.g., the next six months, the next year, or the period until a specified milestone is reached). 
+
+﻿
+
+﻿
+Determine Magnitude of Impact
+﻿
+
+CPTs assist network owners and commanders in determining potential adverse impacts to a mission partner in terms of operations (e.g., missions, functions, image, and reputation), organizational assets, individuals, other organizations, and the Nation. They describe impact determinations and any assumptions related to the impact determination process, particularly addressing specific mission/business processes or information resources (e.g., information, personnel, equipment, funds, and IT). Organizations may include information from Business Impact Analysis (BIA) with regard to providing impact information for risk assessments. 
+
+﻿
+
+NOTE: A BIA is the process of ensuring continuous and resilient operations by determining, quantifying, and prioritizing critical activities and their required resources. 
+
+﻿
+﻿
+Determine Risk
+﻿
+
+Organizations determine the levels and types of risk that are acceptable. Risk tolerance is determined as part of the organizational risk management strategy to ensure consistency across the organization. Organizations also provide guidance on how to identify reasons for uncertainty when risk factors are assessed, since uncertainty in one or more factors propagates to the resulting evaluation of level of risk, and how to compensate for incomplete, imperfect, or assumption-dependent estimates. Consideration of uncertainty is especially important when organizations consider Advanced Persistent Threats (APT) since assessments of the likelihood of threat event occurrence can have a great degree of uncertainty. To compensate, organizations can take a variety of approaches to determine likelihood, ranging from assuming the worst-case likelihood (certain to happen in the foreseeable future) to assuming that if an event has not been observed, it is unlikely to happen. Organizations also determine what levels of risk (combination of likelihood and impact) indicate that no further analysis of any risk factors is needed. NIST uses a nonnumerical qualitative description for how to assess the risk (e.g., very low, low, medium, high, and very high).
+
+Risk Assessment | The USCYBERCOM Risk Assessment Methodology
+﻿
+
+Another way of assessing risk is by determining risk at the intersection of a threat and a vulnerability influenced by likelihood and impact. 
+
+﻿
+
+According to CWP 3-33.4:
+
+﻿
+
+United States Cyber Command (USCYBERCOM) and subordinate commanders use the criticality, threat, and vulnerability methodology to assess risk and identify priority for CPT task management.
+
+﻿
+
+Criticality
+﻿
+
+This criterion derives from the DoD determination of which critical systems or assets would have a debilitating impact on security, public health, or safety if incapacitated or destroyed.
+
+﻿
+
+Refer to CWP 3-33.4 Chapter 3, Section 4.c.(7).(a) for more information.
+
+﻿
+
+NIST SP 800-60 defines criticality as:
+
+﻿
+
+A measure of the degree to which an organization depends on the information or information system for the success of a mission or of a business function.
+
+﻿
+
+Threat
+﻿
+
+The threat methodology is a characterization of the possible threat sources and the threat events that are likely to be encountered during the protection of the mission partner network. These risk factors are derived from threat intelligence provided by the CPT All-Source Analyst cell, MITRE ATT&CK Navigator overlays of known threats (such as the overlays developed during M5L2 Overview of MITRE ATT&CK), or the results of a Threat Assessment or Events/Anomalies report developed earlier during CPT assess operations. Each of these products contributes to the common operating picture of likely threat attack vectors.
+
+﻿
+
+CWP 3-33.4, Appendix D describes those sections of the RMP as follows:
+
+﻿
+Vulnerability
+﻿
+
+The vulnerability methodology is a characterization of actual avenues of attack available to potential threat actors for Malicious Cyberspace Activity (MCA). These are either highly-technical true or false determinations of technological weakness, or programatic non-technical determinations of compliance with industry standard policies and procedures. The results of the scans or checklists used in determining a mission partner’s vulnerabilities are appended as an appendix to a RMP. See CWP 3-33.4, Appendix D, Tab B for an example.
+
+﻿
+
+CWP 3-33.4, Appendix D describes the vulnerability section of the RMP as follows:
+
+
+Likelihood
+﻿
+
+This factor is a simple probability that the expected threat sources and events impact the mission partner network. The development of that probability is more subjective and eased by experience, but can be aided by industry-standard tools, such as ACAS and MITRE ATT&CK Navigator, which simplifies the comparison of threats and vulnerabilities.
+
+﻿
+Impact
+﻿
+
+This factor is heavily influenced by the mission partner’s own asset prioritization, key terrain analysis, and criticality assignment. The higher value that a specified asset possesses, the higher the potential impact is of a vulnerability leading to harm on the asset.
+
+﻿
+
+CWP 3-33.4, Appendix D describes these sections of the RMP as follows:
+
+Together, the intersection of these factors and methodologies lead to a systematic risk determination as described in the Risk Framing Model recommended for use in Appendix D.
+
+﻿Assess Risk and Create an RMP for Mission Partner Systems | Identify Vulnerabilities
+Concerned about the vulnerabilities that have now been uncovered in the DMZ scan, the mission partner has requested that the CPT perform a scan and analysis of their entire server subnet. This mission partner has not had their internal network scanned in the past two years and has been experiencing increasing numbers of malicious probes on their external firewall. Additionally, two workstations in the last month have been isolated and re-imaged due to receiving known malicious email attachments. The partner is becoming increasingly aware of the threat to its infrastructure and is eager to discuss mitigation steps to harden its network and systems.
+
+﻿
+
+Using the knowledge obtained in this lesson, analyze a scan and assess the Server subnet. The mission partner has provided the following information and constraints:
+
+The Server subnet is the 174.16.1.0/24 range of addresses.
+The cda-dc machine is key terrain.
+The mission partner's internal web, database, DNS, file, and mail services are critical to their operations and must remain active. 
+The mission partner’s AD domain is cda.
+An ACAS scan labeled Server-Vulnerability-Scan has already been completed and is saved in the My Scans folder on the in-range ACAS server.
+NOTE: This scan has already been run and the results saved in the Server-Vulnerability-Scan results since this scan takes over one hour to complete (without the Perform thorough tests option selected, which would add even more time).
+
+kernel 
+
+sys internal to find rootkit 
+library
+and calls 
+
+program sourcecode
+executable image - cpu can execute
+
+thread smallest unit within a process for execution
+dll is heap
+stack last in first out
+
+heap dynamic
+
+deamon service in background
+
+zombie exited terminated state but is waiting on its parent process parent never comes
+orphan sometimes can be adopted
+
+sans evil 
+explorer.exe can get from cmd
+
+init old linux based off runlevels 
+
+fat 8 OLD 1970's 
+dacls sacl
+hardlink same partition
+simbolic link
+
+exiftools for immages use stat
+
+dos header
+stub jeade
+
+mops support moe
+if completed both = success 
+oiv
+cte
+kali
+nmap
+redesal
+
+windows
+windwows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windowws
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windwos
+windws
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windwows
+windwos
+windows
+windows
+windows
+windwos
+windwos
+windows
+windwos
+windows
+windows
+windows
+windows
+widnwos
+windwos
+windows
+windows
+windows
+windwos
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windwos
+windows
+windows
+windows
+windows
+windows
+iwndows
+windows
+windows
+windows
+windows
+windwos
+windows
+iwndows
+windows
+windows
+windows
+iwndows
+windows
+windows
+windows
+iwdnwi
+windows
+windows
+windows
+windwos
+windows
+windows
+windows
+windpws
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+windows
+widnows
+windows
+windwos
+windows
+windows
+windows
+wunoddw
+windows
+windows
+windows
+windows
+windows
+iwndows
+windows
+windows
+windows
+windows
+windows
+widnw
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
