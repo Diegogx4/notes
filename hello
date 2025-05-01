@@ -1,0 +1,1650 @@
+Before evaluating a target environment for Malicious Cyberspace Activities (MCA), some basic knowledge about Command Line Interfaces (CLI) and scripting is required. This lesson covers the basics of various command shells and shell scripting languages. Included in this are the Windows Command Prompt (CMD), PowerShell, and Windows batch scripts. Shell scripts greatly reduce repetition and/or are used for planning actions for future execution.
+
+Scenario Description
+This lesson consists of a Windows domain, cda.corp, with the Key Terrain in Cyberspace (KT-C) consisting of several subnets for workstations, a security subnet with a Windows hunt computer, a server's subnet, and a Demilitarized Zone (DMZ). Primary operation occurs on the cda-win-hunt Virtual Machine (VM) to learn about Windows scripting with batch files and PowerShell. The subnet 10.0.0.0/8 is off-limits and out of scope for all training tasks. Any MCA discovered during must be evaluated. After completing this lesson, trainees can evaluate and, if appropriate, change or offer configuration changes for mission partners' systems.
+
+Threat Intelligence
+﻿
+According to threat intelligence, there are several instances of MCAs associated with threat actors that are conducting active discovery and lateral movement in networks that have trust relationships with cda.corp. In particular, the MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) Command and Scripting Interpreter: Windows Command Shell technique is seen as an active vector to download and execute files on compromised hosts for discovery, command execution, and lateral movement. 
+
+
+Current Events
+﻿
+Command shell and scripting abuse is a long-standing and widely-varied technique used by many MCAs for execution, persistence, and lateral movement. As command shells and scripts are used by system administrators for local and remote configuration and management, MCAs frequently use the same infrastructure and tools to perform discovery, gain execution, and assist in lateral movement. Recent activity reported by FireEye Threat Research identified Advanced Persistent Threat (APT) 41 in early 2020 as using CMD.exe (referred to as CMD throughout the lesson) and batch files as part of their intrusion campaign. Some of the indicators of compromise attributed to APT41 
+
+Recent activity reported by the Palo Alto Networks security research group UNIT42 in May of 2020 identified the Hangover, or Patchwork, threat group as using BackConfig malware to de-obfuscate payloads, execute files, and gain persistence using batch files and Windows scripting language. Threat actors continue to use and abuse the same systems and tools that system administrators use to limit exposure and gain initial footholds.
+
+Additional Resources
+MITRE Command and Scripting Interpreter: https://attack.mitre.org/techniques/T1059/003/
+FireEye Threat Research (APT41): https://www.fireeye.com/blog/threat-research/2020/03/apt41-initiates-global-intrusion-campaign-using-multiple-exploits.html
+paloalto BackConfig Malware: https://unit42.paloaltonetworks.com/updated-backconfig-malware-targeting-government-and-military-organizations/
+MITRE Patchwork: https://a ttack.mitre.org/groups/G0040/  ﻿
+﻿
+Command Line Interfaces
+NOTE: The terms CLI and Command Line Interpreter are used synonymously to refer to the mechanism a human uses to interact with a computer system.
+
+The CLI accepts typed-in inputs typically from a keyboard, and previously a Teletype (TTY) over a slow serial communication line. Modern implementations offer a Pseudo Teletype (PTY) which provides the same interface at a much higher speed as it resides in memory and is not limited by older communications protocols. The CLI outputs the results of that input to the operator, typically on a screen or monitor. Unix and Windows CLIs look similar and have a similar look and feel on the human side, but they both interact with the underlying OS in different ways. This lesson focuses on the Windows CLI and introduction to Windows batch files. Other lessons cover Unix CLIs, specifically the Bourne Again Shell (Bash). Using a non-graphical interface allows system administrators to automate a series of commands that can be scripted. Since system administrators perform their functions using text-based, scriptable tools, threat actors also take advantage of those same tools. This allows them to better blend in with legitimate activity. Experienced defenders and analysts are well-versed in these tools, their operation, what is legitimate, and how to take advantage of scripting to be more efficient. As an example, an integrity hash value on a file that matches a known indicator of compromise helps defenders understand the extent of a compromise and continue their hunting and defending. No one wants, or has the time, to manually calculate an integrity hash on the hundreds of thousands of files on a filesystem and compare it to another list of bad hash values. CLIs and scripting allow this task to be accomplished quickly and with just a few lines of scripting. 
+
+Windows CMD Shell
+
+The Windows command interpreter — CMD — dates back to OS/2 (an OS introduced in 1982 that was closely related to Microsoft), however, its design is based on earlier command interpreters, such as COMMAND.COM for Disk Operating System (DOS). CMD has several built-in commands, such as dir (lists the current directory), cd (changes directory), as well as the ability to run executable binaries. The CMD CLI application provides an interface to the OS as shown in Figure 6.1-2. The processes ConHost.exe and CMD show as running processes; ConDrv.sys is the Windows kernel driver that provides the communication infrastructure between ConHost and one or more CLI applications.
+
+NOTE: An extensive list of commands available on Windows machines is available from https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/windows-commands
+﻿
+Batch Files
+Windows originally used batch files as a way to perform a set batch of saved commands. These commands are executed non-interactively as a script that has some conditional flow control to branch which commands are executed under specific circumstances. Batch files are still supported in the latest versions of Windows OSs, but there are more modern implementations of scripting available in PowerShell, which are covered later. Batch files contain Windows commands along with some flow control and comparison operators that are saved in a text file with a .bat or .cmd extension. The .cmd extension was introduced with the Windows NT family of OSs and were executed with CMD instead of the older COMMAND.COM. COMMAND.COM is no longer included on Windows OSs and CMD executes both .bat and .cmd files as batch scripts. Batch files are plain text files most commonly edited in notepad.exe. Table 6.1-3 describes some of the Windows commands that are most often used in batch files, and are less often used on the CLI, although, they can be used from the command line as well.
+
+NOTE: There are subtle differences between the two extensions, involving handling of error levels returned from applications. They are relatively interchangeable under most conditions.
+
+Variables
+Variables in batch files are case-sensitive and are assigned using the set command. Variables from an interactive CMD session are case-insensitive. There is no whitespace surrounding the equal sign: set foo = bar is not valid, but set foo=bar is valid. The /a switch is used to indicate the variable holds a number and is used for arithmetic operations.
+
+input:  c:\Users\trainee>SET /A seven=4+3
+output: 7
+
+Often localized variables in a batch file use lowercase variable names while system-wide environmental variables are uppercase. The set command does not check to see if a variable already exists; it holds data. For example, set temp=”something temporary” from a CMD session overwrites the already existing %TEMP% environmental variable, which points to a temporary directory. Variables are read by surrounding the variable name with the % operator.
+
+
+
+CMD supports setting and using environment variables such as SYSTEMROOT and PATH. To set a variable, the set command is used, and using an environment variable involves surrounding it with % to indicate that it is a variable (e.g., %PATH%). The echo command is combined with a variable to display the current value for an environment variable (e.g., echo %COMPUTERNAME%). 
+
+
+5. Run the following command to set the path variable by adding an item to the list (semicolon delimited):
+
+
+c:\Users\trainee>set PATH=%PATH%C:\NewFolder;
+
+The environment variables being set are for the current shell only. In order to update the environment for the current and future shells (but not existing shells or environments for other currently running applications), the setx command is used instead (which uses a slightly different syntax). Double quotes are needed since the previous contents of the variable are being set and used.
+
+6. Run the following command to update the PATH variable for the current shell and save the setting across future logins: 
+
+c:\Users\trainee>setx PATH "%PATH%C:\NewFolder;"                                                                         
+
+Generally, the setx command should only be used when permanently altering the environment variable is desired. 
+
+NOTE: The setx command operates off the current user, rather than system environment variables by default. To learn more about this command, run setx /?. The command argument /? is often used by convention as a help argument on Windows, but this option may not be present for all binaries/commands, which might use other conventions or lack a help option entirely.
+
+There are also special variables that are replaceable and are set to the arguments passed on the CLI to the script. These variables only have a single % operator as a prefix and are numbered 0 – 9, so %1 and %9 refer to the first argument and the ninth argument passed to a script. The variable %0 refers to the name of the batch file being executed. If there is no corresponding argument passed, the variable is empty. Other special variables have some characteristics that are very useful for scripts and are listed in Table 6.1-4. The I in the example is replaced with one of the numbered argument variables such as 0 for the name of the script being run.
+
+The batch file below demonstrates the use of these special variables. This code can be saved as commandline.bat in the c:\Users\trainee\Desktop directory.
+
+
+7. Run the following command to change to the Desktop directory:
+
+
+c:\Users\trainee>cd Desktop
+
+
+
+8. Open Notepad.exe from the Start menu.
+
+
+9. Copy and paste the following commands, and save the file as commandline.bat in the c:\Users\trainee\Desktop directory using File > Save:
+
+
+@echo off
+set myvar=%~0
+set myvarpath=%~f0
+set myvarshort=%~fs0
+set myparent=%~dp0
+set mycmd=%~n0
+set firstarg=%1
+set firstargquote=%~1
+
+echo myvar=%myvar%
+echo myvarpath=%myvarpath%
+echo myvarshort=%myvarshort%
+echo myparent=%myparent%
+echo mycmd=%mycmd%
+echo firstarg=%firstarg%
+echo firstargquote=%firstargquote%
+
+10. Run the following command to execute the batch file:
+
+C:\Users\trainee\Desktop>commandline.bat
+
+11. Run the command again, passing an argument string in quotation marks:
+
+C:\Users\trainee\Desktop>commandline.bat "this is arg1"
+
+12. Run the command a final time, passing an argument string without quotation marks:
+
+C:\Users\trainee\Desktop>commandline.bat this is arg1
+
+Notice the difference when the full path of the batch file is used and how the quotes are treated for the %1 argument in the second run of commandline.bat. More details on the use of these special variables are found in the help with the for /? command.
+
+As previously stated, variables used in arithmetic operations need to be set with the /a switch to the set command. Table 6.1-5 summarizes the arithmetic and assignment operators.
+
+The following commands are equivalent:
+
+set /a total=total+1
+set /a total+=1
+
+Loops and Conditionals
+IF Statements
+﻿
+
+Conditional program flow is handled via the if command. The basic structure of the if command is:
+
+﻿
+
+if [NOT] condition (command) [else (command)]
+if [NOT] ERRORLEVEL number (command)
+if [NOT] string1==string2 (command)
+if [NOT] EXIST filename command
+﻿
+
+The specific conditions if supports include:
+
+not: Specifies that the command to be executed initiates if the condition is false.
+exist: Checks for the existence of a file or directory. In order to ensure the tested value is a directory and not a file, checking for a device file, such as NULL, may be used (e.g., exist “C:\NewFolder\NULL”)
+errorlevel: Compares the last returned errorlevel against a specified value. For example, errorlevel 0 checks for a return value of 0 (by convention, no error returned from the previous command). The error level may not be reset on some built-in commands if .bat files are used.
+string1==string2: Checks if the two string values are the same (e.g., %COMPUTERNAME%=="SYSTEM1” checks if the computer’s name is SYSTEM1).
+string1 OPERATOR string2: Compares the two values using the three letter operator:
+EQU: Equal to
+NEQ: Not equal to
+LSS: Less than
+LEQ: Less than or equal to
+GTR: Greater than
+GEQ: Greater than or equal to
+﻿
+
+The following is an example usage of these principles, which creates a folder only if it does not exist without changing the errorlevel:
+
+﻿
+
+if not exist "C:\NewFolder\NULL" mkdir "C:\NewFolder"
+
+
+FOR Statements
+for %variable IN (set) DO command [command-parameters]
+﻿
+
+The for command is used to iterate each item in a set and perform some action/command. The variable used as the iterator — %variable in the above command outline — is a single character in the range a-z or A-Z, and is referenced as %%a or %%Z (%%z and %%Z are different variables). The use of the extra % operator is used in batch files and not from the CLI (where it is a single %). The various types of iterations are based on the switches below:
+
+/l: Series of values
+/f: Series of files
+/d: Series of directories
+/r: Each item in a directory tree
+Stepping through a series of values:
+
+﻿
+
+for /l %%variable in (start,step,end) do (command)
+﻿
+
+for /l %%A in (0,2,10) do echo %%A
+﻿
+
+The values for start, step, and end are used to determine the iteration. This example starts at 0, steps through by adding two each time, and stops at 10.
+
+
+Looping through files:
+
+﻿
+
+for %%variable in (fileSet) do (command)
+﻿
+
+for %%B in (%USERPROFILE%\Desktop\*) do echo %%B
+
+Looping through directories:
+
+﻿
+
+for /d %%variable in (directorySet) do (command)
+﻿
+
+for /d %%C in (%PUBLIC%\* %USERPROFILE%\*) do echo %%C
+
+The example above shows two base directories to iterate in the loop; the directories pointed to by the %PUBLIC% and %USERPROFILE% variables.
+
+﻿
+
+Looping through directories, recursively:
+
+﻿
+
+for /r "%USERPROFILE%" %%D in (*) do echo %%D
+﻿
+This example iterates recursively through each file in the directory %USERPROFILE%. A filter can also be applied to only look for files that end in .bat:
+
+﻿
+
+for /r "%USERPROFILE%" %%D in (*.bat) do echo %%D
+﻿
+
+Parsing File Content and Output
+
+﻿TAKE OUT THE DOUBLE PERCENTAGE IF DONT WANT A BAT FILE
+
+
+for /f ["options"] %%variable in (source) do (command)
+﻿
+
+@echo off
+for /f "tokens=1-4" %%A in (hosts.txt) do ( echo host: %%A IP Address: %%B Department: %%C Email: %%D)
+﻿
+In this example, the for command is iterating through a specific example file — in this case hosts.txt — which has multiple lines with host information. For each line in this file, the loop iterates over each word that is separated by a space or tab, which is the default token. The command specifies that the loop operates on the first four words — there are only four words in this example file — and prints the results to the screen in a specific format. This loop could be modified to only operate on the Internet Protocol (IP) address and then perform another option — like a ping — to that address to see if the host is reachable on the network. There are additional options for /f that are used for additional flexibility such as changing the delimiter. These can be found in the documentation: for /?.
+
+RECURSIVE SEARCHING for /f ["options"] %%variable in (source) do (command)
+
+REMEMBER TO TAKE OFF PERCENTAGE SYMNOL AND SSSSS
+
+GOTO Statements
+Batch files support labels and the goto operand for program flow. Labels are specified by giving the label name preceded by :, for example: :LABEL. The goto command is followed by the label specifying a location in the batch file to start executing instructions from next, which is a way to control the order in which instructions are executed. The example below takes an argument from the command line and uses if and goto to branch execution to a specific part of the batch file. Notice the goto EXIT commands to jump to the end of the script. Batch files do not have support for functions or procedures, so this is a way to handle cases where code reuse is desired.
+
+﻿
+
+@echo off
+if "%1"=="" (echo Error: No arguments) & (goto EXIT)
+if "%1"=="1" goto SUBROUTINE1
+if "%1"=="2" goto SUBROUTINE2
+if "%1"=="3" goto SUBROUTINE3
+goto EXIT
+
+:SUBROUTINE1
+echo This is subroutine 1
+goto EXIT
+
+:SUBROUTINE2
+echo This is subroutine 2
+goto EXIT
+
+:SUBROUTINE3
+echo this is subroutine 3
+goto EXIT
+
+:EXIT
+echo exiting...
+﻿
+Which switch to the for command iterates a set of values?
+/l
+
+Which switch(es) to the for command iterates recursively for file entries? 
+/r *************************
+
+Which special variable expands to the parent directory of the running batch file? 
+%~dp0
+
+
+
+
+
+Using CLI to Gather System Information
+This task focuses on CMD familiarization and using the CLI to work with batch files to gather system information used to verify provided information about a computer or network from a mission partner/customer. The actual state may not match the expected, or documented, state and can reveal vulnerabilities or possible indicators of compromise associated with MCAs.
+C:\Users\trainee> cd Desktop
+
+4. From the Start menu, open Notepad, if it is not already open.
+
+﻿
+
+5. Copy the following script into Notepad, and use the Save As… option to save the file as c:\Users\trainee\Desktop\host_baseline.bat:
+
+﻿
+
+@echo off
+REM This script will perform host configuration commands and display the output to 
+REM the screen/console (con) unless there is a file specified as argument1
+REM This script uses a variable to control the output
+REM If there is no argument, the %OUTPUT% variable is replaced with the
+REM special device  con  which is the console, or screen. 
+
+if "%1"=="" (set OUTPUT==con) else (set OUTPUT=%1)
+
+title "Host Baseline Script"
+echo Starting baseline...
+echo Systeminfo...
+systeminfo > %OUTPUT%
+echo Time...
+time /t >> %OUTPUT%
+echo Services
+sc query state= all >> %OUTPUT%
+echo Scheduled Tasks...
+schtasks >> %OUTPUT%
+Echo Directory tree...
+tree /f /a c:\Users >> %OUTPUT%
+echo Drivers...
+driverquery >> %OUTPUT%
+
+echo Baseline complete.
+﻿
+
+6. In the CMD session, execute the batch file and save the results to the file cda-win-hunt_baseline.txt:
+
+﻿
+
+C:\Users\trainee\Desktop>host_baseline.bat cda-win-hunt_baseline.txt
+﻿
+
+﻿
+
+Figure 6.1-19
+
+﻿
+
+This script is a collection of Windows commands that are executed and their output is saved in a file or to the screen. One of the advanced features used in this script is the use of a variable and output redirection. The > character is used to redirect the standard output — which is normally the console or screen — to either the file specified as the first argument or back to the special file con — which is the console or screen. The >> appends to the file rather than overwriting any existing data. This could have been done solely on the CLI to redirect all the output of the script to a file rather than each command. The benefit of this option is that when this script is run by a human, they can see the status updates as the script is progressing and the output of the commands are still saved in a file.
+
+﻿
+
+7. Open cda-win-hunt_baseline.txt from the Desktop and review the output of the commands.
+
+8. Save the host_baseline.bat script as a new file named host_baseline_autodelete.bat. Save the modified script after modifying it to match the below:
+
+﻿
+
+@echo off
+REM This script will perform host configuration commands and display the output to 
+REM the screen/console (con) unless there is a file specified as argument1
+REM This script uses a variable to control the output
+REM If there is no argument, the %OUTPUT% variable is replaced with the
+REM special device  con  which is the console, or screen. 
+
+if "%1"=="" (set OUTPUT==con) else (set OUTPUT=%1)
+
+title "Host Baseline Script"
+echo Starting baseline...
+echo Systeminfo...
+systeminfo > %OUTPUT%
+echo Time...
+time /t >> %OUTPUT%
+echo Services
+sc query state= all >> %OUTPUT%
+echo Scheduled Tasks...
+schtasks >> %OUTPUT%
+Echo Directory tree...
+tree /f /a c:\Users >> %OUTPUT%
+echo Drivers...
+driverquery >> %OUTPUT%
+
+echo Baseline complete.
+echo Deleting batchfile
+del "%~f0"
+﻿
+
+The command del ”%~f0” uses the special variable to refer to the name of the script that was run on the CLI and deletes the batch file once the other commands have run. This method displays an error, but is often used by administrators running a script to perform some action when a user logs on as part of a group policy. This automatically deletes the script when completed.
+
+﻿
+
+9. Close any Notepad windows that have host_baseline_autodelete.bat open, and run the new script:
+
+﻿
+
+c:\Users\trainee\Desktop>dir host*
+c:\Users\trainee\Desktop>host_baseline_autodelete.bat cda-win-hunt_baseline2.txt 
+c:\Users\trainee\Desktop>dir host*
+﻿
+Notice that even though there was an error displayed — The batch file cannot be found — the script host_baseline_autodelete.bat was deleted.
+
+PowerShell
+PowerShell is a CLI shell and scripting language designed specifically for system administration. Built on .NET Framework, PowerShell helps Information Technology (IT) professionals control and automate the administration of the Windows OS and applications that run on Windows Server environments. PowerShell has a rich expression parser and a fully developed scripting language. In simple words, you can complete all the tasks that you do with a Graphical User Interface (GUI) and much more.
+
+﻿
+
+The PowerShell Integrated Scripting Environment (ISE) is a host application for PowerShell. In PowerShell ISE, you can run commands and write, test, and debug scripts in a single Windows-based GUI with multiline editing, tab completion, syntax coloring, selective execution, context-sensitive help, and support for right-to-left languages.
+
+﻿
+
+PowerShell ISE allows users to utilize menu items and keyboard shortcuts to perform many of the same tasks that are executed in the Windows PowerShell console. For example, when debugging a script in PowerShell ISE, to set a line breakpoint in a script — a way to pause the execution of a script to perform debugging —, right-click the line of code, and select Toggle Breakpoint.
+
+﻿
+
+The PowerShell scripting environment was designed to extend the capabilities of the Command shell to run PowerShell commands, called cmdlets. Cmdlets are similar to Windows commands, but provide a more extensible scripting language. Windows commands and PowerShell cmdlets are both able to be run in PowerShell, however, the Command shell can only run Windows commands and not PowerShell cmdlets.
+
+﻿
+
+PowerShell Features 
+Cmdlets: Cmdlets perform common system administration tasks such as managing the registry, services, processes, event logs, and using Windows Management Instrumentation (WMI).
+Task-oriented: PowerShell scripting language is task-based and provides support for existing scripts and CLI tools.
+Consistent design: As cmdlets and system data stores use common syntax, and have common naming conventions, data sharing is easy. The output from one cmdlet can be pipelined to another cmdlet without manipulation.
+Simple to use: Simplified, command-based navigation lets users navigate the registry and other data stores similar to the file system navigation.
+Object-based: PowerShell possesses powerful object manipulation capabilities. Objects can be sent to other tools or databases directly.
+Extensible interface: PowerShell is customizable as independent software vendors and enterprise developers can build custom tools and utilities using PowerShell to administer their software.
+﻿
+
+Cmdlet vs Command
+﻿
+
+Cmdlets are different from commands in other command-shell environments in the following manners:
+
+Cmdlets are .NET Framework class objects; not just stand-alone executables.
+Cmdlets are easily constructed from as few as a dozen lines of code.
+Parsing, error presentation, and output formatting are not handled by cmdlets. It is done by the PowerShell runtime.
+Cmdlets process works on objects not on text stream, and objects can be passed as output for pipelining.
+Cmdlets are record-based as they process a single object at a time.
+﻿
+Launch PowerShell and Execute Commands
+In this task, open PowerShell and run a series of commands on the cda-win-hunt VM. Each cmdlet has more capabilities and options that can be viewed using the Get-Help cmdlet (example: Get-Help New-Item).
+
+
+2. From the Start menu, enter powershell in the Search and select Enter.
+
+﻿
+
+3. Use the Get-Help cmdlet to retrieve the syntax for the New-Item cmdlet:
+
+﻿
+
+PS C:\users\trainee> Get-Help New-Item
+PS C:\users\trainee> Get-Help New-Item -full
+PS C:\users\trainee> Get-Help New-Item -examples
+﻿
+
+Get-Help also has options for a more verbose listing (-full) and can show examples (-examples). The examples are included in the -full output.
+
+4. Use the New-Item cmdlet to create a new directory:
+
+﻿
+
+PS C:\users\trainee> New-Item -Path 'C:\users\trainee\temp' -ItemType Directory
+PS C:\users\trainee> dir
+
+The New-Item cmdlet is used to create a directory by passing the new location using -Path as the path of the directory and -ItemType as the directory. Notice that the dir command is run in PowerShell, just as it would be in a CMD session, however PowerShell has created an alias between dir and the cmdlet Get-ChildItem, so some of the CMD dir options are invoked using the cmdlet options (Get-Help Get-ChildItem). Many of the Windows commands used in CMD have aliases that perform the same function but return an object instead of plain text to allow further processing by PowerShell cmdlets.
+
+﻿
+
+5. Use the Copy-Item cmdlet to copy the c:\users\trainee\temp folder to c:\users\trainee\temp2:
+
+﻿
+
+PS C:\users\trainee> Copy-Item 'C:\users\trainee\temp' 'C:\users\trainee\temp2'
+PS C:\users\trainee> dir
+
+The Copy-Item cmdlet is used to copy a directory by passing the path of the directory to be copied and destination path where the folder is to be copied. The dir command shows both folders that were created. This cmdlet is similar to the copy command.
+
+﻿
+
+6. Use the Remove-Item cmdlet to delete the c:\users\trainee\temp2 folder:
+
+﻿
+
+PS C:\users\trainee> Remove-Item 'C:\users\trainee\temp2'
+PS C:\users\trainee> dir
+
+The Remove-Item cmdlet is used to delete items, including a directory, by passing the path of the item to be deleted. This cmdlet is similar to the del and rmdir commands.
+
+﻿
+
+7. Use the Move-Item cmdlet to move the c:\users\trainee\temp folder to c:\users\trainee\old_temp:
+
+﻿
+
+PS C:\users\trainee> Move-Item 'C:\users\trainee\temp' 'c:\users\trainee\old_temp'
+PS C:\users\trainee> dir
+
+﻿
+
+The Move-Item cmdlet is used to move items by passing the path of the item to be moved and destination path where the item is to be moved. This cmdlet is similar to the move command.
+
+﻿
+
+8. Use the Rename-Item cmdlet to rename the c:\users\trainee\old_temp folder to c:\users\trainee\new_temp:
+
+﻿
+
+PS C:\users\trainee> Rename-Item 'C:\users\trainee\old_temp' 'c:\users\trainee\new_temp'
+PS C:\users\trainee> dir
+
+The Rename-Item cmdlet is used to rename a folder by passing the path of the folder to be renamed and target name. There should not be another folder with the same name already in the temp directory, otherwise, the PowerShell command fails.
+
+﻿
+
+9. Use the Test-Path cmdlet to check for the existence of the folder the c:\users\trainee\test:
+
+﻿
+
+PS C:\users\trainee> Test-Path 'C:\users\trainee\test'
+PS C:\users\trainee> Test-Path 'C:\users\trainee\new_temp'
+
+﻿
+
+The Test-Path cmdlet is used to check the existence of a folder. Notice the first test for the test folder does not exist so the cmdlet returned False.
+
+PowerShell Scripts
+PowerShell scripts are stored in .ps1 files. By design, a user cannot run a script by simply double-clicking the file; this helps avoid accidental harm to the system. Instead, to run a script, a user must right-click it and select Run with PowerShell.
+
+
+NOTE: It is possible to associate the .ps1 extension with PowerShell by modifying the registry key HKEY_CLASSES_ROOT\Microsoft.PowerShellScript.1\Shell\open\command, but Microsoft advises against it to retain the default security.
+
+﻿
+
+Additionally, there is a policy that restricts script execution. A user can check this policy by running the Get-ExecutionPolicy command in PowerShell:
+
+
+The Get-ExecutionPolicy command returns one of the following values:
+
+Restricted: No scripts are allowed (individual commands are still permitted). This is the default setting for workstations and client systems; it appears the first time the command is executed.
+AllSigned: Run scripts signed by a trusted developer. With this setting in place, before executing, a script confirms that you want to run it.
+RemoteSigned: Run your own scripts or scripts signed by a trusted developer. This is the default policy for servers. Scripts running remotely or those downloaded from the internet still must be signed by a trusted publisher.
+Unrestricted: Run any script you want.
+This setting varies for each mission partner’s network and may vary from subnet to subnet and type of user.
+
+﻿
+
+IMPORTANT NOTE: Defenders must understand the policy of the network they are operating on and what the scope of the hunting mission permits. Coordination with the mission partner may be required prior to starting to enable specific policies for the Cyber Protection Team (CPT) conducting the mission.
+
+﻿
+
+To start working with PowerShell scripts, the policy setting value must be changed from Restricted to RemoteSigned using the Set-ExecutionPolicy RemoteSigned command from a PowerShell session with administrator privileges:
+
+
+Cmdlet Format
+﻿
+
+A cmdlet always consists of a verb (or a word that functions as a verb) and a noun, separated with a hyphen (the verb-noun rule). Some of the most common verbs include:
+
+Get: To get something
+Set: To define something
+Start: To run something
+Stop: To stop something that is running
+Out: To output something
+New: To create something (new is not a verb, of course, but it functions as one)
+﻿
+
+There are a limited number of verbs, but the nouns are essentially unlimited. The Get-Command cmdlet shows the currently available cmdlets. Figure 6.1-34 shows the description for the Get-Command cmdlet.
+
+﻿
+
+PS C:\Windows\system32> Get-Help Get-Command
+
+2. From the Start menu, enter powershell, and open Windows PowerShell ISE.
+
+
+PowerShell ISE has additional features to help in the development of PowerShell scripts, shown in the right pane of the window.
+
+
+3. Practice using PowerShell by executing the following cmdlets:
+
+
+NOTE: For this step, enter the commands into PowerShell ISE instead of copying and pasting.
+
+﻿
+
+PS c:\users\trainee> Get-Process
+PS c:\users\trainee> Get-Service
+PS c:\users\trainee> Get-Content C:\windows\system32\drivers\etc\hosts
+﻿
+
+Notice as commands are entered into the shell, PowerShell ISE provides helpful hints and auto-completions to assist with the intended outcome. 
+
+Get-Process: Shows the processes currently running on the computer
+﻿
+
+Get-Service: Shows the list of services with their status
+﻿
+
+Get-Content: Shows the content of the file specified (for example, Get-Content C:\Windows\System32\drivers\etc\hosts). The hosts file is used in networking to set a static IP address to hostname mapping. Malware often modifies this file to attempt to block compromised hosts from reaching anti-virus and other security websites.
+﻿
+
+4. Use the Get-Help cmdlet to view the help for all available cmdlets:
+
+﻿
+
+PS c:\users\trainee> Get-Help -Category cmdlet
+
+﻿
+
+Figure 6.1-39 only shows a portion of the results, which also includes aliases that are available. Each alias and cmdlet has additional details available and can be seen with the Get-Help cmdlet syntax. There is also extensive documentation online at  https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/?view=powershell-7.1&viewFallbackFrom=powershell-6  and  https://docs.microsoft.com/en-us/powershell/ .
+
+Parameters
+Each cmdlet has several parameters that customize its function. PowerShell ISE automatically suggests all valid parameters and their types after a user enters a cmdlet and a hyphen.
+
+﻿
+
+For example, the following cmdlet shows all services whose names start with W:
+
+﻿
+
+Get-Service -Name W*
+﻿
+
+If a user forgets a cmdlet parameter, the Get-Member command is used to display the parameters for a specific cmdlet (in this example for the Get-Process cmdlet):
+
+﻿
+
+Get-Process | Get-Member
+﻿
+
+If the cmdlet is still not discovered, a user can make sure the help is current and get examples for a cmdlet (such as Get-Process) using a script like this:
+
+﻿
+
+Get-Help Get-Process -Examples
+﻿
+Aliases
+﻿
+
+The PowerShell Alias provider lets you get, add, change, clear, and delete aliases in PowerShell.
+
+﻿
+
+An alias is an alternate name for a cmdlet, function, and executable file — including scripts. PowerShell includes a set of built-in aliases. Users can add their own aliases to the current session and to their PowerShell profile. For example, instead of Get-Help, a user can use Help. The following two commands provide the same result:
+
+﻿
+
+Start-Process notepad
+start notepad
+﻿
+
+Similarly, to stop this process, use either of the following commands:
+
+﻿
+
+Stop-Process notepad
+stop notepad
+﻿
+
+NOTE: Stopping processes may require the process Identifier (ID) if there are multiple processes with the same name running.
+
+Pipelines
+A pipeline is a series of commands connected by pipeline operators (|) (American Standard Code for Information Interchange [ASCII] 124). Each pipeline operator sends the results of the preceding command to the next command. This could be the standard output of a command, or the resulting object, to the next command.
+
+﻿
+
+The output of the first command can be sent for processing as input to the second command. The second output can be sent to yet another command. The result is a complex command chain or pipeline that is composed of a series of simple commands.
+
+﻿
+
+Example of pipeline syntax:
+
+﻿
+
+Command-1 | Command-2 | Command-3
+﻿
+
+In this example, the objects that Command-1 outputs are sent to Command-2. Command-2 processes the objects and outputs them to Command-3. Command-3 processes the objects and sends them down the pipeline. Once there are no more commands in the pipeline, the results are displayed on the console.
+
+﻿
+
+In a pipeline, commands are processed in order from left to right. The processing is handled as a single operation and output is displayed as it is generated.
+
+﻿
+
+The following command gets the Notepad process and then stops it:
+
+﻿
+
+Get-Process notepad | Stop-Process
+﻿
+
+The first command uses the Get-Process cmdlet to get an object representing the Notepad process. It uses the pipeline operator (|) to send the process object to the Stop-Process cmdlet, which stops the Notepad process. Notice that the Stop-Process command does not have a name or ID parameter to specify the process, because the specified process object is passed through the pipeline.
+
+﻿
+
+Most PowerShell cmdlets support pipelines. In most cases, you can pipe the results of a Get cmdlet to another cmdlet of the same noun. For example, you can pipe the output of the Get-Service cmdlet to the Start-Service or Stop-Service cmdlets.
+
+﻿
+
+This example pipeline starts the Remote Desktop service on the computer (only if run by an Administrator):
+
+﻿
+
+Get-Service termservice | Start-Service
+﻿
+
+Many of the utility cmdlets, such as Get-Member, Where-Object, Sort-Object, Group-Object, and Measure-Object are used almost exclusively in pipelines. You can pipe any object type to these cmdlets.
+
+﻿
+
+This example shows how to sort all the processes on the computer by the number of open handles in each process:
+
+﻿
+
+Get-Process | Sort-Object -Property handles
+﻿
+
+For example, to determine which of the parameters of the Start-Service cmdlet accepts pipeline input, enter:
+
+﻿
+
+Get-Help Start-Service -Full
+﻿
+or 
+
+Get-Help Start-Service -Parameter *
+﻿
+
+
+To support pipelining, the receiving cmdlet must have a parameter that accepts pipeline input. Use the Get-Help command with the Full or Parameter options to determine which parameters of a cmdlet accept pipeline input.
+
+﻿
+
+The help for the Start-Service cmdlet shows that only the InputObject and Name parameters accept pipeline input.
+
+﻿
+
+-InputObject <ServiceController[]>
+Specifies ServiceController objects representing the services to be started.
+Enter a variable that contains the objects, or type a command or expression
+that gets the objects.
+
+Required?                    true
+Position?                    0
+Default value                None
+Accept pipeline input?       True (ByValue)
+Accept wildcard characters?  false
+
+-Name <String[]>
+Specifies the service names for the service to be started.
+
+The parameter name is optional. You can use Name or its alias, ServiceName,
+or you can omit the parameter name.
+
+Required?                    true
+Position?                    0
+Default value                None
+Accept pipeline input?       True (ByPropertyName, ByValue)
+Accept wildcard characters?  false
+﻿
+
+When a user sends objects through the pipeline to Start-Service, PowerShell attempts to associate the objects with the InputObject and Name parameters.
+
+﻿
+
+Cmdlets parameters accept pipeline input in one of two different ways:
+
+ByValue
+The parameter accepts values that match the expected .NET type or that can be converted to that type.
+For example, the Name parameter of Start-Service accepts pipeline input by value. It can accept string objects or objects that can be converted to strings.
+ByPropertyName
+The parameter accepts input only when the input object has a property with the same name as the parameter.
+For example, the Name parameter of Start-Service can accept objects that have a Name property. To list the properties of an object, pipe it to Get-Member.
+﻿
+
+Some parameters accept objects by both value or property name, making it easier to take input from the pipeline.
+
+Scripting in PowerShell
+Like batch files, PowerShell has the ability to perform comparisons, execute conditional commands, and perform complex operations repeatedly and flexibly by using scripts. Scripting is especially helpful for analysts in processing large amounts of data and performing the same set of commands repeatedly or on multiple hosts.
+
+
+
+2. From the Start menu, enter powershell, and open Windows PowerShell ISE.
+
+﻿
+
+3. Enable the Script Pane in PowerShell ISE from the View menu.
+
+The script pane is a convenient integrated environment to draft, debug, and execute PowerShell scripts that have syntax highlighting.
+
+﻿
+
+4. Enter the following command into the script pane section, and save the file as c:\users\trainee\FirstScript.ps1:
+
+﻿
+
+Write-Host "Hello World!"
+﻿
+
+5. Select Run from the File menu (or select F5) to execute the FirstScript.ps1 script:
+
+﻿
+
+PS C:\users\trainee> FirstScript.ps1
+
+
+Since the default execution policy for workstations and client systems does not allow the execution of scripts, an error message showing that policy appears.
+
+﻿
+
+6. Enter the following cmdlet to change the execution policy and select YES in the Execution Policy Change dialog box.
+
+﻿
+
+PS C:\users\trainee> Set-ExecutionPolicy RemoteSigned
+
+There are a couple of things to notice. The execution policy described earlier in this lesson does not allow the script to run, and the execution policy cannot be changed as a normal user.
+
+﻿
+
+7. From the Start menu, enter powershell, right-click Windows PowerShell, select Run as Administrator, and select Yes in the dialog box.
+
+﻿
+
+8. In the Administrator: Windows PowerShell window, re-run the Set-ExecutionPolicy cmdlet. Enter Y when prompted to make changes:
+
+﻿
+
+PS C:\Windows\system32> Set-ExecutionPolicy RemoteSigned
+
+
+9. Back in the PowerShell ISE Window as the trainee user, re-run the FirstScript.ps1 script:
+
+﻿
+Notice the script was successful and the output was displayed on the screen.
+
+﻿
+
+10. Close the Administrator: Windows PowerShell window.
+
+﻿
+
+11. Open Google Chrome from the desktop and leave it in the background. Execute the Get-Process cmdlet in the PowerShell ISE window:
+
+﻿
+
+PS C:\users\trainee> Get-Process
+
+
+Notice that Chrome has multiple processes running and can be referred to by ID or ProcessName.
+
+﻿
+
+12. Run the Stop-Process cmdlet to kill the Chrome processes:
+
+﻿
+
+PS C:\users\trainee> Stop-Process -ProcessName chrome
+
+Notice that the Chrome window was closed when the processes stopped.
+
+﻿
+
+13. Create a new script in the script pane called SecondScript.ps1 with the following commands and execute it:
+
+﻿
+
+$condition = $true
+if ( $condition )
+{
+    Write-Output "The condition was true"
+}
+
+
+The statement in line one assigns the Boolean value of TRUE to the variable condition. This variable is referenced using the dollar sign symbol ($). The if condition in line two performs the same type of comparison that is used in batch files with a couple of differences in the syntax. PowerShell if statements require a script block, defined by braces ({…}) for it to work correctly. Table 6.1-6 shows the comparison operators available. The syntax for these operators is below; operand1 and operand2 can be static number or text values or variables. All the comparison operators have case-sensitive and case-insensitive variations. The base operator is case-insensitive, preceding the base with an i specifies case-insensitive, and preceding the base with a c specifies case-sensitive. Only the first operator shows all the variations.
+
+﻿
+
+if (operand1 -eq operand2) 
+{
+    # do something
+}
+
+﻿
+
+NOTE: On-line IF documentation: https://docs.microsoft.com/en-us/powershell/scripting/learn/deep-dives/everything-about-if?view=powershell-7.1  
+
+﻿
+
+14. Modify the SecondScript.ps1 script to look like the below and execute it:
+
+﻿
+
+$files = Get-ChildItem -Path "C:\Program Files" -Recurse -Include *.dll,*.pdf
+$files | ForEach-Object {
+    if ($_.Name -like '*powershell*' -or $_.Name -like '*microsoft*')
+    {
+        Write-Output $_.FullName
+    }
+}
+
+﻿
+This script uses if conditions to look for any file that has the strings powershell or microsoft, has a file extension of .dll or .pdf, and is located in the C:\Program Files directory structure, recursively. Logical operations can be combined with various comparisons to create complex conditional statements. The ForEach-Object cmdlet performs an operation on each item in a collection of input objects; in this case, all the files specified in line one of the script. The $_ variable is commonly called the pipeline variable, and is used in pipe lines to refer to every value in the array. It is also used in other cmdlets that do not have pipelines, but the result is similar in that it refers to each item in the collection or array for use in iterations. The most common logical operators are -and, -or, -not, and -xor. The ! character is equivalent to -not. These operate the same as they do in batch files. A script like this is used by analysts to search recursively through file systems for specific files with specific characteristics and then perform some action to aid in analysis or remediation of suspected MCA.
+
+﻿
+
+Many of the PowerShell cmdlets have options to limit, filter, or include specific objects or items using switches like -include, -exclude, and -filter. There is also a Where-Object cmdlet that provides finer control over the specific properties to filter on and is used in pipelines to specify specific objects to perform actions on.
+
+﻿
+
+Get-Help Where-Object
+﻿
+These commands are used by system administrators and defenders when investigating anomalies during the Hunt phase, and remediate and clean hosts during Clear and Harden phases. Each incident has distinct indicators of compromise that can help analysts and defenders understand the scope of the intrusion and assist in remediation. A specific process name may be known to be malicious and could be quickly stopped with a script using these commands on many hosts.
+
+Scripting with PowerShell
+Using the provided PowerShell script, add additional sections using any three of the following cmdlets to capture additional host information. The output format of the cmdlets' information should match one of the four existing examples in the provided script. Direct all cmdlet information to SysInfo.txt.
+
+2. Modify the below script by adding three of the below cmdlets, following the same format:
+
+Get-ComputerInfo
+Get-NetIPConfiguration
+Get-Process
+Get-Service
+Get-NetFirewallSetting
+Get-LocalUser
+Get-Host
+Get-ScheduledTask
+﻿
+
+<#
+Moves to the Desktop of the user that is currently logged on
+Creates the "WinTriage" folder
+Moves into the "WinTriage" folder
+#>
+cd ~\Desktop
+New-Item .\WinTriage -ItemType Directory 
+cd .\WinTriage
+
+########################
+## System Information ##
+########################
+Write-Host "Retrieving System information" -ForegroundColor DarkGray
+
+<#
+Writes the current system time to SysInfo.txt
+#>
+Write-Output "-------" > SysInfo.txt
+Write-Output "System Time" >> SysInfo.txt
+Write-Output "-------" >> SysInfo.txt
+Get-Date >> SysInfo.txt
+
+<#
+Displays detailed list of system information
+Formats it as a table and writes it to SysInfo.txt
+#>
+Write-Output "-------" >> SysInfo.txt
+Write-Output "System Information" >> SysInfo.txt
+Write-Output "-------" >> SysInfo.txt
+systeminfo | Format-Table >> SysInfo.txt
+
+<#
+Displays the Unique Identifier number of the system
+Formats it as a table and writes it to SysInfo.txt
+#>
+Write-Output "-------" >> SysInfo.txt
+Write-Output "System Device ID" >> SysInfo.txt
+Write-Output "-------" >> SysInfo.txt
+(Get-WMIObject -Class Win32_ComputerSystemProduct).UUID | Format-Table >> SysInfo.txt
+
+<#
+Displays all currently installed programs
+Formats it as a table and writes it to SysInfo.txt
+#>
+Write-Output "-------" >> SysInfo.txt
+Write-Output "Installed Programs" >> SysInfo.txt
+Write-Output "-------" >> SysInfo.txt
+Get-WmiObject win32_product | Format-Table >> SysInfo.txt
+﻿
+
+In finishing this task, you have a PowerShell script that utilized three additional cmdlets to achieve the outlined objective. 
+
+
+
+This lesson familiarizes trainees with Bash, input and output redirection, functions, and a foundation for simple scripts.
+
+
+Estimated time to complete: 2.0 hours
+
+
+Topics
+Bash command prompt and filesVariables and parametersInput and output redirectionSupporting commands
+
+
+Enabling Learning Objectives
+6.2.1: DISCUSS Command Line Interface for various OSs6.2.2: DEMONSTRATE redirecting stdout to a file6.2.3: DEMONSTRATE redirecting stdout to a new command6.2.4: DEMONSTRATE  running multiple commands on one line6.2.5: CREATE CLI actions using Bash scripts
+
+Bash
+
+Bash is the GNU Project’s Bourne-Again Shell, a complete implementation of the IEEE POSIX and Open Group shell specification with interactive command line editing, job control on architectures that support it, csh-like features such as history substitution and brace expansion, and other features.
+
+Vi
+
+Vi is one of the most common text editors on Unix. There are many clones of Vi that add additional capability based on the original.
+
+Vim
+
+Vim is a highly configurable text editor built to enable efficient text editing. It is an improved version of the Vi editor distributed with most Unix systems.
+
+Bash Command Prompt and Files
+Review, learn, and test several topics applicable to creating, editing, and executing Bash and system commands with a focus on Defensive Cyberspace Operations (DCO). Analysts are exposed to command line interfaces applicable to Unix systems for the purposes of automating and scripting tasks. Practical aspects include hands-on experience with creating and executing Bash scripts.
+
+﻿
+This overview covers Bash and compatibility with the Bourne and Z shells. Bash files, manual document, and environment are introduced. It also introduces creating simple scripts to run multiple commands from one file/command to customize and repeat actions during analysis. Additional information introduces flow control, conditional expressions, and chaining commands together.
+
+Introduction to Bash
+Bash is an interpreter that executes commands from an interactive interface, from standard input, or from a file. Bash is also known as the GNU (GNU not Unix) Bourne-Again Shell as it is fully compatible with the previous standard Bourne shell sh. Bash provides a standard environment to execute built-in commands or other commands provided by the OS on which it is running. It is commonly installed by default on modern Unix/Linux distributions and MacOS, and is installed on other systems, such as Microsoft Windows. Not every system has a Graphical User Interface (GUI) so it is important that analysts and defenders have the ability to efficiently navigate and use text-based terminal shells. Remote access and configuration is also often done over a text-based terminal through a secure terminal session via programs like Secure Shell (SSH). The ability to link commands and run them in scripts make shells like Bash extremely useful in sifting through large amounts of data and pulling out the pieces that are important to the analyst or defender.
+
+﻿
+
+Since Bash is interpreted, the same commands run interactively from a command prompt can be saved into a file as a script to be run at a later date, or perform automated or complex operations repeatedly. This flexibility makes it useful for analysts in performing operations against a large amount of data, or the same operations on many different files, in order to assist in analyzing hosts for threats. Unix/Linux OSs typically employ a shell for users as their login environment and to interact with the system. Bash is also invoked to execute commands non-interactively, or as a subshell of Bash or another shell. When a user logs into a Linux system that has the user’s login shell set to Bash, one of the system processes starts Bash in the context of the user’s profile, which includes user system accesses and security permissions. Bash is also started as a subshell of other login shells using the bash command.
+
+﻿
+
+When Bash is started, there are several files read and commands executed to set the environment of the shell and set certain options that the system administrator and user have established. There are also files that are read/executed when the shell exits normally. This is useful to set things like the default PATH variable for login shells. Inserting commands or scripts into these files is one of the ways Malicious Cyberspace Activities (MCA) execute files in the context of another user, maintain persistence, or harvest credentials. These files are not required to be present. Bash reads and executes /etc/profile and the first file below in the user’s home directory, in order, if they exist. Bash uses the tilde, or ~, as a wildcard for the user’s home directory.
+
+
+Other common Bash files:
+
+When Bash is started as an interactive shell that is not a login shell, the file ~/.bashrc is the only file that is read, unless the -norc option is sent to the shell to not read the ~/.bashrc file. Additionally, when Bash is started non-interactively, it inherits the contents of the $BASH_ENV variable, if it exists. A more detailed explanation and additional options are found in the Bash manual page, which is available from Bash with the man bash command.
+
+﻿
+
+Z shell, or zsh, is very similar to Bash in that it is backwards compatible with the Bourne shell (sh) and has many of the same capabilities as Bash, but uses different files and additional/alternate environment variables. Z shell is commonly found on the same systems as Bash — and has a Bash compatibility mode. However, Bash is more often the default shell and is installed by default on more systems. Z shell also has a history system that is shared among multiple Z shell sessions, loadable modules or plugins for socket controls or a File Transfer Protocol (FTP) client, spelling correction, and case-insensitive command interpretation (e.g. ls executes /bin/ls). More information on the Z shell is found in the zsh manual page (man zsh). Table 6.2-3 lists the common Z shell files read in order depending on the type of shell invoked. If the variable ZROOTDIR is not set, the HOME directory variable is used instead.
+
+Bash Reference Manual: https://www.g nu.org/software/bash/manual/bash.html ﻿
+﻿
+Bash Prompt
+The Bash prompt has many configurable options. This commonly includes the username, the hostname, and where in the directory structure the shell is currently residing or Current Working Directory (CWD). There is also an indicator showing the privilege level the shell is operating in. A $ indicates a non-root (user Identifier [ID] other than 0) user and a # indicates commands are executed with root (user ID of 0) privileges. The standard prompt is set in the PS1 variable and seen with the echo $PS1 command.
+
+﻿
+
+Normal user prompt:
+
+
+Root user prompt:
+
+The items in the PS1 variable that are preceded with a backslash are decoded, or expanded, as follows:
+
+The following example shows the full current working directory and the time in 24-hour format (HH:MM:SS): 
+
+[trainee@localhost local]$ PS1="[\u@\h \w \T]\\$ "
+
+Additional options are found in the Bash manual page under the PROMPTING heading.
+
+Parameters
+Parameters are containers that store values including a name, a number, or a special character. A variable is a container that has an associated name and is declared using the format name=value. A null value is assigned to a variable with the set command and no value. Variables are referenced and their values returned by pre-pending the $ character. The command MYFIRSTVAR=”This is my first variable” assigns the string This is my first variable to the variable MYFIRSTVAR. The echo command outputs the contents of a variable to standard output (also known as standard out); echo $MYFIRSTVAR displays This is my first variable to the screen.
+
+
+Bash has several parameters that have special meanings or expansions. Some of the most common expansions include:
+
+Additional parameters are documented on the Bash manual page.
+
+﻿
+
+Bash keeps a history containing a list of commands run from an interactive shell. The number of commands saved is controlled by the HISTSIZE variable and defaults to 500 commands. The HISTCONTROL and HISTIGNORE variables are set to not save commands that are duplicates or are prefaced with the characters described in the variable. This is often set to a space so users can prevent commands that may contain a password as an option from being saved in the history. The options are ignorespace and ignoredup, or ignoreboth to set both options.
+
+To add ignorespace to the HISTCONTROL variable, enter the command: 
+
+﻿
+
+HISTCONTROL=$HISTCONTROL:ignorespace
+
+The example above shows how to add the ignorespace option to the current HISTCONTROL variable. Notice that prefacing the history command with a space exempted it from inclusion in the history list.
+
+﻿
+
+Bash history expansion is a powerful feature that allows a user to refer to a previous command without having to enter the entire command again. Some common history expansions are:
+
+Additional details are documented on the Bash manual page.
+
+﻿
+
+The following shows an example of the !! command use. The command being run is shown as the first line after the carriage return (history).
+
+This example shows how to rerun the command in the history list at number five (ps -ef | grep bash displays a process list and searches for processes that have the word bash in them. More information about ps and grep is presented in a later lesson).
+
+
+This example demonstrates rerunning the above ps command, but instead replacing the filter of bash for systemd, one of the system processes on Linux systems. The new command is shown on the first line, ps -ef | grep systemd.
+
+Re-Introduction to Vi/Vim
+Vim is an improved version of the text editing program Vi. It uses the same basic functions as Vi but allows for enhanced features like syntax highlighting, external plugins, multi-level undo/redo, screen splitting for editing multiple files, and other features documented on the Vim manual page. Vi is the de facto standard for Unix and Linux OSs as a text editor and is more readily available than other text editing programs like emacs, nano, and pico. Many modern Linux distributions symbolically link Vi to Vim or have an alias configured so that Vi actually starts Vim.
+
+Vim has two main modes: command mode (default) and insert-text mode. The table below shows some of the common commands that are used in both Vi and Vim, as well as the commands that have options only available in Vim. Notice the four movement letter keys are all adjacent on the same row on a standard keyboard. This is important if a system only has Vi and not Vim, but many users find that the letter keys for movement are easier to use than the arrow keys as they do not require the fingers to move off the normal home row used by typists. When Vi is in insert-text mode, the characters entered are included in the file or buffer. To exit insert-text mode and return to command mode, select <esc>. The command listed in Table 6.2-7 are entered in command mode.
+
+Input and Output Redirection
+This section describes the standard input, output, and error file descriptors. Learn how to redirect the output or error of a command to a file or to the input of another command using pipelines. Stringing commands together through the use of input and output redirection and pipelines is useful when enumerating hosts and analyzing large amounts of data. Manipulating data and reformatting the output is a huge timesaver and assists in identifying anomalies and artifacts left by MCAs.
+
+Standard Input, Standard Output, and Standard Error
+On Linux, and programming languages like C, devices are treated as files. This includes input and output devices like a keyboard and a screen. The OS kernel and user programs send data to or read data from these files. Programming languages also reference these files, and other files/devices, by opening a File Descriptor (FD) associated with that file, which is a handle that includes the types of actions the program performs (i.e., read only, write, security permissions, etc.). Typically for Linux-based systems, a special memory-based filesystem is mounted containing information on all the processes running on the system, including the FDs the program has opened and is mounted as /proc. There are three standard files, also called streams, that are associated with input and output for programs: /dev/stdin, /dev/stdout, and /dev/stderr. Streams have two ends, a source and a destination like a water hose or a pipe, and contain data.
+
+
+There are two additional special files that Bash handles during redirections.
+
+
+Streams are powerful as they can be redirected. Standard input is usually the stream of data that is being entered on a keyboard, but with redirection, a file could be connected and become the source of that pipe instead of a keyboard. A program reading from standard input receives the contents of that file, as if it had been entered on a keyboard. The same type of redirection is done with the output streams, so that instead of displaying on a screen, the data being output is written to a file. Anything that is displayed during the normal execution of a program is usually contained in the standard output stream. A directory listing is written to stdout. If there are errors encountered during the execution of a program, they are contained in the stderr stream. This is an important distinction as they are redirected separately. An attempt to view a directory the user does not have access to results in an error, which is written to standard error. Since stdout and stderr are normally the screen, they both appear on the screen.
+
+Output Redirection
+The greater than symbol (>) is used to redirect an output stream to another file. If that file already exists, it is overwritten and any previous contents are lost.
+
+
+In Figure 6.2-21 example, the first ls command displayed the directory listing of the /home directory to stdout, which in this case is the screen. The second ls command redirected stdout to the file dirlist.txt. If a user attempts a directory listing on a directory they do not have access to, ls generates an error and sends that output to stderr.
+
+
+The Figure 6.2-22 example demonstrates that the only output was sent to stderr. The only redirection specified was for stdout, and since there was nothing sent to stdout, the dirlist.txt file is empty.
+
+
+In the Figure 6.2-23 example, ls has data output to both stderr and stdout as there are two directory listings being done, /home and /root. The error is sent to the screen, and the normal results are redirected to the file. Since both stdout and stdin are device files, both are redirected. When users interact with a shell, error messages displaying on their screen is normal and preferred. In the case where a script is being run automatically, such as a start-up script, there is not a user watching a terminal to see if there were any errors. In order to save those errors for troubleshooting later, the script often redirects stderr to a file. The default use of > redirects stdout or FD#1. In order to redirect stderr, or FD#2, the FD# is entered prior to the > character as shown below.
+
+Since stdout is not redirected, the directory listing for /home is displayed on the screen, and the errors are redirected to the file. Redirections appear anywhere within a simple command or follow a command, and are processed in the order they appear from left to right.
+
+
+The example in Figure 6.2-25 shows both stderr (FD#2) and stdout (FD#1 implied) are redirected to different files. The ampersand character (&) is used to make a copy of a stream to send it to the same endpoint as another output stream. 
+
+﻿
+
+ls > dirlist 2>&1
+﻿
+
+This command redirects stdout to dirlist, and the second redirection sends stderr to the same place as FD#1, stdout, which has been redirected to dirlist.
+
+﻿
+
+ls 2>&1 > dirlist
+﻿
+
+This command first makes a copy of stderr, which is redirected to the same place as FD#1; only stdout is redirected to dirlist. The result is the same in this case, but what occurs matters when complex redirection is conducted.
+
+﻿
+
+Bash also uses the format &>word, which implies redirecting stderr to the same place as stdout, and is expanded semantically to:
+
+﻿
+
+ls >word 2>&1
+
+Input Redirection
+The command cat is used to concatenate files and print on the standard output. If there is no file specified or when the specified file is the hyphen character (-), it reads from standard input rather than the hard drive. A file is redirected to stdin using the redirection operator (<).
+
+This first cat command in the above example specifies a file to read, and the second cat command redirects the file errors.txt to stdin, which cat reads from stdin. A list of commands is saved in a file and used as the input to a shell or other command as a form of automation.
+
+Pipelines
+A pipeline is a sequence of one or more commands separated by one of the control operators (| or |&). Pipelines allow the output of one command to be redirected to the input of the next command, which allows complex operations to be conducted in series, with each command in the pipeline waiting for the previous command to complete before starting. Pipelines are often also called pipes. Each command in the pipeline executes in its own subshell, which is a separate process. A common use of a pipeline is to take a large amount of data, sort it, and remove duplicates. Another is to take a large amount of data and use a paging application like less to allow forward and backward movement of data that exceeds the size of the terminal.
+
+﻿
+
+ls -la /var/log | less
+﻿
+
+This command takes the output of the directory listing and pipes it to the input of the less paging command.
+
+﻿
+
+The grep command in the example below is used to search for a matching pattern in a file or the standard input. Grep can also return the inverse of a matching pattern, or every line that does not match the pattern in a file or standard input. The example below is finding the words in a dictionary file for those that match the characters cyb. The second command includes a pipeline where the output of the grep command is piped to the input of the word count command wc, which counts the number of lines using the -l option.
+
+
+In this more complex example in Figure 6.2-28, there are three commands in the first pipeline and four commands in the second pipeline. The first searches for words that have cyb in the word list, the second searches for words that do not have punk in them, and the last command does a reverse sort and only returns unique results. The second pipeline below adds in a word count.
+
+﻿chnod u+x scrfipt
+nano <script>
+write or copy script
+ctrl+x
+y
+enter
+chmod
+./script
+
+Supporting Common Commands
+The power of using a command line shell like Bash is being able to string many different commands together to do complex operations on a data set. The following commands are some of the most common commands that analysts use in automating and performing tasks on Unix and Linux systems.
+
+
+practice Redirection in Bash
+Practice using the redirection techniques in the previous tasks. The ability to control the input and output of commands is integral to scripting, automating repetitive tasks, and analyzing large amounts of data. In order to complete, all the previous tasks must be finalized.
+
+
+2. Open Terminal Emulator from the desktop, if not already open, and change to the /tmp directory:
+
+﻿
+
+trainee@cda-lin-hunt:~$ cd /tmp
+trainee@cda-lin-hunt:/tmp$ pwd
+﻿
+
+3. Execute a directory listing of the /proc/self directory, then execute the same directory listing with a redirection of stdout to the file dirlist, and view the file dirlist with less:
+
+﻿
+
+trainee@cda-lin-hunt:/tmp$ ls -l /proc/self
+trainee@cda-lin-hunt:/tmp$ ls -l /proc/self > dirlist
+trainee@cda-lin-hunt:/tmp$ less dirlist
+﻿
+
+NOTE: The /proc/self directory contains information about the currently running process. The /proc directory also contains information about other processes that a normal user does not have access to view.
+
+﻿
+
+TIP: The Q key can be pressed to quit an active less session.
+
+﻿
+
+4. Execute the file usage utility du on the /home and /root directories, redirecting any errors to the file errors.txt:
+
+﻿
+
+trainee@cda-lin-hunt:/tmp$ du /home /root 2> errors.txt
+trainee@cda-lin-hunt:/tmp$ less errors.txt
+﻿
+
+5. Execute a directory listing for all the file descriptors for all processes in the /proc/*/fd directories, saving the errors in the file error and piping the stdout results into less, and then changing to the trainee home directory:
+
+﻿
+
+trainee@cda-lin-hunt:/tmp$ ls -la /proc/*/fd 2> error | less; cd ~trainee
+trainee@cda-lin-hunt:~$ less /tmp/error
+﻿
+
+Notice that the errors from the directory listing were saved as /tmp/error because the current working directory changed only after the first less command completed.
+
+﻿
+
+6. Use the && and || operators to perform a directory listing, if the current user can cd into the /root directory or print Failed to stdout:
+
+﻿
+
+trainee@cda-lin-hunt:~$ cd /root && ls -la || echo "Failed"
+
+FIND Command
+The find command searches for files in a directory hierarchy from a specified starting point, or multiple starting points, in the directory tree. If no starting point is specified, the current directory, or . is assumed. Expressions are a type of query specification describing how find matches files and what happens to files that are matched.
+
+﻿
+
+find [starting-point] [expression]
+
+Expression is composed of a sequence of things. The full range of options and expressions are found on the find manual page. Some examples of common settings are below. 
+Tests — Return true or false based on a property of a file (the -empty test returns true only when the current file is empty)
++n — Greater than n
+-n — Less than n
+n — Equals n
+-amin n — File was last accessed n minutes ago
+-anewer file — File was last accessed more recently than file was modified
+-atime n — File was last accessed n*24 hours ago; fractional part is ignored (-atime +1: a file has to have been accessed at least two days ago)
+-cmin n — File status was last changed n minutes ago
+-cnewer file — File status was last changed more recently than file was modified
+-ctime n — File status was last changed n*24 hours ago; fractional part is ignored (see -atime for example on rounding)
+-empty — File is empty and is either a regular file or directory
+-executable — Matches files that are executable and directories that are searchable
+-false — Always returns false
+-gid n — File numeric group ID is n
+-group gname — File belongs to group gname
+-iname pattern — Like -name but the match is case-insensitive (fo* and F?? match the file names Foo, FOO, foo, fOo, etc.)
+-inum n — File has inode number n
+-iregex pattern — Like -regex but the match is case-insensitive
+-links — File has n links
+-mmin n — File data was last modified n minutes ago
+-mtime n — File data was last modified n*24 hours ago (see -atime for example on rounding)
+-name pattern — Base of file name matches shell pattern pattern (-name never includes a slash)
+-newer file — File was modified more recently than file
+-perm mode, -perm -mode, -perm /mode — Matches a file based on file permissions mode (see manual page)
+-readable — Matches files that are readable
+-regex pattern — File name matches regular expression pattern
+-size n[cwbkMG] — File uses n units of space, rounding up
+b — 512-byte blocks
+c — Bytes
+w — Two-byte words
+k — Kilobytes (units of 1024 bytes)
+M — Megabytes (units of 1048576 bytes)
+G — Gigabytes (units of 1073741824 bytes)
+-type c — File is of type c
+b — Block special
+c — Character special
+d — Directory
+p — Named pipe (FIFO)
+f — Regular file
+l — Symbolic link
+s — Socket
+-uid n — File numeric user ID is n
+-user uname — File is owned by user uname
+-writable — Matches files that are writable
+Actions — Performs something and returns true or false, based on whether they are successful (the -print action prints the name of the current file on the standard output)
+-delete — Delete files; true if removal successful
+-exec command ; — Execute command; true if zero status is returned
+-ls — Lists current file in ls format on standard output
+-ok command — Like -exec but asks the user first
+-print — Prints the full filename on the standard output, followed by a newline
+-printf format — Print format on the standard output (see manual page for format strings)
+Global options — Affects the operations of tests and actions (the -depth option makes find traverse the file system in a depth-first order
+-depth — Processes each directory’s contents before the directory itself
+-help — Prints a summary of the command-line usage of find and exits
+-maxdepth level — Descend, at most, to the lowest hierarchal level specified of directories below the starting points
+-mount — Do not descend directories on other filesystems
+Operators — Join together the other items within an expression (-o is logical OR, -a is logical AND; -a is assumed if an operator is missing)
+( expr ) — Force precedence (since parentheses are special to the shell, they need to be quoted: \( expr \)
+! expr — True if expr is false
+-not expr— Same as ! expr
+expr1 expr2 — Two expressions in a row are joined with an implied AND
+expr1 -a expr2 — Same as expr1 expr2
+expr1 -and expr2 — Same as expr1 expr2
+expr1 -o expr2 — OR, expr2 is not evaluated if expr1 is true
+expr1 -or expr2 — Same as expr1 -o expr2
+expr1, expr2 — List, both expr1 and expr2 are always evaluated
+Examples
+
+Find with no other arguments locates and prints a list of every file in and beneath the current directory
+
+trainee@cda-lin-hunt:~$ find
+﻿
+
+Find with three starting points (current directory ., /tmp, and /etc)
+
+trainee@cda-lin-hunt:~$ find . /tmp /etc
+﻿
+
+Find files that have an extension of .log
+
+﻿
+
+trainee@cda-lin-hunt:~$ find /var/log -name "*.log"
+﻿
+
+Find files starting in /var/log then pipe the filename list through grep to find filenames that have tmp in them
+
+﻿
+
+trainee@cda-lin-hunt:~$ find /var/log | grep -i tmp
+﻿
+
+Find files starting in /var/log that are regular files and are readable. Then search those files using grep for the term boot. The '{}' portion of the command indicates where the filename that find has found is placed in the command being executed. The \; portion is how find knows where the -exec command ends and is escaped with the slash.
+
+﻿
+trainee@cda-lin-hunt:~$ find /var/log -type f -readable -exec grep -i boot '{}' \;
+
+GREP and EGREP Commands
+The grep command searches the named input file for lines containing a match to the given pattern. If no files are specified, or if the file - is given, grep searches standard input. By default the matching lines are printed. Some of the common options are listed below (see manual page for full documentation). Egrep is the equivalent of grep -E. The use of extended Regular Expression (regex) allows multiple logical comparisons in the PATTERN where some simple operators are: & is logical AND; | is logical OR.
+
+grep [OPTIONS] PATTERN [FILE...]
+--help — Output a usage message and exit
+-E, --extended-regexp — Interpret the pattern as an extended regular expression
+-F, --fixed-strings — Interpret the pattern as a list of fixed strings instead of regular expressions
+-G, --basic-regexp — Interpret the pattern as a basic regular expression (default)
+-P, --perl-regexp — Interpret the pattern as a Perl regular expression
+-e PATTERN, --regexp=PATTERN — Use PATTERN as the pattern. Multiple -e can be used to specify different search patterns
+-f FILE, --file=FILE — Obtain patterns from FILE, one per line
+-i, --ignore-case — Ignore case distinction in both the PATTERN and the input files
+-v, --invert-match — Invert the sense of matching (select the non-matching lines)
+-w, --word-regexp — Only return lines containing matches that form whole words
+-x, --line-regexp — Only return matches that exactly match the whole line
+-c, --count — Suppress normal output and only print a count of matching lines for each input file
+-L, --files-without-match — Suppress normal output and only print the name of each input file which have no matches to the PATTERN
+-l, --files-with-matches — Suppress normal output and print the name of each input file which have matches to the PATTERN
+-n, --line-number — Prefix each line of output with the line number within its input file
+-A NUM, --after-context=NUM — Print NUM lines of trailing context after matching lines
+-B NUM, --before-context=NUM — Print NUM lines of leading context before matching lines
+-C NUM, --context=NUM — Print NUM lines of both input and output context
+-r, --recursive — Read all files under each directory, recursively
+Examples
+
+Find the word root in all files in the /var/log directory:
+
+trainee@cda-lin-hunt:~$ grep root /var/log/*
+﻿
+
+Find the word root recursively in all files below the /var/log directory:
+﻿
+trainee@cda-lin-hunt:~$ grep -r root /var/log/*
+﻿
+
+Run the dmesg (kernel ring buffer) output through grep and search for the word boot and show two lines before and after the matching line:
+﻿
+trainee@cda-lin-hunt:~$ dmesg | grep -C 2 boot
+﻿
+Repeat the same as the last, but just show a count of the matching lines:
+
+trainee@cda-lin-hunt:~$ dmesg | grep -c boot
+
+CAT Command
+The cat command concatenates files and prints on the standard output. Some of the common options are below (full documentation on the manual page).
+
+cat [OPTION] [FILE]...
+-n, --number — Number all output lines
+-s, --squeeze-blank — Suppresses repeated empty output lines
+Examples
+
+Output file1's contents, standard input, and file2’s contents:
+
+trainee@cda-lin-hunt:~$ cat file1 - file2
+﻿
+
+NOTE: The CTRL+D keyboard shortcut can be used to signal the end of transmission for standard input.
+
+CUT Command
+The cut command removes sections from each line of a file. When no FILE or when FILE is -, read from standard input. Some of the common options are shown below (full documentation on the manual page).
+
+cut OPTION... [FILE]...
+-b, --bytes=LIST — Select only these bytes
+-c, --characters=LIST — Select only these characters
+-d, --delimiter=DELIM — Use DELIM instead of TAB for field delimiter
+-f, --fields=LIST — Select only these fields; also print any line that contains no delimiter character, unless -s option is specified
+-s, --only-delimited — Only print lines that contain delimiters
+--output-delimiter=STRING — Use STRING as the output delimiter; the default is to use the input delimiter
+-z, --zero-terminated — Line delimiter is NULL, not newline
+Examples
+
+The /etc/passwd file is a good example of using cut to extract specific data from a file. The extract of the passwd file below has fields separated by a colon. As a reminder, /etc/passwd has a format of:
+
+username:password:user ID:group ID:user name or comment:home directory: command interpreter or shell
+
+The cut command extracts specific fields, such as the username and the user’s shell with the following command:
+
+trainee@cda-lin-hunt:~$ cut -d ":" -f1,7 /etc/passwd
+﻿
+The delimiter is specified as the colon (:), and the fields to return are the first and the seventh field.
+
+The delimiter is anything to separate the data that needs to be cut out. If the delimiter is changed to a slash (/), the output becomes:
+
+trainee@cda-lin-hunt:~$ cut -d"/" -f1,7 /etc/passwd
+﻿
+This example does not have seven different fields separated by slashes so only the first field is returned.
+
+The fields are specified as an inclusive list that are adjacent or not adjacent. This example cuts out the first through third fields and the sixth field through the end:
+
+trainee@cda-lin-hunt:~$ cut -d":" -f1-3,6- /etc/passwd
+
+TR Command
+The tr command translates or delete characters from standard input; writing to standard output. Some common options are listed below (full documentation on the manual page).
+
+tr [OPTION]... SET1 [SET2]
+-d, --delete — Delete characters in SET1, do not translate
+-s, --squeeze-repeats — Replace each sequence of a repeated character in the last specified SET with a single occurrence of that character (squeeze a bunch of spaces into a single space)
+[:alnum:] — All letters and digits
+[:alpha:] — All letters
+[:blank:] — All horizontal whitespace
+[:digit:] — All digits
+[:lower:] — All lower case letters
+[:print:] — All printable characters including spaces
+[:punct:] — All punctuation characters
+[:space:] — All horizontal and vertical whitespace
+[:upper:] — All upper case letters
+﻿
+Examples
+
+The tr command translates all lower case letters to upper case letters:
+
+trainee@cda-lin-hunt:~$ cat /etc/hosts | tr [:lower:] [:upper:]
+﻿
+Repeated spaces or tabs are squeezed into a single occurrence with the -s option:
+
+trainee@cda-lin-hunt:~$ cat /etc/services | tr -s [:blank:]
+
+Repeated spaces or tabs are deleted with the -d option:
+
+trainee@cda-lin-hunt:~$ cat /etc/services | tr -d [:blank:]
+
+SORT Command
+The sort command sorts lines of text files to standard output, or from standard input if no files are specified. Some of the common options are below (full documentation is on the manual page).
+
+sort [OPTION]...[FILE]...
+-b, --ignore-leading-blanks — Ignore leading blanks
+-d, --dictionary-order — Consider only blanks and alphanumeric characters
+-f, --ignore-case — Fold lower case to upper case characters
+-g, --general-numeric-sort — Compare according to general numerical value
+-i, --ignore-nonprinting — Consider only printable characters
+-r, --reverse — Reverse the result of comparisons
+-o, --output=FILE — Write result to FILE instead of standard output
+-u, --unique — Output only the first of an equal run
+﻿
+
+The example below sorts the first 10 usernames in the /etc/passwd file:
+
+trainee@cda-lin-hunt:~$ cut -d":" -f1 /etc/passwd | head -10 | sort
+﻿
+The example below does the same sort but in reverse order:
+
+trainee@cda-lin-hunt:~$ cut -d":" -f1 /etc/passwd | head -10 | sort -r
+
+DIFF Command
+The diff command compares files line by line to identify differences. Some common options are listed below (full documentation is on the manual page).
+
+diff [OPTION]... FILES
+-q, --brief — Report only when files differ
+-c, -C NUM, --context[=NUM] — Output NUM (default 3) lines of copied context
+-u, -U NUM, --unified[=NUM] — Output NUM (default 3) lines of unified context
+-y, --side-by-side — Output in two columns
+--suppress-common-lines — Do not output common lines
+-r, --recursive — Recursively compare any subdirectories found
+-i, --ignore-case — Ignore case differences in file contents
+-E, --ignore-tab-expansion — Ignore changes due to tab expansion
+-Z, --ignore-trailing-space — Ignore white space at line end
+-b, --ignore-space-change — Ignore changes in the amount of white space
+-w, --ignore-all-space — Ignore all white space
+-B, --ignore-blank-lines — Ignore changes whose lines are all blank
+﻿
+
+Examples
+The standard use of diff shows the line and characters that are different between two files. This example shows differences in the file size of dirlist2.txt and new files dirlist1.txt and newfile:
+
+trainee@cda-lin-hunt:~$ diff dirlist1.txt dirlist2.txt
+﻿
+When diff finds files that are different, the exit code is non-zero, which is useful as it is used in scripting to trigger some action on if the files are the same or if they are different.
+
+trainee@cda-lin-hunt:~$ diff -q dirlist1.txt dirlist2.txt
+trainee@cda-lin-hunt:~$ echo $? 
+
+SLEEP Command
+The sleep command delays for a specified amount of time. This is useful if there is a task happening in the background or a script needs to wait a specified amount of time before doing another task.
+
+sleep NUMBER[SUFFIX] — Pause for NUMBER of seconds, SUFFIX may be s for seconds (default), m for minutes, h for hours, or d for days
+Example
+Sleep for five seconds:
+trainee@cda-lin-hunt:~$ sleep 5
+
+WATCH Command
+The watch command runs a command repeatedly, displaying its output and errors, which allows you to watch the programs output change over time. This is commonly used when monitoring something (e.g., a network connection status watch netstat -natp, a directory for new files watch ls -l /tmp, or disk usage of a directory (every 10 minutes) watch -n 600 du -hs /tmp). Watch continues until interrupted with CTRL+C.
+
+watch [options] command
+-d, --differences — Highlight the differences between successive updates
+-n, --interval seconds — Specify update interval in seconds
+
+Example
+trainee@cda-lin-hunt:~$ watch netstat -natp
+
+The kill command sends a signal to a process or processes. The default signal for kill is SIGTERM.
+kill [options] <pid> [...]-l, --list [signal] — List signal names-s, --signal <signal> — Specify the signal to be sent-9, -SIGKILL, -KILL — Alternate ways to send signal SIGKILL
+Some of the common signals for Linux systems are in the table below; additional details are found on the manual page for signal(7).
+To kill a second Bash process (ID 8917, in this example) with the default signal:
+trainee@cda-lin-hunt:~$ kill 8917
+
+LSOF Command
+The lsof command, or LiSt Open Files, lists standard output file information about files opened by processes. An open file may be a regular file, a directory, a block special file, a character special file, a library, a stream, or a network file (internet socket, Network File System (NFS) file, or Unix domain socket). The default output for lsof is in a list parsed by other programs and customized through the -F option. Privileged execution is required to list open files for processes that a user cannot normally access. Identifying the open files associated with a process reveals unexpected behavior or attempts by a malicious actor to hide their actions. Some of the common options are listed below (full documentation is on the manual page).
+
+lsof [OPTIONS] [--] [names]
++d directory — Causes lsof to search for all open instances of directory directory
++D directory — Causes lsof to search for all open instances of directory directory and all the files and directories it contains to its complete depth
++E — Specifies that pipe and Unix socket files are displayed with endpoint information
+-F f — Specifies a character list, f, that selects the fields to be output for process by another program (see manual page for details)
+-i [i] — Selects the listing of files whose internet address matches the address specified in i
+-l — Inhibits the conversion of user ID numbers to login names
++M — Enables the reporting of port mapper registrations for local TCP, UDP, and UDPLITE ports, where port mapping is supported
+-n — Inhibits the conversion of network numbers to host names for network files
+-p pids — Excludes or selects the listing of files for the processes whose Process ID (PID) numbers are in the comma-separated set pids (e.g., 123 or 123,^456; PID numbers that begin with the ^ negation character are excluded)
++|-r time — Puts lsof in repeat mode; repeats endlessly if - or once with + at interval time (default seconds)
+-R — Displays the Parent Process ID number (PPID)
+-u uids — Selects listing of files for the user whose login names or user ID numbers are in the comma separated list uids
+-U — Selects the listing of Unix domain socket files
+﻿
+
+Examples
+To display the open files associated with a specific process (in this case, Bash PID 8854):﻿
+
+trainee@cda-lin-hunt:~$ lsof -p 8854
+
+To display the open files associated with a directory:
+
+trainee@cda-lin-hunt:~$ lsof +d /tmp
+
+To display all accessible open files without converting network numbers to names and including the PPID (excerpt screenshot below):
+
+trainee@cda-lin-hunt:~$ lsof -n -P
+﻿
+To find all running processes for a specific port (requires elevated privileges):﻿
+
+trainee@cda-lin-hunt:~$ sudo lsof -i TCP:80
+
+To find all running processes with internet open files and not converting IP addresses to host names:
+
+trainee@cda-lin-hunt:~$ sudo lsof -i -n
+
+TIMEOUT Command
+The timeout command runs a command with a time limit and kills it if still running after a set duration. If the command times out, and --preserver-status is not set, then exit with status 124. Otherwise, exit with the status of COMMAND. DURATION is a floating point number with an optional suffix: s for seconds (default), m for minutes, h for hours, or d for days.
+
+timeout [OPTION] DURATION COMMAND [ARG]
+--preserve-status — Exit with the same status as COMMAND, even when the command times out
+--foreground — Run the command in the foreground, allowing COMMAND to read from the terminal (previously known as Teletype (TTY)) and get TTY signals
+-k, --kill-after — Send a KILL signal if COMMAND is still running this long after the initial signal was sent
+-s, --signal=SIGNAL — Specify the signal to be sent on timeout
+﻿
+Example
+This example uses timeout to stop the lsof command after 0.1 seconds (and send the standard output to /dev/null (a special file that is like a black hole and does not save anything)):
+
+trainee@cda-lin-hunt:~$ timeout 0.1 lsof > /dev/null; echo $?
+
+Notice the exit code (from echo $?) is 124 indicating that timeout killed the command before it could complete.
+
+SED Command
+The sed stream editor performs basic text transformations on an input stream (a file or input from a pipeline). The sed editor works by making a single pass of the input stream. It has a wide-range of pattern-matching and transformation capabilities and performs some very complex operations. It also has some simple transformations that are easy to use and can be applied quickly in a pipeline from a command-line or from a Bash script. The most common sed command is a regular expression in the format s/regexp/replacement/. Additional details and documentation about sed are found on the manual page and the Textinfo manual for sed using the info sed command. 
+
+﻿
+
+Examples
+A simple sed command to replace the word host with lost in the file /etc/services:
+
+trainee@cda-lin-hunt:~$ sed 's/host/lost/' /etc/hosts
+﻿
+Notice only the first occurrence of host is replaced in each line.
+
+Modify this command to replace the second occurrence of host: 
+
+trainee@cda-lin-hunt:~$ sed 's/host/lost/2' /etc/hosts
+
+Notice the only lines that had two or more occurrences of host had the second host replaced.
+
+To replace all occurrences of host in a matching line, the modifier g is used in the command instead of an occurrence number:
+
+trainee@cda-lin-hunt:~$ sed 's/host/lost/g' /etc/hosts
+﻿
+To perform replacements on only the first through third lines, the line numbers are entered prior to the regex:
+
+trainee@cda-lin-hunt:~$ sed '1,3 s/host/lost/g' /etc/hosts
+﻿
+Notice line four did not have any replacements.
+
+To perform replacements on the third through the last line, $ is used as thed second line number:
+
+trainee@cda-lin-hunt:~$ sed '3,$ s/host/logs/g' /etc/hosts
+﻿
+To perform a deletion of a line that matches a pattern, there is no replacement, instead a d is added after the last slash:
+
+trainee@cda-lin-hunt:~$ sed '/#/d' /etc/hosts
+﻿
+This example deletes all lines that have a # in them (lines that start with # in /etc/hosts are comments).
+
+AWK and GAWK Commands
+The awk and gawk commands are used for pattern scanning and processing of files and standard input. awk is similar to sed in that it performs operations as part of a script that is a separate file or input on the command line. The full documentation for awk is found on the manual page and the Textinfo manual info awk.
+
+﻿
+
+Examples
+This example does not have a pattern to match, so it matches all lines, and the {print} command prints all lines of the file (snippet shown):
+trainee@cda-lin-hunt:~$ awk '{print}' /etc/passwd
+awk uses a similar pattern matching regular expression as sed. To find all and print all lines in the /etc/passwd file that have Bash specified:
+
+trainee@cda-lin-hunt:~$ awk '/bash/ {print}' /etc/passwd
+﻿
+awk also splits each line into fields (similar to cut) delimited by a character — the default is a white space character — and are referenced by the $1, $2, $3..$n variables. In order to specify the Field Separator (FS), awk looks for a block that specifies the FS (e.g., 'BEGIN { FS=”:” }). This specifies the FS to use at the start of the file. In order to print only the first and seventh fields in the /etc/passwd file:
+
+trainee@cda-lin-hunt:~$ awk 'BEGIN { FS=":" }; {print $1,$7}' /etc/passwd
+﻿
+This example prints the first, fourth, and seventh fields from the /etc/passwd file that match the pattern Bash. 
+
+trainee@cda-lin-hunt:~$ awk 'BEGIN { FS=":" }; /bash/ {print $1,$4,$7}' /etc/passwd
+
+This example shows the same awk script, but reads the input from standard input instead of a file:
+
+trainee@cda-lin-hunt:~$ cat /etc/passwd | awk 'BEGIN { FS=":" }; /bash/ {print $1,$4,$7}'
+
+awk has a large quantity of built-in variables, a few common ones are listed below:
+
+$NF — Last field
+$NR — Line number
+$0 — All fields in the line
+﻿
+To display lines three through six from the /etc/passwd file, and display the first and last field with line numbers:
+
+trainee@cda-lin-hunt:~$ awk '{ FS=":" }; NR==3, NR==6 {print NR,$1,$NF}' /etc/passwd
+
+Parsing Shell Accounts
+A common task in discovery and hunting is identifying which users have the ability to log in to a specific Unix host. In this challenge, identify those users from the /etc/passwd file and output specific data that may help in further investigations.
+
+Using the cda-lin-hunt VM, start Bash. Use the commands introduced in this section to parse the /etc/passwd file for all accounts that are associated with users that have a login shell that is not /bin/false or /usr/sbin/nologin. The output should include the username, the home directory, and the shell.
+
+﻿
+
+
+d
