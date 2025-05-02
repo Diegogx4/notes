@@ -1644,9 +1644,9 @@ A common task in discovery and hunting is identifying which users have the abili
 
 Using the cda-lin-hunt VM, start Bash. Use the commands introduced in this section to parse the /etc/passwd file for all accounts that are associated with users that have a login shell that is not /bin/false or /usr/sbin/nologin. The output should include the username, the home directory, and the shell.
 
+-d -f
 
-
-
+grep -v -E 'bin/bin' /etc/passwd | cut -d ":" -f1,6-
 
 
 
