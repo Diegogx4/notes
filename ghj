@@ -1,0 +1,592 @@
+PowerShell is a scripting language and associated command shell designed to automate tasks in the Windows Operating System (OS). Automated tasks are performed by executing cmdlets, which work by accessing or modifying data in different data stores. These cmdlets are used by scripts, and can be encapsulated in classes and turned into objects.
+
+In this lesson, the fundamentals of PowerShell objects, methods, and properties are covered. These fundamentals ensure familiarity with all aspects of PowerShell, as well as utilizing these in the field. Understanding the topics covered is key to examining and expanding upon existing scripts, as well as the creation of new scripts to automate or simplify tasks.
+
+Overview of PowerShell Objects, Methods, and Properties
+PowerShell scripting is greatly enhanced by producing your own classes, properties, and methods. Classes can be instantiated to produce objects - though, these are not the only types of objects in PowerShell.
+
+Objects in PowerShell include:
+
+Classes
+PSCustomObject
+Hashtables
+Classes are objects defined by code with concrete properties and methods. The latter two types of objects are dynamic and may contain any property — they are only distinguished by convention. The type system used by PSCustomObject and Hashtables is referred to as Duck Typing — if it behaves, looks, and sounds like an object of the specified type, then it is that type.
+
+In the following task, the New-Object cmdlet is used with one parameter:
+
+TypeName: Type of object to be created; a PowerShell type or a .NET type
+PowerShell Classes
+﻿
+PowerShell version 5.0 and above include native syntax for classes, which contains methods (also sometimes treated as a synonym for functions) and properties. In addition, PowerShell classes optionally contain constructors — code blocks that execute when a class is instantiated — and similar features that might be found in other .NET languages. Prior to PowerShell 5.0, user-defined objects were created using PSCustomObject or HashTables.
+
+PowerShell’s class syntax begins with a simple class declaration:
+
+class ClassName {
+
+}
+
+A class declaration begins with the class keyword, followed by the class name and a code block, indicated by braces.
+
+Methods are defined within a class — a simple method declaration follows:
+
+[String]SayHello([String]$name){
+    Return ("Hello " + $name + "!")
+}
+
+This declaration begins with an optional return type declaration ([String]), followed by the required method name (SayHello), then the parameter ([String]$name) inside opening and closing parentheses (()). Methods that return a value use a Return keyword statement, or the value is implicitly returned by not capturing the output of any function or command.
+
+To find out more about PowerShell classes, use the Get-Help command:
+
+PS C:\Users\trainee> Get-Help about_Classes
+
+This displays a wealth of information about PowerShell classes — including more information than what is covered in this lesson.
+
+Creating and Manipulating Objects From Existing Classes
+Class Review
+﻿
+
+Before proceeding, review a sample basic class. This is useful to understand how to interact with and read classes in PowerShell. In other parts of this lesson, you are tasked with generating classes and functions using similar syntax.
+
+2. Open PowerShell ISE from the desktop.
+
+3. From File > Open, open Example.ps1 in the Documents\Samples directory.
+
+A breakdown of the Person class contained within the PowerShell file is included below:
+
+class Person {
+    [String]$Name = ""
+    [Int]$Age = 0
+    [String]GenerateGreeting(){
+        Return "Greetings, " + $this.Name + ". You're " + $this.Age + " years old, correct?"
+    }
+}
+﻿
+This class uses two properties and a method. In each, the type is specified by the value in brackets before the property or method (String and Int). Default values are supplied for each property by assigning the value using the equal sign (=).
+
+NOTE: The method declaration begins with the return type, if any, followed by the method name, then () and an open brace ({), contains at least one Return keyword, and ends with a close brace (}). In addition, the properties of the class are accessed using $this, similar to other languages with a this keyword. 
+
+4. In the PowerShell ISE terminal, navigate to the Documents\Samples directory:
+
+PS C:\Users\trainee> cd Documents\Samples
+﻿
+5. Import the module into the current environment with the Import-Module cmdlet:
+
+PS C:\Users\trainee\Documents\Samples> Import-Module .\Example.ps1
+
+This command imports all classes and functions within the module into the current namespace. The final parameter (.\Example.ps1) contains a path to a concrete file, or references a module within various locations that PowerShell searches for modules, such as $HOME\Documents\Powershell\Modules.﻿
+
+6. Create an instance of this class using the New-Object cmdlet:
+
+PS C:\Users\trainee\Documents\Samples> New-Object Person
+
+7. PowerShell displays the object created by the command. In order to retain the object for further use, assign it to a variable:﻿
+
+PS C:\Users\trainee\Documents\Samples> $person = New-Object Person
+﻿
+8. Display the object using the Write-Output cmdlet:
+
+PS C:\Users\trainee\Documents\Samples> Write-Output $person
+﻿
+
+The Write-Output cmdlet has several uses. In this case, it outputs the first parameter to the command line. PowerShell displays concrete objects as a table.
+
+9. Assign values to the object:
+
+PS C:\Users\trainee\Documents\Samples> $person.Name = "John Smith"
+PS C:\Users\trainee\Documents\Samples> $person.Age = 21
+﻿
+
+10. Invoke the GenerateGreeting method:
+
+PS C:\Users\trainee\Documents\Samples> $person.GenerateGreeting()
+﻿
+PowerShell displays the return value of this parameter — a string, in this case — if the output is not redirected.
+
+Creating Functions and Classes
+Create a class and associated functions to examine processes and modules loaded by those processes. After completion, list all processes running, list all modules loaded by those processes, and filter for processes containing specific modules.
+
+﻿
+
+A data class is used to map extra data to the output beyond the regular output of Get-Process.
+
+﻿
+
+Creating the Class
+﻿
+
+Create a class to hold and display the data.
+
+﻿
+
+Workflow
+
+﻿
+
+1. If needed, log in to the cda-win-hunt VM using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. Open PowerShell ISE from the desktop.
+
+﻿
+
+3. Create a new script by selecting File > New.
+
+﻿
+
+4. Create a basic class shell:
+
+﻿
+
+class ProcessDetails {
+}
+﻿
+
+5. Add properties to review:
+
+﻿
+
+class ProcessDetails {
+    [int]$ProcessID
+    [int]$ParentProcessID
+    [string]$ProcessName
+    [string]$FilePath
+    [string[]]$Modules
+}
+﻿
+
+These properties are mapped from the output of Get-Process as follows:
+
+ProcessID: ID
+ParentProcessID: none
+ProcessName: ProcessName
+FilePath: MainModule.FileName
+Modules: Modules.ModuleName
+modules is a collection — these are collapsed into the string array (string[])
+﻿
+
+NOTE: ParentProcessID is typically not populated from the output of Get-Process, however, this data is pulled from other sources.
+
+﻿
+
+6. Navigate to File > Save > Documents, and save the file as Processes.ps1.
+
+﻿
+
+7. Open a separate PowerShell terminal.
+
+﻿
+
+8. Navigate to the Documents folder:
+
+﻿
+
+PS C:\Users\trainee> cd Documents
+﻿
+
+9. Import the file with the Import-Module cmdlet:
+
+﻿
+
+PS C:\Users\trainee\Documents> Import-Module .\Processes.ps1
+﻿
+
+NOTE: If necessary, the -Force argument can be used to forcibly reload a module, e.g., Import-Module .\Processes.ps1 -Force.
+
+﻿
+
+10. Interact with this new class:
+
+﻿
+
+PS C:\Users\trainee\Documents> $procdetails = New-Object ProcessDetails
+PS C:\Users\trainee\Documents> $proc = Get-Process -name "Explorer"
+PS C:\Users\trainee\Documents> $procdetails.ProcessID = $proc.Id
+PS C:\Users\trainee\Documents> $procdetails.ProcessName = $proc.ProcessName
+PS C:\Users\trainee\Documents> $procdetails
+﻿
+
+﻿
+
+Figure 7.1-4
+
+﻿
+
+Creating a Mapping and Loading Function
+﻿
+
+Within the same Processes.ps1 file, create a function to load up processes, map the data to ProcessDetails instances, pull extra data, and output those objects.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Create a function shell by placing the following code after the class created before:
+
+﻿
+
+Function Get-ProcessesWithModules {
+}
+﻿
+
+2. Using the editor, add the Get-Process cmdlet to the Processes.ps1 script to allow the function to load the list of current processes:
+
+﻿
+
+$processes = Get-Process
+﻿
+
+3. Create a list to store each ProcessDetails object created:
+
+﻿
+
+$outputProcesses = New-Object -TypeName "System.Collections.ArrayList"
+﻿
+
+4. Use a foreach loop to enumerate each process:
+
+﻿
+
+foreach($proc in $processes)
+{
+}
+﻿
+
+5. Create a new instance of the ProcessDetails class within the loop body:
+
+﻿
+
+$currentProcess = New-Object ProcessDetails
+﻿
+
+6. Map the details from the current item onto this new object:
+
+﻿
+
+      $currentProcess.ProcessName = $proc.ProcessName
+      $currentProcess.ProcessID = $proc.Id
+      $currentProcess.FilePath = $proc.MainModule.FileName
+      $currentProcess.Modules = ($proc.Modules | ForEach {$_.ModuleName})
+﻿
+
+NOTE: Piping (|) the output of $proc.Modules to ForEach is used in this case to pull the ModuleName property. Note that $_ token represents the current item being enumerated with ForEach.
+
+﻿
+
+7. To load the parent Process Identifier (PID), use Windows Management Instrumentation (WMI) to grab the process details from the Common Information Model (CIM) server in Windows. This is one of several other methods of pulling process data in PowerShell:
+
+﻿
+
+$currentProcess.ParentProcessID = (Get-CimInstance Win32_Process | Where ProcessID -eq $proc.Id).ParentProcessId
+﻿
+
+NOTE: Get-CimInstance is used to pull CIM objects via WMI. In this case, the class specified is Win32_Process, which returns all processes. This data is filtered by piping the output to the Where cmdlet, and performing the -eq operation to find the correct process.
+
+﻿
+
+NOTE: Parentheses around the statement are used to treat the output as an object from which a property value can be grabbed — avoiding the use of a temporary variable.
+
+﻿
+
+8. Add $currentProcess to the list to be returned:
+
+﻿
+
+$outputProcesses.Add($currentProcess) | Out-Null
+﻿
+
+.Add() returns a value that is undesirable in this case, due to uncaptured output being returned by the function, so the output is directed to Out-Null.
+
+﻿
+
+9. Return the list outside the loop, but within the function:
+
+﻿
+
+return $outputProcesses
+﻿
+
+For clarity, this should be after the foreach loop, but before the end of the function declaration:
+
+﻿
+
+Function Get-ProcessesWithModules {
+    # rest of the body
+    foreach($proc in $processes)
+    {
+        #contents of loop
+    }
+    return $outputProcesses # goes here
+}
+﻿
+
+10. Ensure that this function is accessible when loaded by adding the following statement after the function:
+
+﻿
+
+Export-ModuleMember -Function 'Get-ProcessesWithModules'
+﻿
+
+11. Save the file to Documents > Processes.psm1. 
+
+﻿
+
+NOTE: This is a separate path from before; it is important that the file extension changes to .psm1 for exported functions to work.
+
+12. Test the module from the previous PowerShell terminal:
+
+﻿
+
+PS C:\Users\trainee\Documents> Import-Module .\Processes.psm1 -Force
+PS C:\Users\trainee\Documents> Get-ProcessesWithModules | Where ProcessName -eq "Explorer"
+PS C:\Users\trainee\Documents> Get-ProcessesWithModules | Where Modules -contains "MSCOREE.DLL"
+
+13. View the loaded modules for a specified process:
+
+﻿
+
+PS C:\Users\trainee\Documents> (Get-ProcessesWithModules | Where ProcessName -eq "Explorer").Modules | Sort
+﻿
+
+﻿
+
+Figure 7.1-7
+
+﻿
+
+NOTE: (Get-ProcessesWithModules | Where ProcessName -eq "Explorer").Modules | Sort treats the output of Get-ProcessesWithModules | Where ProcessName -eq "Explorer" as an object, and queries the Modules property of this object. Piping the output to the Sort cmdlet sorts these alphabetically.
+
+﻿
+
+14. Find the path of all instances of XmlLite.dll (the final module listed in Figure 7.1-7) via Get-ChildItem:
+
+﻿
+
+PS C:\Users\trainee\Documents> Get-Childitem -Path C:\ -Include XmlLite.dll -File -Recurse -ErrorAction SilentlyContinue
+﻿
+15. Validate which version is being loaded by using Get-Process:
+
+PS C:\Users\trainee\Documents> (Get-Process | Where ProcessName -eq "Explorer").Modules | Where Modulename -eq 'XmlLite.dll'
+﻿
+This is only possible because Explorer is a 64-bit process. More information about this is provided later in this lesson.
+
+Troubleshooting
+﻿
+If an error is encountered above, troubleshooting is necessary. The output of either attempting to run Import-Module or running the Get-ProcessesWithModules cmdlet may indicate the source of the error. 
+
+For example, if the following line:
+
+$processes = Get-Process
+﻿
+were mistyped as:
+
+$processes = Get-Processs
+﻿
+then the output error message might look like:
+
+Note the portion Processes.psm:10 char:15 (highlighted in Figure 7.1-10), which indicates where the error was detected by the script interpreter. This corresponds to line number 10 in the source file:
+
+Note that the char:15 corresponds to column 15 in the status bar as well.
+
+Errors may be due to mistakes made earlier in code, or may not be indicated with any recognizable output (for example, simply no output or incorrect output). In those cases, review each line of code to determine what was intended to be there, and analyze the logic of the code to ensure that it is performing the behavior expected. 
+
+Double-check the spelling of any references, such as variable names, function names, etc. For example, the Export-ModuleMember call needs to correctly reference the function name.
+
+For more advanced troubleshooting, see Microsoft’s documentation on debugging scripts. 
+
+﻿Expanding Functionality
+When Get-Process is used to load modules, it cannot properly query 32-bit processes, if the 64-bit PowerShell instance (default on cda-win-hunt) is used due to the underlying implementation of Get-Process. This can be alleviated by loading the data from a 32-bit process version of PowerShell. For this purpose, the Start-Job cmdlet can be used with the -RunAs32 argument. Communicating data back uses the Receive-Job cmdlet — however, complex objects may not map correctly, so strings may be desirable.
+
+﻿
+
+Workflow
+
+﻿
+
+Expand the function by adjusting it as follows:
+
+﻿
+
+1. Add a script block to the beginning of the function to be passed to Start-Job (use tabs or spaces to indent code for readability):
+
+﻿
+
+    $32bitscript = {
+      $procs = Get-Process
+      ForEach($p in $procs){
+        $id = $p.Id
+        $modules = $p.Modules | ForEach {$_.ModuleName}
+        if($modules -eq $null){
+            $id.ToString()
+        }
+        else{
+            ($id.ToString() + ',' + [String]::Join(',', $modules))
+        }
+      }
+    }
+﻿
+
+This section behaves similarly to the existing code, aside from this block:
+
+﻿
+
+if($modules -eq $null){
+            $id.ToString()
+        }
+        else{
+            ($id.ToString() + ',' + [String]::Join(',', $modules))
+        }
+﻿
+
+This block determines if any modules are able to be loaded for this Process, and either returns the Identifier (ID), or the ID and a comma-separated list of loaded modules. The parentheses are used to indicate that this entire block should be treated as a single value.
+ll
+﻿
+
+2. Add code to run this block:
+
+﻿
+
+$output = Start-Job -ScriptBlock $32bitscript -RunAs32 | Receive-Job -Wait
+﻿
+
+3. Map the output for later lookup:
+
+﻿
+
+    $32bitModules = New-Object -TypeName "System.Collections.ArrayList"
+    foreach($line in $output){
+       $items = $line.Split(',')
+       $proc = New-Object ProcessDetails
+       $proc.ProcessID = [int]$items[0]
+       $proc.Modules = $items[1..($items.Length - 1)]
+       $32bitModules.Add($proc) | Out-Null
+    } 
+﻿
+
+ArrayList is commonly used in PowerShell scripts when a list of items is needed. The .Split() method splits a string into an array based on the specified character. [int]$items[0] grabs the first item in the array and converts it to an integer. $items[1..($items.Length - 1)] slices the array; grabbing the second item (at index 1) and each subsequent item until the end of the array.
+
+﻿
+
+The combined sections should resemble the following code block:
+
+﻿
+
+    $32bitscript = {
+      $procs = Get-Process
+      ForEach($p in $procs){
+        $id = $p.Id
+        $modules = $p.Modules | ForEach {$_.ModuleName}
+        if($modules -eq $null){
+            $id.ToString()
+        }
+        else{
+            ($id.ToString() + ',' + [String]::Join(',', $modules))
+        }
+      }
+    }
+    $output = Start-Job -ScriptBlock $32bitscript -RunAs32 | Receive-Job -Wait
+    $32bitModules = New-Object -TypeName "System.Collections.ArrayList"
+    foreach($line in $output){
+       $items = $line.Split(',')
+       $proc = New-Object ProcessDetails
+       $proc.ProcessID = [int]$items[0]
+       $proc.Modules = $items[1..($items.Length - 1)]
+       $32bitModules.Add($proc) | Out-Null
+    } 
+﻿
+
+4. Adjust the mapping loop to add these modules — line 8 being added to the for loop:
+
+﻿
+
+    foreach($proc in $processes)
+    {
+      $currentProcess = New-Object ProcessDetails
+      $currentProcess.ProcessName = $proc.ProcessName
+      $currentProcess.ProcessID = $proc.Id
+      $currentProcess.FilePath = $proc.MainModule.FileName
+      $currentProcess.Modules = ($proc.Modules | ForEach {$_.ModuleName})
+      $currentProcess.Modules = $currentProcess.Modules + ($32bitmodules | where ProcessId -eq $proc.Id).Modules | Select -Unique
+      $currentProcess.ParentProcessID = (Get-CimInstance Win32_Process | Where ProcessID -eq $proc.Id).ParentProcessId
+      $outputProcesses.Add($currentProcess) | Out-Null
+    }
+﻿
+
+NOTE: Select-Unique filters out duplicates in the incoming data.
+
+﻿
+
+5. Execute a sample Dynamic Link Library (DLL) injection process by opening injection_sample on the desktop. This launches PuTTY and injects the dllinject.dll module into the process.
+
+﻿
+
+6. Save this version of the module. Interact with and test this module from the previous PowerShell terminal to find a process loading a specific module:
+
+﻿
+
+PS C:\Users\trainee\Documents> Import-Module .\Processes.psm1 -Force
+PS C:\Users\trainee\Documents> Get-ProcessesWithModules | Where Modules -Contains "dllinject.dll"
+﻿
+
+7. Add a module search parameter by first defining the parameter to be passed in at the top of the function definition:
+
+﻿
+
+function Get-ProcessesWithModules {
+    param (
+         [parameter(Mandatory=$False,Position=0)][String]$modulename = ''
+    )
+    #rest of the code block
+}
+﻿
+
+The param keyword specifies that the parameters in the parentheses are available. The parameter attribute has several items set:
+
+Mandatory: Indicates whether or not this function fails to execute if the parameter is not supplied
+Position: When used as a cmdlet, indicates the position of the argument that maps to this parameter — if the argument name is unspecified — with a 0-based index
+In addition, the type is specified as string in a similar manner to class properties.
+
+﻿
+
+8. Add a conditional to the return statement to respect the module filter, when present:
+
+﻿
+
+        if($modulename -eq ''){
+            return $outputProcesses
+        }
+        else{
+            return $outputProcesses | Where Modules -Contains $modulename
+        }
+﻿
+
+9. Save this version of the module. Interact with and test this module from the previous PowerShell terminal to find a process loading a specific module:
+
+﻿
+
+PS C:\Users\trainee\Documents> Import-Module .\Processes.psm1 -Force
+PS C:\Users\trainee\Documents> Get-ProcessesWithModules 'dllinject.dll'
+PS C:\Users\trainee\Documents> Get-ProcessesWithModules -ModuleName 'dllinject.dll'
+
+This module now accepts an optional parameter for a specific module to search for.
+
+Leveraging Get-ProcessesWithModules
+Use the process scanning module created earlier to answer questions about running processes on the cda-win-hunt VM. 
+
+Before proceeding, relaunch PowerShell as Administrator by right-clicking the desktop icon, and selecting Run as administrator. Browse to the module’s location (i.e., C:\Users\trainee\Documents), then re-import the module using Import-Module. This is necessary to access some processes that are otherwise protected.
+
+
+
+
+
+
+
+
+
+
