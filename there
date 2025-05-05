@@ -588,4 +588,26 @@ Conduct an investigation on the above hosts to determine any indicators of compr
 
 TermService = service   remote desktop
 
-rpc smb
+rpc smb port =135 then any rhp
+
+wmic /node:"199...." /user:"cda\trainee"
+/password:"psswd" process 
+/list brief 
+get /all /format:list
+get name,...
+wmic service where name="TermService" list /format:list
+
+get-ciminstance process 
+
+ts term srvice = rdtoggle
+
+
+
+
+
+
+
+
+
+
+
