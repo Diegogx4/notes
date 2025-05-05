@@ -1,0 +1,130 @@
+Compound Commands and Flow Control
+This lesson covers the Bash features that control the flow of instructions or commands, how to test for various states of variables and other objects, and use additional system binaries that are useful when automating complex tasks and analyzing large amounts of data. These techniques assist when hunting for anomalies and other indicators of Malicious Cyberspace Activity (MCA).
+
+Compound Commands
+A compound is a command executed in a subshell environment, executed in the current shell environment, executed in a group, evaluated as an arithmetic expression, evaluated as a conditional expression, or a series of commands executed within several flow control constructs. Recall from previous lessons that commands can be executed in the foreground (sequentially) and in the background (asynchronously). Multiple commands are separated by a semicolon, and any command that has the ampersand (&) associated with it is executed in the background (asynchronously) while the next command is started before waiting for the background command to finish. Table 7.3-1 describes the format for some compound command constructs. Additional explanations follow later in this lesson.
+
+Quoting
+Quoting is used to remove the special meaning of certain characters or words to the shell. This disables any special treatment those characters or words may have, and forces the shell to treat reserved words or characters as the actual character needed and not using them for things like parameter expansion. The following meta-characters must be quoted to prevent them from separating words:
+
+﻿
+
+| & ; ( ) < > ! space tab
+﻿
+
+There are three types of quoting in Bash: the escape character, single quotes, and double quotes. A non-quoted backslash ( \ ) is the escape character, and preserves the literal value of the next character. Quoting characters in single quotes (') preserves the literal value of each character within the quotes. A single quote may not occur between single quotes, even when preceded by a backslash. Quoting characters with double quotes (“) preserves the literal value of each character with the exception of $, ', \, and when history expansion is enabled, !. The backslash retains its special meaning only when followed by $, ', “, \, or <new line>. A double quote may be quoted within double quotes by preceding it with a backslash. Some examples of quoting are below:
+
+There are several escape sequences that are decoded in the format $'string', where string is replaced by one of the following sequences:
+
+The command echo $'\nTest\t\Tab' outputs a new line, the word Test, a horizontal tab, and the word Tab.
+
+Flow Control
+The ability for Bash and other scripting languages to do the same operation on multiple objects, perform loops, and branch execution path is one of the most powerful aspects of scripting. The concept of flow control and conditional execution is present in all programming languages. The syntax is usually what differs between each language or environment. Bash uses the following constructs for controlling flow for which commands are executed under specific conditions.
+
+For Loops
+The power of for loops is that they allow scripts to iterate over each item in a list. To illustrate this, the following sequence of commands creates a number of empty files in the /tmp directory that are named dummy_logX.log where X is a number in a sequence expansion:
+
+﻿
+
+trainee@cda-lin-hunt:~$ cd /tmp
+trainee@cda-lin-hunt:/tmp$ for i in {1..15}; do touch dummy_log$i.log; done
+trainee@cda-lin-hunt:/tmp$ ls *.log 
+﻿
+The touch command changes the access and modification times for a file to the current date/time or a specific date/time string with the -t option. It also creates the file with the current date/time stamp, if it does not already exist. The command for i in dummy_log{1..15}; do touch $i.log; done does exactly the same thing; the expansion is just different. The first expansion is just the numbers 1 through 15, and the second expansion is the words dummy_log1 through dummy_log15.
+
+A common use of for loops on files is to compress, copy, archive, or delete old files. The gzip utility compresses a file into a new file named originalfile.gz. So, gzip dummy_log1.log results in the new file dummy_log1.log.gz. In order to only compress the log files that are numbered 6 through 15, enter the following for loop:
+
+
+trainee@cda-lin-hunt:/tmp$ for i in dummy_log{6..15}.log; do gzip $i; done
+trainee@cda-lin-hunt:/tmp$ ls dummy*
+
+The other format for for loops is using one with three expressions, similar to for loops in the C programming language. The first expression initializes a variable (only performed once), the second performs a test (on each iteration of the loop and is the test to exit the loop), and the last updates the variable (on each iteration of the loop).
+
+trainee@cda-lin-hunt:/tmp$ for (( c=1; c<=5; c++ )); do echo "This is number $c" >> dummy_log$c.log; done
+﻿
+The <= operator returns true (zero or null), if the number in the variable c is less than or equal to 5 (the numbers 1, 2, 3, 4, and 5). When the operation c++ (which increments c, or adds one to the number in c: c=c + 1) increments c to be equal to 6, the test returns a non-zero, or false, result and the loop exits.
+
+Recall that the >> operator redirects standard output and appends it to the file specified. This example adds the string This is number x to the corresponding file.
+
+Select Statements
+select name [ in word ] ; do list ; done
+
+The select command generates a menu from the items in the word list. The example below has a list of Internet Protocol (IP) addresses that the user can select from the menu. The loop then executes the commands in do list. Since there is no test case in this example, the loop continues until the user interrupts execution with CTRL+C.
+
+trainee@cda-lin-hunt:/tmp$ select ip in 192.168.1.1 192.168.1.2 192.168.1.3; do echo "You selected: $ip"; done
+
+Case Statements
+Case statements allow for complex conditional statements and branches of execution to be tested in a way that does not require multiple if statements.
+This example uses the previous select statement to do a test for the entry of user input. The test is performed in the statement 192.168.1.1) and is equivalent to if $ip == 192.168.1.1; then. The Bash script for this example and an output example is below:
+
+If Statements
+if list1; then list2; [ elif list3; then list4; ] … [else list5; ] fi
+﻿
+Conditional statements using if are one of the most common ways to control the execution of a script and perform specific actions based on a condition. The if conditional performs a test, and then executes a list of commands. Additional tests can be performed if the previous test was non-zero, or false, using the elif construct, which can be thought of as else if. There is also a last case that is executed if all previous tests in the if block return false using the else construct. The previous case example can be rewritten using if statements:
+Notice that the conditional expressions are enclosed in [[ ]]. This is necessary to prevent Bash from trying to evaluate a string as a command and designate it as a conditional expression. Since IP addresses are not considered numbers, the (( )) construct for arithmetic expressions is not appropriate.
+This example also introduces the break statement, which is used to break out of a loop. The default case in else outputs an error and breaks out of the select loop. The break command is also used in case, select, for, while, and until loops.
+While and Until Loops
+while list1; do list2; done
+﻿
+
+until list1; do list2; done
+﻿
+
+While and until loops are useful for performing a set of tasks while (or until) a certain condition changes. They are also often used as infinite loops where the test condition never changes. This relies on a user-initiated interrupt with something like CTRL+C or with a break statement somewhere inside the loop. As the (( )) expansions are used for arithmetic expressions, this example shows how to increment a variable to perform a task five times:
+Notice that the addition is accomplished within the arithmetic (( )) and NOT the conditional [[ ]]. Until loops are the same, with the opposite test condition (until (( $i > 5 ))).
+
+﻿Additional Comparison and Evaluation Operators
+This section builds on variables and introduces additional comparison operators used in flow control and conditional testing, which can be incorporated into scripts and automated workflows.
+
+The following table summarizes the arithmetic operators used in arithmetic expansion (between (( and )) ). Bash only does arithmetic operations on integers, without checking for overflow. An attempt to divide by zero is checked and results in a shell error. The operators in Table 7.3-5 are listed by precedence.
+
+
+If a number is preceded by a zero, it is interpreted by the shell as an octal number. If a number is preceded by 0x or 0X, it is interpreted by the shell as a hexadecimal number.
+
+
+Bash also has operators that are used in conditional expressions to test for various outcomes. As has previously been discussed, the Bash operators [[ and ]] denote a conditional expression and are built into Bash. Many Unix and Linux Operating Systems (OSs) also have the [ command and the test command. These are similar to the [[ and ]] operators in that they perform conditional tests and return a true or false result, but are not the same. The built-in Bash variation is compatible with the [ and test commands, but is upgraded to set exit codes for conditions, and test if a string matches a wildcard pattern. The behavior of the various types of operators in an if condition is shown in Table 7.3-6.
+
+SSH Walkthrough
+Security analysts and incident responders are provided data regarding systems, which may or may not be current and correct. Maintaining updated network and host configuration documentation is a never-ending task that is easy for those implementing changes to view as a side task that is overlooked in favor of getting the network or host back up and running. An important aspect of security analysis and incident response is verifying the configuration of each host and network device to see if it has been changed or modified intentionally or maliciously. Attached to this lesson is a quick reference of some of the common system binaries and utilities that may assist in analysis and documentation and can be used in scripting. They are added to scripts that automate this data collection to be run on an individual host, or as part of a remote survey, in order to have a consistent document that can be run easily.
+
+SSH Command
+The ssh command is a client program used for logging into a remote machine over an encrypted network connection and executing commands. It is done as an interactive session or as part of a script. Ssh is immensely valuable to analysts to allow remote access to hosts that are physically separated and those that do not have a physical terminal associated with them. The full capabilities are beyond this lesson, but the basics for logging into a remote host and executing commands are covered here. When logging into a remote system using ssh, a username and credentials are presented and authenticated prior to commands being executed. The basic command and options for ssh in this lesson are summarized below.
+
+NOTE: The notice about the authenticity of the host is only displayed the first time a user connects to a new host, or if certain encryption certificate keys have changed since the last time that user connected.
+
+NOTE: The notice about the authenticity of the host is only displayed the first time a user connects to a new host, or if certain encryption certificate keys have changed since the last time that user connected.
+
+process list brief or get /all/format:list or get ___________ seperated by commas
+service |
+useraccount 
+sysaccount
+rdtoggle
+group
+
+invoke-webrequest - uri http:\\ or -outfile or -source or -destination or 0-ans
+
+start-bitstransfer
+
+invoke-getcommand
+-credentials
+-scriptblock
+-command
+-computername
+-
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
