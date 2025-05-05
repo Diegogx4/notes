@@ -65,42 +65,6 @@ This class uses two properties and a method. In each, the type is specified by t
 
 NOTE: The method declaration begins with the return type, if any, followed by the method name, then () and an open brace ({), contains at least one Return keyword, and ends with a close brace (}). In addition, the properties of the class are accessed using $this, similar to other languages with a this keyword. 
 
-4. In the PowerShell ISE terminal, navigate to the Documents\Samples directory:
-
-PS C:\Users\trainee> cd Documents\Samples
-﻿
-5. Import the module into the current environment with the Import-Module cmdlet:
-
-PS C:\Users\trainee\Documents\Samples> Import-Module .\Example.ps1
-
-This command imports all classes and functions within the module into the current namespace. The final parameter (.\Example.ps1) contains a path to a concrete file, or references a module within various locations that PowerShell searches for modules, such as $HOME\Documents\Powershell\Modules.﻿
-
-6. Create an instance of this class using the New-Object cmdlet:
-
-PS C:\Users\trainee\Documents\Samples> New-Object Person
-
-7. PowerShell displays the object created by the command. In order to retain the object for further use, assign it to a variable:﻿
-
-PS C:\Users\trainee\Documents\Samples> $person = New-Object Person
-﻿
-8. Display the object using the Write-Output cmdlet:
-
-PS C:\Users\trainee\Documents\Samples> Write-Output $person
-﻿
-
-The Write-Output cmdlet has several uses. In this case, it outputs the first parameter to the command line. PowerShell displays concrete objects as a table.
-
-9. Assign values to the object:
-
-PS C:\Users\trainee\Documents\Samples> $person.Name = "John Smith"
-PS C:\Users\trainee\Documents\Samples> $person.Age = 21
-﻿
-
-10. Invoke the GenerateGreeting method:
-
-PS C:\Users\trainee\Documents\Samples> $person.GenerateGreeting()
-﻿
-PowerShell displays the return value of this parameter — a string, in this case — if the output is not redirected.
 
 Creating Functions and Classes
 Create a class and associated functions to examine processes and modules loaded by those processes. After completion, list all processes running, list all modules loaded by those processes, and filter for processes containing specific modules.
@@ -118,48 +82,6 @@ Create a class to hold and display the data.
 
 ﻿
 
-Workflow
-
-﻿
-
-1. If needed, log in to the cda-win-hunt VM using the following credentials:
-
-﻿
-
-Username: trainee
-Password: Th1s is 0perational Cyber Training!
-﻿
-
-2. Open PowerShell ISE from the desktop.
-
-﻿
-
-3. Create a new script by selecting File > New.
-
-﻿
-
-4. Create a basic class shell:
-
-﻿
-
-class ProcessDetails {
-}
-﻿
-
-5. Add properties to review:
-
-﻿
-
-class ProcessDetails {
-    [int]$ProcessID
-    [int]$ParentProcessID
-    [string]$ProcessName
-    [string]$FilePath
-    [string[]]$Modules
-}
-﻿
-
-These properties are mapped from the output of Get-Process as follows:
 
 ProcessID: ID
 ParentProcessID: none
@@ -356,24 +278,6 @@ PS C:\Users\trainee\Documents> (Get-ProcessesWithModules | Where ProcessName -eq
 
 ﻿
 
-Figure 7.1-7
-
-﻿
-
-NOTE: (Get-ProcessesWithModules | Where ProcessName -eq "Explorer").Modules | Sort treats the output of Get-ProcessesWithModules | Where ProcessName -eq "Explorer" as an object, and queries the Modules property of this object. Piping the output to the Sort cmdlet sorts these alphabetically.
-
-﻿
-
-14. Find the path of all instances of XmlLite.dll (the final module listed in Figure 7.1-7) via Get-ChildItem:
-
-﻿
-
-PS C:\Users\trainee\Documents> Get-Childitem -Path C:\ -Include XmlLite.dll -File -Recurse -ErrorAction SilentlyContinue
-﻿
-15. Validate which version is being loaded by using Get-Process:
-
-PS C:\Users\trainee\Documents> (Get-Process | Where ProcessName -eq "Explorer").Modules | Where Modulename -eq 'XmlLite.dll'
-﻿
 This is only possible because Explorer is a 64-bit process. More information about this is provided later in this lesson.
 
 Troubleshooting
@@ -415,60 +319,12 @@ Expand the function by adjusting it as follows:
 
 1. Add a script block to the beginning of the function to be passed to Start-Job (use tabs or spaces to indent code for readability):
 
-﻿
-
-    $32bitscript = {
-      $procs = Get-Process
-      ForEach($p in $procs){
-        $id = $p.Id
-        $modules = $p.Modules | ForEach {$_.ModuleName}
-        if($modules -eq $null){
-            $id.ToString()
-        }
-        else{
-            ($id.ToString() + ',' + [String]::Join(',', $modules))
-        }
-      }
-    }
-﻿
-
-This section behaves similarly to the existing code, aside from this block:
-
-﻿
-
-if($modules -eq $null){
-            $id.ToString()
-        }
-        else{
-            ($id.ToString() + ',' + [String]::Join(',', $modules))
-        }
-﻿
-
 This block determines if any modules are able to be loaded for this Process, and either returns the Identifier (ID), or the ID and a comma-separated list of loaded modules. The parentheses are used to indicate that this entire block should be treated as a single value.
 ll
 ﻿
 
-2. Add code to run this block:
-
-﻿
-
 $output = Start-Job -ScriptBlock $32bitscript -RunAs32 | Receive-Job -Wait
 ﻿
-
-3. Map the output for later lookup:
-
-﻿
-
-    $32bitModules = New-Object -TypeName "System.Collections.ArrayList"
-    foreach($line in $output){
-       $items = $line.Split(',')
-       $proc = New-Object ProcessDetails
-       $proc.ProcessID = [int]$items[0]
-       $proc.Modules = $items[1..($items.Length - 1)]
-       $32bitModules.Add($proc) | Out-Null
-    } 
-﻿
-
 ArrayList is commonly used in PowerShell scripts when a list of items is needed. The .Split() method splits a string into an array based on the specified character. [int]$items[0] grabs the first item in the array and converts it to an integer. $items[1..($items.Length - 1)] slices the array; grabbing the second item (at index 1) and each subsequent item until the end of the array.
 
 ﻿
@@ -476,33 +332,6 @@ ArrayList is commonly used in PowerShell scripts when a list of items is needed.
 The combined sections should resemble the following code block:
 
 ﻿
-
-    $32bitscript = {
-      $procs = Get-Process
-      ForEach($p in $procs){
-        $id = $p.Id
-        $modules = $p.Modules | ForEach {$_.ModuleName}
-        if($modules -eq $null){
-            $id.ToString()
-        }
-        else{
-            ($id.ToString() + ',' + [String]::Join(',', $modules))
-        }
-      }
-    }
-    $output = Start-Job -ScriptBlock $32bitscript -RunAs32 | Receive-Job -Wait
-    $32bitModules = New-Object -TypeName "System.Collections.ArrayList"
-    foreach($line in $output){
-       $items = $line.Split(',')
-       $proc = New-Object ProcessDetails
-       $proc.ProcessID = [int]$items[0]
-       $proc.Modules = $items[1..($items.Length - 1)]
-       $32bitModules.Add($proc) | Out-Null
-    } 
-﻿
-
-4. Adjust the mapping loop to add these modules — line 8 being added to the for loop:
-
 ﻿
 
     foreach($proc in $processes)
@@ -580,6 +409,448 @@ Leveraging Get-ProcessesWithModules
 Use the process scanning module created earlier to answer questions about running processes on the cda-win-hunt VM. 
 
 Before proceeding, relaunch PowerShell as Administrator by right-clicking the desktop icon, and selecting Run as administrator. Browse to the module’s location (i.e., C:\Users\trainee\Documents), then re-import the module using Import-Module. This is necessary to access some processes that are otherwise protected.
+
+Get-Childitem -Path C:\ -Include XmlLite.dll -File -Recurse -ErrorAction SilentlyContinue ****
+
+get-processeswithmodules | where modules -contains sjaflk.dll
+
+use PowerShell to connect to remote computers, interact with artifacts on local and remote computers, and download or upload files. In addition to remote computer interactions, some related topics are covered, such as fingerprinting artifacts retrieved from remote machines and using .NET classes to encode binaries for text transmission.
+
+Interacting with Artifacts
+Review various useful PowerShell features to enhance daily work. Along with some interaction with artifacts, learn about using PowerShell to interact with .NET classes to convert binary data into a form transmissible via text (Base64).
+
+File Hashing
+﻿
+During the course of duties, situations occur that require the hashing of files — such as comparing artifacts against databases or compiling information for reports. In addition, intelligence briefings often include hashes of known artifacts associated with a particular malware; validating their presence is part of the analyst’s responsibilities. PowerShell hashes files or other artifacts natively via the Get-FileHash cmdlet.
+
+The Get-FileHash cmdlet uses these arguments:
+
+Algorithm: Hashing algorithm to use, such as Message Digest 5 (MD5), Secure Hashing Algorithm 1 (SHA1), or Secure Hashing Algorithm 256 (SHA256)
+Path: Path to the file to be hashed; accepts wildcards to evaluate multiple files or an array of strings
+The first unnamed parameter is inferred to be the Path argument (e.g., Get-FileHash example.txt).
+
+.NET Encoding Classes
+﻿
+Red teams and blue teams alike benefit from using various encoding methods, such as Base64 encoding, to perform their tasks. Red teams use Base64 encoding to bypass executable detection, filters, etc., or to download or upload executable binaries or other artifacts via text-only channels. Blue teams use Base64 encoding to deliver artifacts for review via text-only channels.
+
+In addition to Base64 encoding, .NET contains classes for converting between various text-encoding types, such as American Standard Code for Information Interchange (ASCII), Unicode Transformation Format – 8-bit (UTF-8), etc. While many modern text editors support converting between these text encodings, often this is handled via PowerShell.
+
+Use the [Convert]::ToBase64String and [Convert]::FromBase64String methods with one parameter for each (in these examples):
+
+[Convert]::ToBase64String(byte[]) 
+byte[]: Byte array (binary data) converted to a Base64 string
+return type: String containing the Base64 encoded data
+[Convert]::FromBase64String(string) 
+string: String converted to a byte array (binary data)
+return type: Byte[] containing the converted data
+
+The [System.IO.File]::WriteAllBytes and [System.IO.File]::ReadAllBytes methods are used with the following parameters:
+
+[System.IO.File]::WriteAllBytes(string, byte[])
+string: Path to the file to be written
+byte[]: Byte array to be written
+return type: Void (nothing returned)
+[System.IO.File]::ReadAllbytes(string)
+string: Path to the file to be written
+return type: Byte[] containing the file’s contents
+﻿
+Hashing a Single File
+
+
+Hashing a single file is accomplished using the Get-FileHash cmdlet. This cmdlet performs a file hash and returns an object containing the results, which PowerShell formats and displays to Terminal.
+
+
+Because hashes change whenever file contents change, if the file hashing algorithm is a modern and accepted cryptographic hash function, such as the SHA family of cryptographic hash algorithms.
+PS C:\Users\trainee\Desktop> Get-FileHash .\Files\d1ejyvn0.ybv
+PS C:\Users\trainee\Desktop> Get-FileHash .\Files\d1ejyvn0.ybv -Algorithm SHA1
+
+Because hashes change with the contents of a file, they are found and used in various ways. Hash values are found in intelligence reports, used in reporting, as well as to ensure intact transmission. Get-FileHash is used to obtain hashes of files to compare with intelligence reports, etc
+
+Hashing Multiple Files
+
+PowerShell enumerates files and folders (or any other enumerable object, such as the output of a command) without leaving Terminal. While this particular example is done in a simpler method using idiomatic PowerShell, use Terminal to enumerate the files directly first.
+
+1. Obtain a list of files in the directory Files using the Get-ChildItem cmdlet. Assign it to a variable:
+
+PS C:\Users\trainee\Desktop> $files = Get-ChildItem ".\Files"
+
+2. Enumerate these files using foreach. Output the filenames to Terminal using Write-Output:
+
+PS C:\Users\trainee\Desktop> foreach($file in $files) {
+Write-Output $file
+}
+Additionally, Get-FileHash accepts a file path with wildcards (*) in it:
+PS C:\Users\trainee\Desktop> Get-FileHash .\Files\*
+
+While you can foreach over items (or execute complicated logic) without even leaving Terminal, it is not always necessary, and is simpler and easier to accomplish the same thing via idiomatic PowerShell commands.
+
+Encoding Using .Net Classes
+
+PowerShell runs under the .NET runtime, and accesses .NET classes. Using these classes allows the delivery binaries or scripts using Base64 encoding — a technique sometimes used by attackers to evade detection. Base64 encoding also used for administrative or other purposes to distribute binaries or scripts using text-only communication, such as over a remote terminal.
+
+1. Explore Base64 encoding using the following commands:
+
+
+PS C:\Users\trainee\Desktop> $contents = [System.IO.File]::ReadAllBytes('C:\Users\trainee\Documents\Samples\Demo.ps1')
+PS C:\Users\trainee\Desktop> [Convert]::ToBase64String($contents)
+
+
+NOTE: [Class]::Method() syntax is used to execute static methods on .NET classes, such as the baked-in System.IO.File class. This is useful for accessing features outside of standard PowerShell cmdlets. The current directory is not maintained for the .NET runtime, therefore, it is recommended that full paths be used for .NET calls.
+
+2. Run the following commands to convert Base64 to file and execute:
+
+C:\Users\trainee\Desktop> $base64 = [Convert]::ToBase64String($contents)
+C:\Users\trainee\Desktop> $raw = [Convert]::FromBase64String($base64)
+C:\Users\trainee\Desktop> [System.IO.File]::WriteAllBytes('C:\Users\trainee\Desktop\Demo.ps1', $raw)
+C:\Users\trainee\Desktop> .\Demo.ps1
+
+This demonstrates converting to/from Base64, then writing the resulting file to disk. If done correctly, the Demo.ps1 file contains a simple script to demonstrate the file is correctly written.
+
+Utilizing PSProviders
+PowerShell Providers (PSProviders) interact with databases or other data structures in a manner very similar to a filesystem, querying and navigating the underlying data using concepts of files and folders, much like a filesystem. The FileSystem PSProvider interacts with the filesystem in PowerShell using cmdlets like Get-ChildItem. 
+
+﻿
+
+Analysts use these PSProviders to search for artifacts (such as autorun entries) to detect persistence or unusual path environment variable entries used in library preference order attacks.
+
+Use the following cmdlets in this exercise:
+
+Get-Item: Retrieves an object containing information about a particular item supplied by a PSProvider; uses the following parameter:
+Path: Location of the item; accepts wild cards, and inferred as the first unnamed parameter (e.g., Get-Item C:\Windows\System32\Hosts)
+Get-ChildItem: Lists all items in a specified or current directory; uses the following parameter:
+Path: Location of the directory to be enumerated; inferred from the first unnamed parameter (e.g., Get-ChildItem C:\Windows\System32)
+New-Item: Creates a new entry in the specified location; uses the following parameters:
+Path: Location of the item to be created (i.e., directory/folder/drive)
+Name: Name of the item to be created
+Value: Initial value of the new item
+Move-Item: Moves an item to a specified location; uses the following parameters:
+Path: Location of the file to be moved; inferred from the first unnamed parameter 
+Destination: Destination filename; inferred from the second unnamed parameter
+Set-Item: Replaces the contents of a specified item with a new value; uses the following parameters:
+Path: Path of the item to have its value changed
+Value: New item value
+Remove-Item: Deletes the specified item; uses the following parameter:
+Path: Path of the item to be removed; inferred from the first unnamed parameter 
+Rename-Item: Renames a specified item; uses the following parameters:
+Path: Path of the item to be renamed; inferred from the first unnamed parameter 
+NewName: New item name
+New-PSDrive: Maps a new PowerShell Drive (PSDrive) — used to simplify paths; uses the following parameters:
+Name: New drive name; addressable via Name:
+PSProvider: PSProvider that the PSDrive operates under
+Root: Root path that the PSDrive operates under
+Get-PSProvider: Displays all available PSProviders
+
+To get a list of PSProviders currently available in the PowerShell session, run the following command:
+
+PS C:\Users\trainee\Desktop> Get-PSProvider
+
+For each PSProvider, a set of properties is returned:
+Name: The PSProvider’s name, such as Registry or Alias.Capabilities: Defines certain capabilities for the PSProvider, such as ShouldProcess — indicating support for the -WhatIf and -Confirm parameters (used to output changes that would be made; Confirm allows a user to choose to apply these changes).Drives: The root path(s) available for this PSProvider, such as Env for Environment or Alias for Alias.
+
+
+Interacting with the Alias PSProvider
+
+
+The Alias PSProvider offers an interface to view, create, and edit PowerShell aliases. Commands referenced here interact by using shorter or alternate aliases, such as cd rather than Set-Location. By default, these aliases are only used for the current PowerShell session. To make them permanent, they are added to the PowerShell profile, or exported and imported using the Export-Alias and Import-Alias commands.
+1. List all current aliases:
+
+
+PS C:\Users\trainee\Desktop> Get-ChildItem Alias:
+
+To create a new item for a specific PSProvider, use the New-Item cmdlet. 
+
+
+2. Create a new alias for Get-ChildItem called list:
+
+
+PS C:\Users\trainee\Desktop> New-Item -Path Alias:list -Value "Get-ChildItem"
+
+3. Test the new alias by listing all aliases again:
+
+
+PS C:\Users\trainee\Desktop> List Alias:
+
+4. Change the alias name:
+
+
+PS C:\Users\trainee\Desktop> Rename-Item Alias:list enumerate
+PS C:\Users\trainee\Desktop> enumerate Alias:
+
+5. Change the value of the alias:
+
+
+PS C:\Users\trainee\Desktop> Set-Item Alias:enumerate "Get-Item"
+PS C:\Users\trainee\Desktop> Rename-Item Alias:enumerate item
+PS C:\Users\trainee\Desktop> item Alias:item
+
+6. Remove the alias:
+
+
+PS C:\Users\trainee\Desktop> Remove-Item Alias:item
+
+7. Examine an existing alias by name:
+
+
+PS C:\Users\trainee\Desktop> Get-Item Alias:gi
+PS C:\Users\trainee\Desktop> gi Alias:gi
+
+8. Find all aliases for a specific cmdlet:
+
+
+PS C:\Users\trainee\Desktop> Get-ChildItem Alias: | Where Definition -Eq "Get-Item"
+
+The Alias PSProvider is useful to discover some default shortcuts to common cmdlets, as well as for customizing the PowerShell environment per user.
+
+
+Interacting With the Environment PSProvider
+
+
+The Environment PSProvider (available via the Env: drive) views, creates, or edits environment variables (such as Path), which are used while searching for executables or assemblies to load when a full path is not specified. By default, these environment variables are specific to this session only.
+1. PSProviders interact with regular file commands. Change to the Env: drive:
+
+
+PS C:\Users\trainee\Desktop> cd Env:
+
+2. List all environment variables:
+
+
+PS Env:\> ls
+
+3. Examine the Path environment variable:
+
+
+PS Env:\> Get-Item Path
+
+4. The output format might not display the entire path value. Use the Value property instead to view the entire variable:
+
+
+PS Env:\> (Get-Item Path).Value
+
+5. Add a path to the Path environment variable:
+
+
+PS Env:\> $path = $Env:Path
+PS Env:\> $path = $path + "C:\Users\trainee\Documents\Samples;"
+PS Env:\> Set-Item Path $path
+
+Query PSProvider values via $DriveName:Path, as per this example $Env:Path. This removes the need to capture the output to query the Value property, such as (Get-Item Path).Value.
+
+
+6. Test the new Path variable:
+
+
+Env:\> PathSample.ps1
+
+The Environment PSProvider accesses Environment variables, which can be useful for viewing or modifying these variables. In this example, the Path variable was modified to demonstrate adding a new directory to Path.
+
+
+Interacting with the Registry PSProvider
+
+
+The Registry PSProvider (available via the HKEY_LOCAL_MACHINE [HKLM]: and HKEY_CURRENT_USER [HKCU]: drives) is used to interact with the registry on the system. This powerful PSProvider allows a user to interact with the registry using features available within PowerShell to filter or find items. This PSProvider is covered in future lessons, however, a basic interaction is demonstrated here.
+
+1. View Run entries using the HKCU: and HKLM: drives:
+
+
+PS Env:\> cd C:
+PS C:\Users\trainee\Desktop> Get-Item HKCU:\Software\Microsoft\Windows\CurrentVersion\Run
+PS C:\Users\trainee\Desktop> Get-Item HKLM:\Software\Microsoft\Windows\CurrentVersion\Run
+
+2. Use New-PSDrive to create a new drive mapped to a folder:
+
+
+PS C:\Users\trainee\Desktop> New-PSDrive -Name "WCurrentVersion" -PSProvider "Registry" -Root "HKLM:\Software\Microsoft\Windows\CurrentVersion"
+
+New-PSDrive mounts any path as its own drive. In this case, a new drive named WCurrentVersion is mounted, with HKLM:\Software\Microsoft\Windows\CurrentVersion as its root. This simplifies repeated access to the same root and is treated similar to a drive letter (e.g., C: or D:). This is also used for mapping remote volumes, etc.
+
+
+3. Browse the new folder:
+
+
+PS C:\Users\trainee\Desktop> cd WCurrentVersion:
+PS WCurrentVersion:\> ls
+
+4. Browse the Explorer folder:
+
+
+WCurrentVersion:\> cd Explorer
+WCurrentVersion:\Explorer\> ls
+
+
+5. View an item in this folder:
+WCurrentVersion:\Explorer\> Get-Item 'User Shell Folders'
+The Registry PSProvider gives access to the HKLM and HKCU registry nodes, which can be useful for gathering information from a system, or for deploying settings via the registry.
+
+Interacting Remotely Using PowerShell
+PowerShell connects to and runs commands on remote computers. Some commands run without further reconfiguration, however, many remote commands require Windows Remote Management (WinRM) — including those used within this lesson — to be configured on the remote computer, as well as a host trusted by the local computer.
+
+﻿
+
+Security implications exist with the usage of PowerShell Remoting, especially with potentially compromised machines or networks. Depending on the method of authorization, the identity of the remote machine may not be validated — especially if Trusted Hosts is used to bypass verification. In addition, compromised machines often intercept credentials or authentication hashes.
+
+﻿
+
+To support missions, an analyst uses these methods to gather information from remote computers or batches of computers, or to deploy software (such as sensors) to remote computers. Attackers use these methods to move laterally within a network.
+
+﻿
+
+For this module, use the following commands:
+
+Get-Credential: Stores credentials after prompting for them; used with commands that require them, such as Invoke-Command or New-PSSession
+Invoke-Command: Runs a code block or script file on the local or a specified remote machine; uses the following parameters:
+Credential: Created via Get-Credential; used to connect to the remote computer
+ComputerName: Name of the computer to run commands on; accepts multiple computer names; must be resolvable via Domain Name System (DNS) or other name lookup
+ScriptBlock: Block of code to be run
+FilePath: File containing the script to be run
+Session: Session to invoke a command on (exclusive with ComputerName)
+New-PSSession (PowerShell Session): Creates a reusable session with the remote computer(s), variables, etc. on the remote session to be saved for the duration of the session.
+Credential: Created via Get-Credential; used to connect to the remote computer
+ComputerName: Name of the computer to run commands on; accepts multiple computer names; must be resolvable via DNS or other name lookup
+Invoke-WebRequest: Useful for interacting with web servers. For this lesson, used to download files via the PowerShell terminal.
+URI (Uniform Resource Identifier): Location of the file to be downloaded, e.g. http://speedtest.tele2.net/10MB.zip
+Megabyte (MB)
+OutFile: File to be written
+Credential: Created by Get-Credential, used to authenticate with the remote server for this request
+Start-BitsTransfer: Uses Background Intelligent Transfer Service (BITS) on Windows environments to download a file
+Source: Location of the file to be downloaded, e.g. http://speedtest.tele2.net/10MB.zip
+Destination: File to be written
+Credential: Created by Get-Credential, used to authenticate with the remote server for this request
+Asynchronous: Specifies whether or not a file is downloaded interactively
+Get-BitsTransfer: Lists active download jobs for BITS
+﻿
+PS C:\Users\trainee> cd Desktop
+﻿
+
+3. Store the credentials to interact with the remote computers by executing the following command:
+
+﻿
+
+PS C:\Users\trainee\Desktop> $credentials = Get-Credential
+
+5. Execute a small script on a remote computer. In this case, get the file hash of a file with a known path:
+
+﻿
+
+C:\Users\trainee\Desktop> Invoke-Command -Credential $credentials -ComputerName 'cda-dc' -ScriptBlock {Get-FileHash 'C:\Users\Administrator\Desktop\hashme.txt'}
+
+The parameters used in this cmdlet call include:
+
+Credential: Credentials to use. In this case, the credential object created earlier.
+ComputerName: Computer(s) to execute this script against. In this case, cda-dc.
+ScriptBlock: Code to run.
+﻿
+
+Any mistakes in entering the password are now visible. If there is an authorization error, try replacing the credential object by running the following command again:
+
+﻿
+
+PS C:\Users\trainee\Desktop> $credentials = Get-Credential
+﻿
+
+6. Execute the following command to load a list of computers to interact with:
+
+﻿
+
+PS C:\Users\trainee\Desktop> [string[]] $computers = Get-Content 'Computers.txt'
+﻿
+
+7. Gather information from each of these computers by using the FilePath parameter to execute an information gathering script:
+
+﻿
+
+PS C:\Users\trainee\Desktop> foreach($computer in $computers){
+Invoke-Command -Credential $credentials -ComputerName $computer -FilePath C:\Users\trainee\Documents\Samples\GatherInfo.ps1
+}
+
+This gathers information about the remote computers. The contents of GatherInfo.ps1 are replicated below with additional comments to explain each block:
+
+﻿
+
+Get-ChildItem Env: # Gather various environmental variables
+[System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain() # Get information about the current Domain
+([System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()).GetAllTrustRelationships() # Get information about Trust Relationships in the current Domain
+[System.DirectoryServices.ActiveDirectory.Forest]::GetCurrentForest() # Get information about the Forest the current Domain is in
+([System.DirectoryServices.ActiveDirectory.Forest]::GetForest((New-Object System.DirectoryServices.ActiveDirectory.DirectoryContext('Forest', 'forest-of-interest.local')))).GetAllTrustRelationships() # Get information about Trust Relationships in the current Forest
+Get-Service | Select-Object Name, DisplayName, Status, StartType | Where Status -Eq "Running" # Query running services
+﻿
+
+The Select-Object cmdlet projects objects with a transformation — for this example, reducing the size of the object by only including specific properties. The Where cmdlet filters a collection based on a condition, such as querying a property’s value.
+
+﻿
+
+Using PSProviders allows for the gathering of information, such as autorun entries or environment variables. In the information gathering script example above, environment variables are gathered.
+
+Downloading Files From Remote Computers
+﻿
+Use Copy-Item to download or upload files — depending on the remote computer’s configuration — using a PSSession. The following steps detail how to copy a file from a remote computer.
+
+1. From the existing PowerShell terminal, open a new PSSession
+
+PS C:\Users\trainee\Desktop> $session = New-PSSession -ComputerName 'cda-dc' -Credential $credentials
+
+2. Use Copy-Item with this new session to copy the file that was hashed earlier:
+
+PS C:\Users\trainee\Desktop> Copy-Item -FromSession $session 'C:\Users\Administrator\Desktop\hashme.txt' -Destination 'C:\Users\trainee\Desktop\hashme.txt'
+﻿
+3. Interact with the newly copied file by hashing it:
+
+PS C:\Users\trainee\Desktop> Get-FileHash hashme.txt
+﻿
+4. Compare the newly hashed file to the hash of the same file on the remote machine:
+
+PS C:\Users\trainee\Desktop> $local = Get-FileHash hashme.txt
+PS C:\Users\trainee\Desktop> $remote = Invoke-Command -Credential $credentials -ComputerName 'cda-dc' -ScriptBlock {Get-FileHash 'C:\Users\Administrator\Desktop\hashme.txt'}
+PS C:\Users\trainee\Desktop> $local.Hash -eq $remote.Hash
+﻿
+This method of interacting with remote computers allows for transferring files from the command line or from scripts. This is desired over Explorer or enabling Server Message Block (SMB) shares to transfer these files.
+
+Downloading Files From Web Servers Using PowerShell﻿
+
+Downloading files from web servers is accomplished in several ways. In this task, use Invoke-WebRequest and Start-BitsTransfer to download files from a server.
+
+1. Use Invoke-WebRequest to download a file located at http://training.local/TestFile.zip:
+
+PS C:\Users\trainee\Desktop> Invoke-WebRequest -Uri "http://training.local/TestFile.zip" -OutFile TestFile.zip
+﻿
+During the download, the status is overlaid indicating the download progress.
+
+2. Use Get-FileHash to validate a successful download. The downloaded file should have a file hash of 029C54D99DA58FE76CDA1C2FB365DE4FDC0173CB9A05A10B9DF417C0804D75CF:
+
+PS C:\Users\trainee\Desktop> (Get-FileHash TestFile.zip).Hash -eq "029C54D99DA58FE76CDA1C2FB365DE4FDC0173CB9A05A10B9DF417C0804D75CF"
+﻿
+3. Use Invoke-WebRequest to download a sample payload located at http://training.local/payload.ps1 and execute it:
+
+PS C:\Users\trainee\Desktop> Invoke-WebRequest -Uri "http://training.local/payload.ps1" -OutFile payload.ps1
+PS C:\Users\trainee\Desktop> .\payload.ps1
+﻿
+For larger files, it is desirable to use BITS to download them. This service is designed for downloading files, such as Windows Updates. BITS can be interacted with using Start-BitsTransfer and Get-BitsTransfer. 
+
+To download a large file with Start-BitsTransfer, follow these steps:
+
+1. Download a file interactively using Start-BitsTransfer:
+
+PS C:\Users\trainee\Desktop> Start-BitsTransfer -Source "http://training.local/128.file" -Destination "C:\Files\128.file"
+
+Despite this file being 128MB rather than the 10MB of the previous file, it downloaded much faster.
+
+Downloads are performed in the background by using the asynchronous argument:
+
+PS C:\Users\trainee\Desktop> Start-BitsTransfer -Asynchronous -Source "http://training.local/512.file" -Destination "C:\Files\512.file"
+
+This returns an object with the job Identifier (ID).
+
+2. Check on the status of the download using the Get-BitsTransfer cmdlet:
+
+PS C:\Users\trainee\Desktop> Get-BitsTransfer
+
+When complete, the job’s status changes to Transferred.
+
+These methods for downloading files are used for system maintenance and by attackers. Useful for deploying programs, attackers also use these methods to download and deliver payloads.
+
+
+
+
+
 
 
 
