@@ -1,0 +1,591 @@
+Introduction
+﻿
+Review, learn, and test on a number of topics applicable to Windows Management Instrumentation (WMI) and how Defensive Cyberspace Operations (DCO) analysts can use WMI to perform Discovery and Counter Infiltration (D&CI) and threat mitigation during hunt, clear, and enable hardening functions. Conduct D&CI in a specified terrain as a response to ongoing simulated threats which are an integral part to full-spectrum DCO. 
+
+Topics
+WMI architecture
+WMI providers
+WMI consumers
+WMI practice and exercise
+WMI host investigation
+﻿
+Enabling Learning Objectives	
+6.3.1: IDENTIFY Windows event logs, Windows security logs, Sysmon.
+6.3.2: DEMONSTRATE interacting with Windows event logs using the Command Line Interface (CLI).	
+6.3.3: DISCUSS the impact of Windows logs on DCO.	
+6.3.4: DISCUSS the use of Windows Management Instrumentation Command Line Utility (WMIC).
+6.3.5: EMPLOY PowerShell to automate WMIC functions.
+WMIC.exe
+
+WMIC provides a CLI for WMI. WMIC is compatible with existing shells and utility commands.
+
+Scenario Description
+This lesson consists of a Windows domain, cda.corp, with the key terrain consisting of several subnets for workstations, a security subnet with a Windows hunt computer, a server subnet, and a Demilitarized Zone (DMZ). Trainees primarily operate on the cda-win-hunt VM to learn about WMI and enumerate local and remote systems. The subnet 10.0.0.0/8 is off-limits and out of scope for all training scenarios. Any malicious activity discovered during this lesson must be evaluated. Trainees should identify any recommendations to enable hardening to mitigate critical vulnerabilities for for the mission partners' systems.
+
+Threat Intelligence
+﻿
+According to threat intelligence, there are several threat actor Malicious Cyberspace Activities (MCA) that are conducting active discovery and lateral movement in networks that have trust relationships with cda.corp. In particular, WMI has been seen as an active vector for threat actors to perform discovery and execute binaries on remote systems with compromised credentials.
+
+Current Events
+
+WMI abuse during MCAs is long-standing and varies widely among many different threat actors. As WMI is used by system administrators for remote configuration and management, MCAs have used the same infrastructure and Application Programming Interfaces (API) to perform discovery, gain execution, and assist in lateral movement. MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) identified WMI abuse as execution technique T1047. In particular, the threat group identified by FireEye Threat Research as UNC2452 used WMI abuse as part of their SUNBURST backdoor to enumerate the installed drivers in late 2020 and early 2021.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+WMI Architecture﻿
+
+WMI is a valuable tool for system administrators to aid in configuring local and remote Windows systems, but it is also frequently abused by threat actors during MCAs. Threat actors continue to use WMI to aid in discovery and remote execution as a part of lateral movement. ***************** WMI relies on the WMI service for local/remote access, Server Message Block (SMB), and Remote Procedure Calls (RPC), over Transmission Control Protocol (TCP) port 135, to function. **************************** Put simply, this means WMI uses TCP port 135 to initiate communication with the remotely managed host, then switches to any random high port anywhere between TCP port 1024-65535. Some of the data threat groups can gain from using WMI include obtaining a list of all domain administrators, identifying any installed antivirus software, and listing all the running processes. 
+
+WMI abuse is mitigated by managing administrator accounts and access, and through credential reuse prevention. By default, only administrators are allowed to remotely access WMI services. WMI services are accessed using a variety of tools and APIs, most commonly using the WMIC.exe command line utility and PowerShell.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Detection
+﻿
+WMI abuse is detected by monitoring network traffic for the use of WMI connections, where not permitted by policy, and process monitoring of the WMIC utility to capture command line arguments — WMIC commands — that are specifically targeted for remote systems. PowerShell logging is configured using group policy under Administrative Templates > Windows Components > Windows PowerShell. Windows has native logging of WMI events, but it is not enabled by default and does not show the WMI classes being queried in a friendly manner. There are two main options to add WMI event logging/tracing: using the Event Viewer graphical application, and the wevtutil.exe command line program. As with all logging, there are various levels of logging and each situation requires tuning to manage the level of logging captured and forwarded for analysis. Understanding where WMI is normally being used by system administrators is important as most systems do not normally use significant WMI resources. Detecting where WMI is being used and during which normal times may assist in identifying malicious WMI activity.
+
+Other methods of detecting WMI use and abuse is found in the logging of the results of their actions. This includes the installation (Event Identifier [ID] 4697) and starting or stopping of services (Event ID 7035), and the installation or uninstallation of software (Event IDs 11707, 1033, 11724, and 1034). This is a small example of the logs that identify the actions of someone using WMI to change the configuration of a system. Other lessons include additional logs and events to use in detecting MCAs.
+
+WMI Architecture
+WMI consists of three main components: WMI providers and the associated managed objects, WMI infrastructure, and WMI consumers or management applications such as WMIC and PowerShell. The implementation of WMI provides a consistent standard framework for interacting with various objects and management data. The WMI API converts the standard interface into the various system and library calls associated with the specific providers handling the managed objects.
+
+WMI Providers — Consist of a Dynamic Linked Library (DLL) and an associated Managed Object Format (MOF) file that define the managed objects, and provide the interface for retrieving data or performing functions — or methods — on those objects. Some of the common WMI providers installed by default are in Table 6.3-1 (the Windows Simple Network Management Protocol (SNMP) WMI provider is not installed by default).
+
+WMI Infrastructure — WMI service — winmgmt — is the system component known as WMI Infrastructure. This service has two components: Common Information Model (CIM) Object Manager (COMOM) or WMI Core, and the WMI (also known as the CIM) Repository. The WMI repository is organized by hierarchically defined namespaces starting with root. Some of the namespaces created by the WMI service on system startup are the root\default and root\cimv2 namespaces. The Win32 provider classes are installed as part of these namespaces. The WMI service handles the requests from the management applications and the WMI repository and providers.
+WMI Consumers — A management application, like WMIC and PowerShell, that sends requests to the WMI service. Management applications query data, enumerate data, execute provider methods, and subscribe to events using the appropriate API. Applications only access the objects and methods that a WMI provider has defined and can handle.
+
+What WMI component do users and scripts use to interface with WMI?
+consumers
+
+WMI Consumers
+WMI Explorer is a Graphical User Interface (GUI)-based tool that makes it easy to enumerate the various namespaces, classes, and instances as well as the associated methods and properties associated with those instances. In the image below, view the namespaces in Box 1. The classes associated with the root\CIMV2 namespace are shown in Box 2. The root\CIMV2\Win32_Account class is highlighted in Box 2 and the actual accounts, or instances, are shown in Box 3. Since the CDA account is highlighted in Box 3, the properties associated with that account are shown in Box 4. The last highlighted Box, number 5, shows the specific class and path in WMI Query Language (WQL) similar to Structured Query Language (SQL).
+
+The WMIC utility is a CLI for dealing with Windows's WMI providers through the WMI Infrastructure APIs provided for management applications. The format for the WMIC command is:
+
+﻿
+
+wmic [global switches] <command>
+﻿
+
+Table 6.3-2 describes the global switches. The switches and commands are not case sensitive, but are displayed in various cases for readability.
+
+WMIC Aliases
+﻿
+
+WMIC has a large set of aliases that map to specific WMI classes associated with Windows. These are listed by entering wmic /? at a command prompt. The use of these aliases provides a shortcut interface to common WMI classes. When using aliases, the format of the WMIC command is in one of the following:
+
+﻿
+
+wmic <alias> [WMIObject]
+wmic <alias> [<path where>]
+wmic <alias> [<path where>] [<verb clause>]
+﻿
+
+Usage:
+
+﻿
+
+wmic <alias> ASSOC [<format specifier]>
+wmic <alias> CALL <method name> [<parameter list>]
+wmic <alias> CREATE <assignment list>
+wmic <alias> DELETE
+wmic <alias> GET [<property list>] [<get switches>]
+wmic <alias> LIST [<list format>] [<list switches>]
+﻿
+
+Some of the common aliases are discussed later in this lesson. Since not all provider classes have aliases in WMIC, the specific path to a class can be specified. The following two commands returns the same information, the first specifying the namespace and class, and the second using only the PATH (which has a default namespace of root\CIMV2).
+rdtoggle remote desktop protocol ***************
+﻿
+
+wmic /namespace:\\root\cimv2 path win32_account get /all /format:list
+wmic path win32_account get /all /format:list
+
+The Win32_Account class contains both system accounts and user accounts. WMIC has an alias for each type of account, so in order to retrieve the same information as in the previous commands, two aliases commands must be run:
+﻿
+wmic sysaccount get /all /format:list 
+wmic useraccount get /all /format:list
+
+Table 6.3-3 describes some of the WMIC aliases used by analysts and defenders in confirming configurations, identifying anomalies, and changing configurations to harden computer systems.
+
+Additional information about all the aliases available and their options are listed by adding a question mark option like wmic useraccount /? or even wmic /?.
+
+WMIC Where Clauses
+
+WMIC Where clauses allow filters to be applied to the WMIC command being executed. An example of filtering the services for only svchost.exe is:
+
+wmic process where ”Name like 'svchost%'” get name,processid,parentprocessid,commandline
+
+The percent symbol is used as a wildcard to filter processes where the Name property starts with svchost. The operators and wildcards that are available for Where clauses are in the table below.
+
+What WMIC Switch specifies the WMI Provider to use?
+PATH
+
+PowerShell and WMI
+PowerShell is a modern command shell that includes the best features of other popular shells. Unlike most shells that only accept and return text, PowerShell accepts and returns .NET objects. This makes it ideal for accessing WMI objects to retrieve or modify their properties and call the methods associated with that object. PowerShell is built upon the .NET framework and uses cmdlets to interact with local and remote systems. These cmdlets generally return .NET objects. Usually, .NET objects provide sufficient information, but sometimes there is a need to not only work with .NET objects but also CIM objects such as the Distributed Component Object Model (DCOM) and Common Object Model (COM) objects that were predecessors to .NET. PowerShell provides this capability through various cmdlets such as Get-WMIObject or Get-CIMInstance, making it ideal for accessing WMI objects to retrieve or modify properties and call the methods associated with that object.
+
+One example is when interacting with processes. The PowerShell Get-Process cmdlet returns the .NET process (System.Diagnostics.Process) object. Looking at the properties included in the .NET process object, notice that one of the properties it does not include is the Process Identifier (PID) of the parent process.
+
+Retrieve that information by using the COM-based Win32_Process object. Use Get-CimInstance -ClassName Win32_Process to pull information about the same processes, but this time as a COM object, which does include the parent PID.
+
+This is one instance where a WMI or COM object might be the better option over PowerShell's native .NET object. While PowerShell's built-in cmdlets and .NET objects are powerful  — and all that is normally needed — the ability to query WMI objects is sometimes required to retrieve all the necessary data. Detailed discussions about PowerShell are in other lessons. 
+
+The main PowerShell cmdlet to interact with WMI is the Get-CIMInstance cmdlet. There are many other cmdlets to interact with common objects such as processes, active directory, events, users, and services. It is important for analysts to be aware of the differences returned from the various PowerShell cmdlets. 
+
+The simplest form of interacting with WMI from PowerShell is to start a PowerShell shell from the start menu and use Get-CIMInstance from the prompt:
+
+PS C:\users\trainee> Get-CIMInstance -ClassName Win32_Process
+﻿
+All the property types and names associated with each instance returned from Get-CIMInstance are seen with the Get-Member cmdlet. The following shows all the associated properties and methods from the Win32_Process class.
+
+PS C:\users\trainee> Get-CIMInstance -ClassName Win32_Process | Get-Member
+
+Since all these properties are shown for each process, a simple way to format the results with specific properties is to pipe the instances through the FormatTable cmdlet.
+
+PS C:\users\trainee> Get-CIMInstance -ClassName Win32_Process | Format-Table -Property ProcessName, Caption, ProcessID, CommandLine
+
+There are multiple ways that PowerShell interacts with remote nodes to create a remote process. This example uses the WMI cmdlet Invoke-WMIMethod to create a non-interactive notepad process on the MEMBERSRV1 host. The WMI method run is specified in the Name property and the ArgumentList has the application to start.
+
+Invoke-WmiMethod –ComputerName MEMBERSRV1 -Class Win32_Process -Name create -ArgumentList "notepad"
+﻿
+Later, use WMIC to start a process on a remote computer.
+
+What PowerShell cmdlet retrieves WMI objects and their properties?
+Get-CIMInstance
+
+MI Practice and Exercise
+Practice using WMIC commands to interact with the WMI architecture. The commands in the tasks that follow are the foundation of using WMIC to enumerate and change configurations on hosts. The same commands you use are often abused by threat group MCAs to gain execution or persistence in a wide variety of ways. 
+
+﻿
+
+The Blue Mockingbird group (ATT&CK Group ID G0108) used WMIC to change the environmental variables in order to specify DLLs to load in order to gain execution and persistence, as reported by Red Canary in 2020.
+
+﻿
+
+The Chimera group (ATT&CK Group ID G0114) used WMIC to execute remote commands on a host to perform reconnaissance to see if that host had an active internet connection, as reported by CyCraft in 2020.
+
+﻿
+
+The MuddyWater group (ATT&CK Group ID G0069) used WMI commands from a PowerShell script to enumerate a compromised host to return host identification information including hostname, OS, domain, username, and IP address. Reported by Cisco Talos in 2019.
+
+Additional Resources
+
+Red Canary — Blue Mockingbird: ht tps://redcanary.com/blog/blue-mockingbird-cryptominer /
+CyCraft — Chimera: ht tps://cycraft.com/download/[TLP-White]20200415 C himera_V4.1.pdf
+Cisco Talos — MuddyWater: ht tps://blog.talosintelligence.com/2019/05/recent-muddywater-associated-blackwater.html ﻿
+
+Use WMIC to Execute Process-related Commands
+Defenders and analysts use WMI during discovery efforts to enumerate processes running on local and remote systems. The ability to retrieve detailed information and change the running state of processes is important in hunting and clearing MCAs from systems. Using WMIC, the following queries and commands familiarize trainees in process-related properties and methods. These can be scripted to provide automation and consistency, especially when enumerating across many hosts.
+
+2. Select the Start menu, and run Command Prompt.
+
+﻿
+
+3. Enter the command to view the wmic.exe command line options, and select any key to continue until all options have been viewed:
+
+﻿
+
+C:\users\trainee>wmic /?
+﻿
+WMIC provides extensive help descriptions and is used after a switch, alias, or command to provide additional detailed information about the properties and methods available for use.
+
+﻿
+
+4. Enter the following command to view the currently running processes:
+
+
+C:\users\trainee>wmic process list brief
+﻿
+The option brief provides the most often used properties in an output that is human-friendly. Omitting the brief option shows additional fields separated by the pipe symbol (|).
+
+5. Enter the following command to view the options for the process alias:
+
+C:\users\trainee>wmic process /?
+
+Each alias and WMIC command has a similar help display.
+
+6. Use WMIC to start the notepad.exe process:
+
+C:\users\trainee>wmic process call create notepad.exe
+
+Notice that the notepad.exe process opened in a window. The wmic command also returned the process identifier associated with the newly created process (in the example, it is 2564).
+
+
+7. Use WMIC to view the owner of the process created, substituting the PID returned from Step 6.
+
+C:\users\trainee>wmic process where processid=2564 call getowner
+
+The where statement is used to filter the specific option or parameter the WMIC alias operates on. The name clause is also associated with the process alias, but since the name of a process is not unique, it returns all instances of that name as shown in the example below where there are two instances of the notepad.exe process running. Windows uses a 0 return code to indicate success.
+
+C:\users\trainee>wmic process where name="notepad.exe"
+
+8. Use the wmic call terminate alias to terminate the notepad.exe process started in Step 6 (substitute the PID with the one returned in Step 6):
+
+C:\users\trainee>wmic process where processid=2564 call terminate
+
+Notice that the ReturnValue was 0, which means the terminate command executed successfully, and that the notepad.exe window in the background was closed. Processes can only terminate if they have the security permissions to terminate (a normal user cannot terminate system or other users' processes without increased permissions).
+
+CLASS = OBJECT
+
+Use WMIC to Enumerate Network- and Remote Desktop-related Services
+Validating and enumerating network interfaces, services, and other related objects is necessary to ensure hosts have not changed from the expected security baseline configuration. These commands are used in scripting to enumerate or change the configuration of many hosts in a consistent manner.
+
+﻿
+NOTE: The following steps continue from the previous task.
+
+9. Use WMIC to list the network interface cards configuration:
+
+﻿
+
+C:\users\trainee>wmic nicconfig list brief
+﻿
+This view shows the two Network Interface Controllers (NICs) on the VM: the in-game and un-configured range administration (169.254.0.0/16 network).
+
+﻿
+
+10. Enter the following commands to view all the possible call methods for network interfaces and call the flushdns method for the in-game NIC (199.63.64.x):
+
+﻿
+
+C:\users\trainee>wmic nicconfig call /?
+C:\users\trainee>wmic nicconfig where index=0 call flushdns
+
+The ability to use WMIC in scripting allows analysts and defenders to enumerate the current configuration of a host and make configuration changes in order to discover and mitigate MCAs in a network.
+
+﻿
+
+11. Use the wmic command to view the currently configured services and their status:
+
+﻿
+
+C:\users\trainee>wmic service list brief
+﻿
+Some of the methods executed on services include: Change, ChangeStartMode, Create, Delete, InterrogateService, PauseService, ResumeService, StartService, StopService, and UserControlService. The TermService service is associated with Windows Remote Desktop capability. 
+
+﻿
+
+12. Use the wmic command to query the status of the TermService service:
+
+﻿
+
+C:\users\trainee>wmic service where name="TermService" list /format:list
+﻿
+The use of Remote Desktop is a well-known attack and evasion technique used by many threat groups. These commands allow defenders and analysts to enumerate hosts to identify hosts that have services that do not conform to the security baseline configuration and may have been altered through misconfiguration or by MCAs.
+
+﻿
+
+13. Use the wmic command to change the status of the TermService service to disabled:
+
+﻿
+
+C:\users\trainee>wmic service where name="TermService" call ChangeStartMode "Disabled"
+﻿
+Since the trainee account does not have administrator privileges, the command failed, as indicated by the 2 for the ReturnValue.
+
+﻿
+
+14. Restart the Command Prompt to run with administrator privileges by selecting Start. Right-click Command Prompt and select Run as administrator:
+
+15. Rerun the command from Step 13:
+
+﻿
+
+C:\Windows\system32>wmic service where name="TermService" call ChangeStartMode "Disabled"
+
+This time the ReturnValue is 0, indicating success.
+
+﻿
+
+16. Verify the status of the TermService service:
+
+﻿
+
+C:\Windows\system32>wmic service where name="TermService" list /format:list
+﻿
+17. Change the TermService service back to Manual start mode:
+
+﻿
+
+C:\Windows\system32>wmic service where name="TermService" call ChangeStartMode "Manual"
+﻿
+
+18. Start the TermService service:
+
+﻿
+
+C:\Windows\system32>wmic service where name="TermService" call StartService
+
+19. Check the status of the TermService service using wmic:
+
+﻿
+
+C:\Windows\system32>wmic service where name="TermService" list /format:list
+﻿
+20. Use the Win32_Service class to view and stop the TermService service instead of the process WMIC alias:
+
+﻿
+C:\Windows\system32>wmic path Win32_Service where name="TermService" get /all /format:list
+C:\Windows\system32>wmic path Win32_Service where name="TermService" call StopService
+﻿
+Notice that this use of the Win32_Service class provided the same information as the wmic service alias, but in a different format.  It is important to note that there are many more properties and methods available using the classes documented by Microsoft in the Win32 Provider documentation. The aliases in WMIC are fully functional for the classes they operate on. WMIC (and other WMI applications) add, modify, and start/stop services that may enable other attack vectors or methods of pivoting into other hosts.
+
+Use WMIC to Enumerate User and Group Account Details on Local and Remote Hosts
+Unexplained or modified accounts may be indicators of MCA. The following commands are used in scripting to enumerate user and group accounts on the local host, as well as remote hosts (with the proper credentials) to provide a consistent output for use in documenting and analyzing for malicious activity.
+
+21. From the Command Prompt session with administrator privileges started in Step 14, use the Win32_Account class to retrieve local account and local group information:
+
+﻿
+
+C:\Windows\system32>cd C:\Users\trainee
+c:\users\trainee>wmic path Win32_Account get /all /format:list
+
+22. Use the Win32_Account class to retrieve specific account information:
+
+﻿
+
+c:\users\trainee>wmic path Win32_Account get Name,SID,SIDType,Status,Caption,Description,Domain /format:list
+
+23. Apply a filter to the Win32_Account class to only retrieve accounts that are user accounts:
+
+﻿
+These are the descriptions of the various types of accounts that Windows uses and their corresponding Security Identifier (SID) type.
+
+﻿
+
+c:\users\trainee>wmic path Win32_Account where SIDType=1 get /all /format:list
+﻿
+24. Use the Win32_StartupCommand class to retrieve commands registered to be executed when a user logs in:
+
+﻿
+
+c:\users\trainee>wmic path Win32_StartupCommand get /all /format:list
+
+Many threat groups abuse the ability to start programs during boot or user login to maintain persistence as the OS automatically starts them during the relevant conditions.
+
+﻿
+
+25. Use the rdtoggle alias to check the status of the Remote Desktop Terminal Services Connections (TS Connections) setting and change the setting to enable Remote Desktop on the local computer:
+
+﻿
+
+c:\users\trainee>wmic rdtoggle list
+c:\users\trainee>wmic rdtoggle where AllowTSConnections="0" call SetAllowTSConnections "1"
+c:\users\trainee>wmic rdtoggle list
+﻿
+26. Use wmic to query the Remote Desktop status on the cda-hr-1 VM at the IP address 172.16.5.2:
+
+﻿
+
+c:\users\trainee>wmic /node:"172.16.5.2" /user:"administrator" rdtoggle list
+Enter the password: Th1s is 0perational Cyber Training!
+﻿
+
+The /node switch specifies which remote hosts the alias operates against. This can be a single host using IP address or hostname (a list of the same), or a file containing the hosts to operate against. See the wmic /node /? command for more detail.
+
+﻿
+
+27. Enable the Remote Desktop service on the cda-hr-1 VM at the IP address 172.16.5.2:
+
+﻿
+
+c:\users\trainee>wmic /node:"172.16.5.2" /user:"administrator" rdtoggle where AllowTSConnections="0" call SetAllowTSConnections "1"
+Enter the password: Th1s is 0perational Cyber Training!
+﻿
+The ability to query WMI on remote hosts is one of the most versatile aspects of WMIC. This allows defenders and analysts to query configuration and OS states without having to go to each computer; they can collect or change configuration states from one location.
+
+﻿
+
+28. Use the os alias to retrieve OS information from the cda-dc VM at IP address 174.16.1.6:
+
+﻿
+
+c:\users\trainee>wmic /node:"174.16.1.6" /user:"cda\trainee" os list brief
+Enter the password: Th1s is 0perational Cyber Training!
+
+29. Change the command to retrieve OS information from the cda-dc VM to include the last boot up time:
+
+﻿
+
+c:\users\trainee>wmic /node:"174.16.1.6" /user:"cda\trainee" os get BuildNumber,SerialNumber,LastBootUpTime
+
+The WMIC aliases do not work in other WMI applications such as PowerShell, but the same data is returned since the aliases are just shortcuts to the relevant classes.
+
+﻿
+
+30. Open PowerShell from the Start menu.
+
+﻿
+
+31. From both PowerShell and the Command Prompt (using WMIC), execute the following command with the credentials Th1s is 0perational Cyber Training!:
+
+﻿
+
+In PowerShell:
+
+﻿
+
+PS C:\users\trainee> Get-WmiObject -Namespace "root\cimv2" -Class Win32_OperatingSystem -Impersonation 3 -Credential cda\trainee -ComputerName 174.16.1.3
+﻿
+
+NOTE: Get-WmiObject is being deprecated in favor of Get-CimInstance. Get-CimInstance and PowerShell have some built-in functionality to work with remote computers that are part of the same domain. Since cda-win-hunt is not part of the cda domain, there are some extensive configuration changes that need to be implemented to enable Windows Remote Management (WinRM) to use Hypertext Transfer Protocol Secure (HTTPS), instead of kerberos, as the transport and authentication mechanism. The older Get-WmiObject is still secure, but using RPC as its transport and authentication, which may not be as flexible in the future. If available, Get-CimInstance is preferred, but both return the same information.
+
+In Command Prompt:
+
+c:\users\trainee>wmic /node:"174.16.1.3" /user:"cda\trainee" os list brief /format:list
+﻿
+Additional Resource
+Microsoft — Configure WinRM for HTTPS:  https://docs.microsoft.com/en-US/troubleshoot/windows-client/system-management-components/configure-winrm-for-https
+
+Use WMIC to Manage Processes on Remote Hosts
+WMIC is used by system administrators — and MCAs with credentials — to manage processes on remote hosts including starting, stopping, and enumerating running processes.
+
+﻿
+
+NOTE: The following steps continue from the previous task.
+
+32. Log in to the cda-hr-1 VM using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+33. From the Start menu and Windows System menu, right-click on Command Prompt and select Run as administrator.
+
+﻿
+
+34. Enter the following command to identify any instances of notepad.exe running:
+
+﻿
+
+C:\Windows\system32>tasklist | find "notepad"
+
+
+35. Open the cda-win-hunt VM, and start a notepad.exe process on cda-hr-1:
+
+﻿
+
+C:\Windows\system32>wmic /node:"172.16.5.2" /user:"cda\trainee" /password:"Th1s is 0perational Cyber Training!" process call create "notepad.exe"
+﻿
+The PID returned is generated dynamically on cda-hr-1 and may not be the same. This indicates that the process was started with that PID. 
+
+﻿
+
+NOTE: Processes created remotely using the Win32_Process method are not started interactively. This means they show up in the task list, but do not have a window for a user to interact with. In order to start a remote process using WMI that is interactive, use the Win32_ScheduledJob create method. However, this starts under the LocalSystem system account, which is a risk as that is more privileged than most applications need.
+
+﻿
+
+36. Open the cda-hr-1 VM, and enter the command below to check for the notepad.exe process:
+
+﻿
+
+C:\Windows\system32>tasklist | find "notepad.exe"
+﻿
+37. Enter the following commands to kill the Notepad process. Replace the XXXX with the PID from the previous steps. Verify that it is no longer running:
+
+﻿
+
+C:\Windows\system32>taskkill /f /pid XXXX
+C:\Windows\system32>tasklist | find "notepad"
+﻿
+Perform WMIC Queries and Control the Output
+WMIC has the ability to perform the same command on multiple hosts — called nodes — and control the format of the output with several different options. These tasks walk through executing WMIC commands that retrieve data from remote hosts and format the output in various ways that can be used for later analysis.
+
+﻿
+
+NOTE: The following steps continue from the previous task.
+
+﻿
+
+Workflow
+
+﻿
+
+38. Open the cda-win-hunt VM, and enter the following command into the Command Prompt window to save the OS information from the command to a filename and to the clipboard:
+
+﻿
+
+c:\users\trainee>wmic /output:os_info.txt os list brief
+c:\users\trainee>type os_info.txt
+c:\users\trainee>wmic /output:clipboard os list brief
+﻿
+39. From the Start menu, open Notepad and paste the output from WMIC using the Edit menu.
+
+﻿
+
+NOTE: There is no need to save this file; it is an example to show how WMIC sends the output to the clipboard.
+
+WMIC has the following format options.
+
+40. Enter the below command to output to a simple Hypertext Markup Language (HTML) form report.
+
+﻿
+
+c:\users\trainee>wmic /output:os_info.htm os list brief /format:hform
+﻿
+
+41. Open the os_info.htm file from the c:\Users\trainee directory to view this report:
+
+The rest of the WMIC output format commands and output examples are below.
+
+﻿
+
+c:\users\trainee>wmic /output:os_htable.htm os list brief /format:htable
+﻿
+c:\users\trainee>wmic os list brief /format:list
+﻿
+c:\users\trainee>wmic /output:os_rawxml.xml os list brief /format:rawxml
+﻿
+c:\users\trainee>wmic os list brief /format:value
+﻿
+c:\users\trainee>wmic /output:os_xml.xml os list brief /format:xml
+﻿
+This image depicts both the raw XML and the XML formats for the same command’s output. The raw XML is on the left and the XML format is on the right.
+
+﻿
+
+c:\users\trainee>wmic os list brief /format:table
+﻿
+
+42. Use WMIC to list the currently installed software packages:
+
+﻿
+
+c:\users\trainee>wmic product get caption,identifyingnumber,installdate,version
+﻿
+This command may take several minutes to enumerate all the applications. It is used to baseline installed software as well as call methods to uninstall, reinstall, and upgrade. Like other WMIC commands, this is run against remote systems with appropriate credentials to assist in discovery and enumeration.
+
+﻿
+
+43. Use WMIC commands to retrieve Windows event logs:
+
+﻿
+alias with events
+c:\users\trainee>wmic ntevent where "eventtype<3 and LogFile='system' and timegenerated>'20210101'" get eventcode,eventidentifier,recordnumber,sourcename,timegenerated,type
+﻿
+
+This command retrieves the metadata for all Critical, Error, and Warning events from the system log that were logged from 1 Jan 2021 through present.
+
+ A specific event can be retrieved in additional detail with the format:
+
+﻿
+
+c:\users\trainee>wmic ntevent where "RecordNumber=4394 and LogFile='system'" list /format:list
+﻿
+
+Other filtering options are also available on the specific EventIdentifiers, which are covered in a separate lesson.
+
+
+44. Enter the command below to retrieve the configured Windows local groups:
+
+c:\users\trainee>wmic group list brief
+
+WMI Host Investigation
+Use all the information and commands learned to retrieve and analyze specific information from the computers listed below. Defenders and analysts perform these types of tasks to validate data received from a network owner and to look for anomalies that may indicate MCA. Identifying anomalies or other configuration changes that do not match specifications are points of interest for further investigation. The CDA domain has a specified policy of servers with Remote Desktop enabled. If they are in the DMZ, then workstations have Remote Desktop disabled.
+
+Review the attached intelligence flash report before proceeding with this task.
+
+Hosts to investigate:
+
+Conduct an investigation on the above hosts to determine any indicators of compromise using the tools included in this lesson.
+
+TermService = service   remote desktop
+
+rpc smb
