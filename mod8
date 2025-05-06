@@ -1,0 +1,16 @@
+M R PIGS
+M R NOT PIGS
+LIB M R PIGS
+
+Libraries Overview
+In computer science, library has a few definitions. For the purposes of this course, and its security context, libraries are resources that contain code and/or data. Modern desktop and server OSs contain methodologies for loading and managing these libraries. While libraries are often used for native code that can be referenced via C/C++ or other languages with the ability to bind or link to native libraries, many managed languages and runtimes — such as .NET and Java — also use libraries for shared code or data.
+
+﻿
+
+Libraries are referenced by new programs via a process known as linking. Libraries are linked statically or dynamically. Static linking copies all the referenced portions of the library into the resulting program image, while dynamic linking references the library instead of copying the library.
+
+
+
+
+
+
