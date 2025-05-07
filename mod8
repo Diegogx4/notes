@@ -608,14 +608,158 @@ MITRE ATT&CK Technique T1106 Native API: https://attack.mitre.org/techniques/T11
 Windows API Index:  https://docs.microsoft.com/en-us/windows/win32/apiindex/windows-api-list ﻿
 ﻿
 
+C:\Users\trainee>tasklist /s 172.16.3.2 /u Administrator /fi "imagename eq wmiprvse.exe" /m
+C:\Users\trainee>tasklist /fi "imagename eq explorer.exe" /m
 
 
 
+The /m switch displays all modules — meaning all loaded DLLs — associated with the selected processes. The /fi switch is a filter. It uses the quoted string immediately following the switch as a query on the list of all processes returned by tasklist.The imagename query selector indicates that results are filtered by the canonical name of the process.The eq query operator filters results in which the selector’s value is equivalent to the trailing expression.The [process] term is a regular expression, such as explorer or explore*.
+Open a PowerShell terminal from the Start menu or the taskbar.
 
 
+2. To view DLLs loaded by the explorer.exe process on the local machine, run the following command:
 
 
+PS C:\Users\trainee> Get-Process “explorer” | Select-Object -ExpandProperty Modules -ErrorAction SilentlyContinue | Format-Table -Autosize
 
+DLL Injection
+Classic DLL injection is an attack performed by writing the path of a malicious DLL into the virtual address space of a target process, resulting in malicious code execution under the guise of a remote thread created by the target process. Due to the types of functions executed (memory manipulation, acquiring process handles, etc.), this type of attack can only be performed in the context of administrator-level permissions.
+
+﻿
+
+This is performed in three steps: 
+
+﻿
+
+Target Selection
+﻿
+
+After identifying a process for injection, such as explorer.exe, the malware searches through the existing processes by using the following API calls:
+
+CreateToolhelp32Snapshot
+Process32First
+Process32Next
+OpenProcess
+CreateToolhelp32Snapshot is first called to enumerate heap or module states of a specified process or all processes. Process32First and Process32Next are used to iterate through the snapshot structure returned from the first function, each returning information about the enumerated processes. Once the malware has received the information for the target process from one of these API calls, it calls OpenProcess to obtain a handle to the target process.
+
+﻿
+
+Memory Allocation
+﻿
+
+Once the handle to a target process is obtained, the malware injects the path to its malicious DLL with the following API calls:
+
+VirtualAllocEx
+WriteProcessMemory
+VirtualAllocEx creates a virtual memory block large enough to hold a file path in order to have a writeable space inside the target process. The malware then writes the path to the malicious DLL in the allocated memory using WriteProcessMemory.
+
+﻿
+
+VirtualAllocEx is necessary for this step because prior to writing to a block of memory in a computer, the block must be allocated for use. Allocating memory is a system internal to the OS that reserves portions of memory for a specific process’s use in order to avoid memory in use being overwritten and lost.
+
+﻿
+
+When a process is allocating additional memory for its own use, it uses the function VirtualAlloc, but when it is allocating space in a different process, VirtualAllocEx is used.
+
+﻿
+
+It is important to note that VirtualAlloc and VirtualAllocEx are used to allocate larger scale blocks of memory, not small byte-sized chunks for variables. For example, if a developer used the line
+
+﻿
+
+void* pAddress = VirtualAlloc(NULL, 8, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+﻿
+
+to allocate memory for an 8-byte value, the developer actually allocated an entire page of memory, the size of which varies from system to system, but is often four kilobytes (kb) rather than eight bytes.
+
+Remote Thread Creation
+
+Finally, to execute code in the target process, the malware calls one of the following APIs:
+
+CreateRemoteThread
+NtCreateThreadEx (undocumented)
+RtlCreateUserThread (undocumented)
+Effectively, executing any one of these functions — by passing the address of the API call LoadLibrary and the address returned from VirtualAllocEx that points to the memory storing the malicious DLL path — successfully results in a remote process that executes the DLL on behalf of the malware.
+
+NOTE: As remarked above, there are a number of undocumented API calls. These occur when developers internal to Microsoft add functionality to the common libraries but do not intend for their code to be widely accessed. They are undocumented for a number of reasons such as testing, not intended for long term use, or other reasons. These functions are subject to change at any time, and their inputs/outputs are not guaranteed to always be the same. Microsoft provides other functions that are documented as a go-between for the undocumented functions, which are intended for programmers to use. These undocumented functions can still be discovered by dumping the export table of a shared library — usually ntdll.dll — and tracing the functions back to their entry points and conducting a reverse engineering of the assembly code there. Since these functions do not provide an intuitive insight into their function until documentation is developed, they are valued tools of malware developers seeking to obfuscate their tools. That is often an indication of possible maliciousness. 
+
+Windows API in Both Malicious and Non-Malicious Contexts
+Each of these API calls exists because they can be and are used for many valid purposes and are commonly employed as such. 
+
+For example:
+
+GetUserName and GetComputerName are frequently and benignly used to obtain the current context in which a program is running. A piece of malware could use it for information gathering on a newly exploited system. 
+FindExecutable is used to obtain the path to a Windows binary that a process relies on as a dependency.
+GetTempPath is used to enable one-off filesystem operations performed by processes, and is also a way for malware to create and hide its on-disk activity.
+The function CheckKeyboardBuffer could be used by normal software to determine whether an expected key was pressed, or it could be used by a piece of malware to peek at what is being typed. 
+﻿
+
+The Windows API exists because developers needed a reliable and well-defined method of accessing kernel-level information and objects while writing user-land code, so it is widely used for very good reasons. This lesson illustrates that the types of calls that a process makes give some insight into its behavior or potential functionality. 
+
+And in some cases, the particular sequence or composition of API calls is highly characteristic of malicious behavior. This kind of sequencing is illustrated by an examination of the types of calls made in a classic DLL injection.
+
+Some of the specific API calls used by the Cerber malware were used to selectively determine if the malware infected a particular machine. The relevant API calls are described below (and are available in the Help Viewer on cda-flare).
+
+
+GetKBCodePage returns the Original Equipment Manufacturer (OEM) code-page identifier that specifies the manufacturing origin and likely keyboard layout.
+
+
+GetLocaleInfoW returns identifiers that indicate the region and language options specified in the control panel.
+
+
+NOTE: The previous question included GetSystemTime, which is incorrect. The reason this API call does not indicate geography is because it returns the time in Coordinated Universal Time (UTC). If the API call had been GetLocalTime, that function returns the local time as an offset of UTC and may indicate the time zone the system is operating in, if properly configured. Threat actors often include these types of checks to target specific industries or networks, and to also prevent infection of other types of networks or industries they want to protect. CDAs should be aware of this type of behavior in their analysis of potentially malicious binaries.
+
+process(.exe)=import
+dll=export
+Dynamic Analysis
+Use what you have learned so far about observing the real-time logs of operations/Windows API calls performed by processes to determine what sort of behavior they are exhibiting. In this exercise, three PowerShell scripts left behind by a threat actor on the mission partner’s network are collected. Run them on the cda-flare VM — which is a sandboxed reverse engineering platform — to discover what each one does. 
+
+﻿
+
+1. Log in to the cda-flare VM using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. Use the following filters in Process Monitor:
+
+Operation is WriteFile
+Operation is Process Create
+Operation is RegSetValue
+Operation is SetDispositionInformationFile
+Operation is SetDispositionInformationEx
+Process Name is powershell.exe
+:\WINDOWS\system32>listdlls createremotethread
+C:\WINDOWS\system32>listdlls putty
+Observe that the putty.exe process has a DLL loaded from a directory outside the c:\Windows\* structure. The c:\dllinject\dllinject.dll DLL looks suspicious and warrants further investigation and isolation if something similar is found in a mission partner’s systems.
+
+
+Here are some great options:
+
+Olympus XA2 – A compact 35mm camera with a sharp lens and natural grain retention.
+
+Canon AE-1 Program – A classic SLR that lets you control exposure for that dreamy, cinematic effect.
+
+Minolta Hi-Matic AF2 – A point-and-shoot with a built-in flash that enhances moody lighting.
+
+Pentax K1000 – Fully manual, perfect for experimenting with grain-heavy film stocks.
+
+For film, consider Kodak Tri-X 400 or Ilford HP5 Plus for rich grain and deep contrast. If you want color, Kodak Portra 800 or Cinestill 800T will give you that nostalgic, cinematic glow.
+Leica M6 – A legendary rangefinder with a sharp lens that retains natural grain and depth.
+
+Pentax 67 – A medium-format camera that delivers cinematic, painterly images with rich tonal range.
+
+Kiev 60 – A Soviet-era medium-format camera that produces hauntingly textured images, perfect for that melancholic Tarkovsky feel.
+
+Zenit E – A classic Russian 35mm camera with a Helios 44-2 lens, known for its dreamy, swirling bokeh and deep contrast.
+Kodak Tri-X 400 – High grain, deep shadows, and a timeless cinematic look.
+
+Ilford HP5 Plus – A moody black-and-white film with rich contrast and texture.
+
+Cinestill 800T – If you want color with a nostalgic glow, this tungsten-balanced film gives a cinematic, ethereal quality.
 
 
 
