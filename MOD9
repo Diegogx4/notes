@@ -1,0 +1,587 @@
+Environment Overview
+This lesson consists of a Windows domain, cda.corp, with the key terrain consisting of several subnets for workstations, a security subnet with a Windows hunt computer, a servers subnet, and a Demilitarized Zone (DMZ). Trainees use the cda-win-hunt Virtual Machine (VM) to learn about the Windows registry with PowerShell. The subnet 10.0.0.0/8 is off-limits and out of scope for all training scenarios. Any MCA discovered during this lesson must be evaluated. Trainees learn to evaluate and appropriately change or offer configuration changes for the mission partner's systems.
+
+Threat Intelligence
+According to threat intelligence, there are several threat groups conducting MCA that are performing active discovery and lateral movement in networks that have trust relationships with cda.corp. In particular, the MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) Command and Scripting Interpreter: Windows Command Shell technique (T1059.003) has been seen as an active vector to download and execute files on compromised hosts for discovery, command execution, and lateral movement. The Modify Registry technique (T1112) has been used to gain execution and maintain persistence.
+
+﻿Monitoring and Detection
+There are many registry events that occur each minute. Most of these query current settings by the system and other applications. It is generally unfeasible to monitor all registry events, or even all registry edit, change, delete, and add events. A targeted approach is more effective, but may miss IOCs for unknown threats. It is important for analysts and defenders to carefully tune any monitoring of registry events to the operating environment and threat level. Some of the important registry keys are discussed in this lesson. Specifically any registry key that is used to affect automatic execution, run on login, change in services, browser helper objects, File Explorer shell extensions, scheduled tasks, and drivers, among others, are some of the critical keys to be aware of and tune monitoring as threats dictate. The Windows Sysinternals Autoruns tool searches through many of these locations and registry keys and is used to assist in monitoring and detecting changes to the baseline configuration set by an organization. System Monitor (Sysmon) and Process Monitor (Procmon) are other tools in the Sysinternals suite used interactively and in unattended modes to monitor for these types of changes, but require tuning and filtering to not overload logging.
+
+Techniques and Mitigations
+Techniques
+
+The MITRE ATT&CK framework details the following techniques specifically associated with the Windows registry:
+
+T1012 Query Registry: Through a variety of tools, threat groups access the registry to query for system configuration data to include security credentials, users, permissions, antivirus or host intrusion detection/protection software, and other system profiling data
+https://attack.mitre.org/techniques/T1012/
+T1112 Modify Registry: Through a variety of methods, threat groups interact with the Windows registry to hide configuration information within registry keys, remove information as part of cleaning up, or as part of other techniques to aid in persistence and execution
+https://attack.mitre.org/techniques/T1112/
+T1552.002 Unsecured Credentials: Credentials in Registry: Threat groups search the registry on compromised systems for insecurely stored credentials
+https://attack.mitre.org/techniques/T1552/002/
+T1574.001 Boot or Logon Autostart Execution: Registry Run Keys/Startup Folder: Threat groups modify the registry to achieve persistence by adding a program to a startup folder or referencing it with a registry run key
+https://attack.mitre.org/techniques/T1547/001/
+T1574.011 Hijack Execution Flow: Services Registry Permissions Weakness: Threat groups execute their own malicious payloads by hijacking the registry entries used by services, use flaws in the permissions for registry to redirect from the originally specified executable to one that they control, in order to launch their own code at service start, and change local service configuration information in the registry
+https://attack.mitre.org/techniques/T1574/011/
+﻿
+Mitigations
+
+The key mitigation MITRE ATT&CK has identified is to restrict the registry permissions so that specific permissions are required to modify certain hives or keys in the registry. This is not an absolute mitigation as threat groups often use privilege escalation techniques to gain execution as a user that can modify those restricted keys. Monitoring is essential for critical keys to identify MCA. ﻿ ﻿
+
+M1024 Restrict Registry Permissions: Restrict the ability to modify certain hives or keys in the Windows registry
+https://attack.mitre.org/mitigations/M1024/ 
+﻿
+Registry Description and Structure
+Registry Description
+
+The registry is a vital piece of Windows systems and holds the vast majority of configuration data for the Operating System (OS) and applications. It includes settings for the system and for each user. Registry data is read during the following principal events:
+
+Initial boot: The boot loader reads the list of boot device drivers to load into memory
+Kernel boot: The kernel reads settings that specify which device drivers to load and settings for other subsystems (memory manager, process manager, etc.)
+Log on: During a user’s log on, File Explorer reads per-user settings from the registry (includes drive-letter mappings, wallpaper, screensaver, desktop appearance, etc.)
+Application startup: Applications read systemwide and per-user settings during startup (can include licenses, menu and toolbar settings, recent documents, and other application settings)
+Accessing the registry is not limited to just the above events. Applications and the system may read and update the registry at any time to set and read configuration settings. Other events that modify the registry include inserting and removing hardware, installing or removing applications, installing or removing device drivers, and changing system settings. As a refresher, Table 9.1-2 describes the various registry data types.
+
+The registry is organized into six root keys, five of which can be accessed via reg.exe (reg) and Registry Editor (regedit). The sixth, HKEY_PERFORMANCE_DATA, is stored outside the registry, but contains the location of the data and is accessed by querying the RegQueryValueEx Windows API function.
+
+The registry can be visually viewed and changed using regedit as well as from command line programs like reg and PowerShell. Documentation for using reg in batch files can be found by entering reg /? in a command prompt session. This lesson focuses on manipulating the registry using PowerShell. PowerShell uses the Get-ChildItem cmdlet to query the registry with a path of -PATH Registry::<ROOT KEY>. PowerShell uses either the root key as specified in Table 9.1-3 or the abbreviation. Get-ChildItem -Path Registry::HKEY_Current_User and Get-ChildItem -Path Registry::HKCU are both valid syntaxes. The cmdlet Get-ItemProperty -Path is used for registry keys to return the values for that key. This is different from Get-ChildItem as that cmdlet retrieves the child keys in the specified path.
+
+get-childiten = path
+get-itemproperty = value
+
+ Services are integral parts of the Operating System (OS), run in the background without user intervention, and often have elevated permissions in order to interface with various devices and other processes. 
+ Blending in with the normal service environment — or injecting malicious code into a properly running service — makes it much harder to identify Malicious Cyberspace Activity (MCA) on a compromised system.
+
+Windows services are applications running in the background of the OS that provide tasks that do not need user interaction. This includes implementing device/driver support, networking, authentication, remote access, and other hardware-related interfaces. Windows services are user-mode processes similar to UNIX daemon processes, which are detached from a terminal and run in the background. They can be configured to start at boot-time, manually, or on an as-needed basis, and controlled by other applications like the Service Control Manager (SCM). The SCM is a special system process — running as services.exe — that is responsible for starting, stopping, and interacting with service processes. Services are defined in the registry under HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services. Windows Service Control Programs (SCP) manage Windows services via the SCM using Remote Procedure Calls (RPC), through Application Programming Interface (API) functions. SCPs include the services.msc snap-in for the Microsoft Management Console (MMC), the CLI utility sc.exe, and any RPC client calling the appropriate service's API functions. The third-party application Service Manager (SrvMan) is an example of an SCP and is discussed later in the lesson.
+
+Service applications must register as a service with the system using the CreateService function. The SCM receives messages from the function and creates the appropriate registry keys. Registry keys that are associated with the service locations in the registry that have not registered through the CreateService function with the SCM are not actually treated as services.
+
+Services have three main names, and also can have a description of the service defined in the registry:
+Process name: The name of the running process like svchost.exe, spoolsvc.exe, or mdm.exe (seen using the tasklist /svc, Task Manager, or Process Explorer applications)Internal name: Defined in the registryDisplay name: Seen in administrative tools (optional; if not defined the internal name is used)
+Windows allows some running services to share a process with other services so there is not a one-to-one mapping between services and processes. Some common services include the Print Spooler, Event Log, Task Scheduler, and networking components. Network administrators and defenders need to weigh the benefit of a particular service and its function, and the risk of compromise if a threat actor is able to compromise that service. Services like the Print Spooler are used constantly in enterprise environments and are not easily disabled. Of note, from 1999 through early July 2021, there were at least 36 Common Vulnerabilities and Exposures (CVE) records describing vulnerabilities in the Windows Print Spooler service, most of which were determined to have Common Vulnerability Scoring System (CVSS) scores in the High category. Low category CVSS CVEs are usually not easily exploited, do not have publicly available exploitation code, or do not have a large impact on a system.
+
+Windows drivers are also loaded like services, and their configuration details are also housed in the same location in the registry. Service device and filesystem drivers are loaded into memory, started using similar Windows function calls, and added and managed by the SCM.
+
+PS C:\Windows\system32> Get-Service -computer cda-dc "spool*" | Select-Object *
+
+As seen in earlier steps, the various properties of the service are seen here, including the start type, dependent services, if it is a standalone or shared process, and its running status. Earlier lessons discussed the various object types in PowerShell and compared them to the Windows Management Instrumentation (WMI) objects and properties. In order to see additional details regarding these services, like the image path of the executable, the Get-CIMInstance cmdlet is used instead of Get-Service. Additionally, the service properties for CanPauseAndContinue, CanShutdown, and CanStop are displayed. The CanPauseAndContinue property indicates if the service can be paused and resumed. The CanShutdown property indicates if the service should be notified when the system is shutting down. The CanStop property indicates if the service can be stopped after it has started. The CanStop property can be targeted by attackers to make it very difficult to stop a malicious service after it has started, and usually requires configuring the system to not start the service on a reboot in order to completely mitigate it. Services with the CanStop property set to False are usually critical services related to security that may compromise the OS if stopped.
+
+PS C:\Windows\system32> Get-CIMInstance win32_service | ?{$_.Name -like '*spool*'} | select *
+lol
+Get-CIMInstance -ComputerName cda-dc win32_service | ?{$_.Name -like '*spool*'} | select *
+
+sc qc
+sc query
+
+Module 9 Lesson 1 Extra Material Prep Job Sheet
+
+Interacting with the Registry to locate other areas of possible persistence:
+1.	Log in to the cda-win-hunt VM using the following credentials
+ 
+  Windows Registry Handling | GUI
+2.	From the Start menu, enter regedit. Right-click regedit and select Run as Administrator to open the Registry Editor. Select Yes on the User Account Control window to allow the application to make changes to the device.
+ 
+3.	Navigate to HKEY_LOCAL_MACHINE > Software > Microsoft > Windows NT > Current Version > Schedule\TaskCache\Tasks\{215D939E-1145-49F9-BF3C-297C9840B65C}
+
+4.	Right-click in the file window and click on task {215D939E-1145-49F9-BF3C-297C9840B65C} then double- click on Actions under Name.
+ 
+5.	Actions reveals the Hex data that represents the executable/binary path, 
+C:\Program Files (x86) \Google\Update\GoogleUpdate.exe
+
+Interacting with the Windows command line to locate tasks to reveal executable/binary path.
+1.	 Log in to the cda-win-hunt VM using the following credentials:
+ 
+2.	 Right-click on Command Prompt, select Run as administrator, and select Yes on the User Account Control window.	
+
+3.	 By default as the Administrator, you will be located under C:\Windows\system32.  Change to the tasks directory (cd tasks) and literally type g* 
+
+Note: G represents the first letter of the task.  In this case, the task is GoogleUpdate
+
+4.	This allows you to search for the executable/binary path under Actions/Exec/Command:
+C:\Program Files (x86)\Google\Update\GoogleUpdate.exe
+
+Windows Events
+Conducting endpoint analysis of Windows event logging in a specified terrain as a response to ongoing threats is an integral part of the full spectrum of CO. 
+
+Windows event logs are the historical record of every major and (depending on the amount of logging enabled) minor system event. Every program that starts on a system posts a notification in an event log, and every well-behaved program posts a notification before it stops. Every system access, security change, non-standard OS behavior, hardware failure, and driver malfunction all end up in one event log or another.
+
+The sheer amount of possible logs on a system can create a significant amount of noise that an analyst must sift through. It is imperative that every analyst understand which logs are important and which are noise.
+
+Event Log Format
+
+Modern Windows systems store logs in the %SystemRoot%\System32\winevt\logs directory by default in the binary Extensible Markup Language (XML) Windows event logging format, designated by the .evtx extension. Logs can also be stored remotely using log subscriptions. For remote logging, a remote system running the Windows Event Collector service manages subscriptions of logs produced by other systems. The types of logs to be collected can be specified at a granular level and transport occurs over Hypertext Transfer Protocol Secure (HTTPS) on port 5986 using Windows Remote Management (WinRM). Group Policy Objects (GPO) can be used to configure the remote logging facilities on each computer.
+
+Events can be logged in the Security, System, and Application event logs or, on modern Windows systems, they may also appear in several other log files. The Setup event log records activities that occurred during installation of Windows. The Forwarded Logs event log is the default location to record events received from other systems. These five logs are the default logs for base installations of modern Windows OSs.
+
+However, there are also many additional logs, listed under Applications and Services Logs in the Event Viewer, that record details related to specific types of activities. Since these log files are much more targeted than the Security log, they often retain information about events that occurred well before the current Security log has been overwritten. 
+
+To save space, log files do not grow indefinitely. By default, Microsoft systems set a maximum log file size at 20480 Kilobytes (KB), and upon reaching that size, it deletes oldest entries first as space is needed to fill the log with more events. Alternative policy options include archiving old logs in a separate file to make more space, which eventually creates a hard disk space issue unless the logs are moved elsewhere; changing the log file maximum size, which is still dependent on the amount of disk space available, and manually clearing logs, which creates an issue with continuous monitoring, as full logs simply do not capture new events.
+
+Every event that the local or domain logging policy marks for auditing is sent to its respective log file. Each occurrence of these forms a log entry.
+
+Event log entries have several fields in common:
+
+Log Name: The name of the event log where the event is stored. Useful when processing numerous logs pulled from the same system.
+Source: The service, Microsoft component, or application that generated the event.
+Event Identifier (ID): A code assigned to each type of audited activity. This code is one of the most important fields in an entry, as it is by this code that complex and specific queries can be formed to examine a particular type of behavior.
+Level: The severity assigned to the event in question.
+The possible Windows event log severity levels are:
+
+User: The user account involved in triggering the activity or the user context that the source was running as when it logged the event. Note that this field often indicates System or a user that is not the cause of the event being recorded.
+Operation Code (OpCode): Assigned by the source generating the log. Its meaning is left to the source.
+Logged: The local system date and time when the event was logged.
+Task Category: Assigned by the source generating the log. Its meaning is left to the source.
+Keywords: Assigned by the source and used to group or sort events.
+Computer: The computer on which the event was logged. This is useful when examining logs collected from multiple systems, but should not be considered the device that caused an event(such as when a remote logon is initiated, the Computer field still shows the name of the system logging the event, not the source of the connection).
+Description: A large text block where additional information specific to the event being logged is recorded. This is often the most significant field for the analyst.
+NOTE: The description is normally displayed above the other fields in the general view of the event viewer, and it is also often referred to as the message. 
+
+maximum log file size at 20480 Kilobytes (KB)
+
+Computer: The computer on which the event was logged. This is useful when examining logs collected from multiple systems, but should not be considered the device that caused an event(such as when a remote logon is initiated, the Computer field still shows the name of the system logging the event, not the source of the connection).
+Description: A large text block where additional information specific to the event being logged is recorded. This is often the most significant field for the analyst.
+
+wevtutil qe System /c:5 /f:text /rd
+wevtutil qe System /c:1 
+wevtutil qe System /q:"*[System[(EventID=104)]]" /f:text
+wevtutil qe System /q:"*[System[(Level=2)]]" /f:text | more
+wevtutil qe System /q:"*[System[(Level=2 or Level=3)]]" /f:text | more
+wevtutil /r:[computer name OR IP] /u:[username] /p:[password] [remaining options]
+wevtutil /r:CDA-ACCT-1 /u:"CDA\trainee" /p:"Th1s is 0perational Cyber Training!" qe System /c:1 /f:text /rd
+
+Get-WinEvent -LogName System | Select-Object -First 5
+Get-WinEvent -LogName System | Group-Object -Property ProviderName -NoElement | Sort-Object -Property Count -Descending | Format-Table Name,Count
+
+The qe option followed by System is the syntax for querying events from the specified System logThe /c:5 option tells this utility to display a count of the last five entriesThe /f:text option tells this utility to format the output in readable text; the default output format is XML.The /rd option tells this utility to list events in reverse direction, which means newest first.While not necessary here, if the output is too long for the user to scroll through, it can be helpful to pipe it to a terminal scroll utility using the syntax | more, or write it to a file using the syntax >> file.txt.
+
+These options are useful when an analyst is examining the most recent log entries, and can be used in conjunction with other filters to see the most recent entries of a certain type of event.
+
+
+5. To see the default — i.e., difficult to read — format looks like, run the following command with no formatting flags:
+
+C:\Windows\system32>wevtutil qe System /c:1 
+
+At first glance, this seems useless. However, this XML format, while not very human-friendly, is easily machine readable and useful for the automated parsing of logs or for extracting and uploading logs to an external tool, such as a Security Information and Event Management (SIEM).
+
+This format is also useful for conducting more targeted queries on these logs, which are helpful in searching for specific adversary behavior on a system.
+
+To perform such a query, use the format /q:*[<logname>[(<xmlvalue=value>)]]. This is called an XML Path Language (XPath) query.
+
+6. Run the following command to return all System logs with event ID 104 — Log clear:
+
+C:\Windows\system32>wevtutil qe System /q:"*[System[(EventID=104)]]" /f:text
+
+
+NOTE: Having a reference of important event IDs is handy for this type of query. A group of such IDs is described and listed later in this lesson, though the list is not exhaustive.
+
+
+NOTE: XPath refers to both the query language that can be used to query data from XML documents and to an XML Path Language expression used in a query. The query language forms expressions to select nodes in the tree representation of an XML document by a variety of criteria.
+
+Having run this command, the analyst has found all recorded occurrences of logs on this system cleared. Many savvy threat actors perform this step in their post-exploitation phase to conceal their access and behavior on a system, making the hunt process more difficult.
+
+This defense evasion technique is described by MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) Technique T1070 Indicator Removal on Host.  
+
+Another example of this query syntax is to find all logs of a particular severity level.
+
+7. Run the following command to retrieve all Error level logs in the System log.
+
+C:\Windows\system32>wevtutil qe System /q:"*[System[(Level=2)]]" /f:text | more
+
+
+NOTE: Exit the more utility early by entering q for quit if not scrolling to the last of the output.
+
+8. Run the following command to retrieve all Error and Warning level logs in the System log.
+
+C:\Windows\system32>wevtutil qe System /q:"*[System[(Level=2 or Level=3)]]" /f:text | more
+
+It may be necessary to run these commands on a remote computer to which an analyst has authenticated access. The format for such a command is
+
+
+wevtutil /r:[computer name OR IP] /u:[username] /p:[password] [remaining options]
+
+9. List the most recent event of the System log on remote system CDA-ACCT-1 with the command:
+
+
+C:\Windows\system32>wevtutil /r:CDA-ACCT-1 /u:"CDA\trainee" /p:"Th1s is 0perational Cyber Training!" qe System /c:1 /f:text /rd
+
+The wevtutil.exe utility is a powerful tool for searching through Windows event logs, especially when combined with the knowledge of which event log IDs are of interest to the analyst performing such queries during a CPT hunt or clear operation. 
+
+104 = cleared logs = T1070
+The Get-WinEvent cmdlet can also be used to find all events of a specific logging level with the following syntax:
+
+﻿
+Get-WinEvent [options] | Where-Object -Property Level -EQ [Level #]
+
+﻿
+
+7. Run the following command to obtain all errors from a specific log file:
+
+﻿
+
+PS C:\Windows\system32>Get-WinEvent -LogName System | Where-Object -Property Level -eq 2 | Format-Table Level,Id,Message
+﻿
+PS C:\Windows\system32> Invoke-Command -ComputerName CDA-EXEC-1 -ScriptBlock {Get-WinEvent -FilterHashTable @{Path='C:\Investigation\sysmo
+n\sysmon_saved.evtx';Id=13} | Where-Object -Property Message -match "3956"} | Format-List Message
+PS C:\Windows\system32> Get-WinEvent -LogName 'Microsoft-Windows-Powershell/Operational' -ErrorAction SilentlyContinue | Select-Object -First 10 | Format-List *
+Events of Interest to DCOs
+In this section, create a custom view to identify Windows event logs, which give a unique insight into several security items of interest. Generate several events that create logs of interest to a Cyber Defense Analyst (CDA), and examine the logs and the data available in them to understand. 
+
+﻿
+
+Some of the important event IDs are:
+
+﻿
+
+Account Creation Events
+Event 4720 is the event A user account was created. — It is important to investigate such events when no new users are expected on the domain, as creating valid accounts is often a persistence method employed by threat actors. 
+This persistence technique is described in MITRE Technique T1136: Create Account.  
+Event 4732 is the event A member was added to a security-enabled local group. — This event is important to monitor when a user is added to a local or domain administrator’s group, as this is a method, in combination with user account creation — mentioned above — that threat actors maintain privileged access in a network.
+This is an addendum to MITRE Technique T1136: Create Account,  and is employed to ensure that the persistence maintained includes privileged access to a compromised system.
+﻿
+
+Account Logon Events
+Event 4624 is the event An account was successfully logged on. — This is generally a good thing, but it is also important to search for evidence of account logins where there should be none (i.e., an Administrator known to be on vacation logging into a Domain Controller [DC]). It is important to pay attention to the Message field of these entries, as the Username field does not indicate which user is logging on to the system. 
+The Logon Type field is especially important in this type of event. The types correspond to Table 9.3-2.
+This access technique usually follows successful reconnaissance using MITRE Technique T1589.001: Gather Victim Identity Information: Credentials. 
+﻿
+
+﻿
+
+Table 9.3-2
+
+﻿
+
+Event 4625 is the event An account failed to log on. — This is the opposite and analogous case of 4624. A number of these logs in short succession on the same accounts is indicative of a brute force password attack in progress. 
+There are a number of codes indicating why the logon failed that help with analysis of these events. The most useful code in detecting a brute force attack is 0xC000006A, in occurs when a threat actor attempts numerous wrong passwords against a valid user account.
+This credential access technique is described in MITRE Technique T1110: Brute Force.  
+﻿
+
+﻿
+
+Table 9.3-3
+
+﻿
+
+Event 4672 is the event Special privileges assigned to new logon. — This event indicates that a user in a highly privileged group, such as local or domain administrators, has logged on and given the appropriate privileges to their logon session. If an adversary has obtained an administrator-level account, this event indicate those logins, so finding these events with an unauthorized administrator account is indicative of privileged adversary persistence in the network.
+This access technique usually follows successful reconnaissance to obtain administrator credentials using MITRE Technique T1589.001: Gather Victim Identity Information: Credentials.  
+﻿
+
+Other Windows Internals Events
+Event 7030 is the event Service is marked as an interactive service. — This event triggers when the system is configured to not allow interactive services, so that the service may not function properly. This event may fire when an adversary attempts to install a service as a persistence mechanism but did not realize that the host did not allow such a service.
+This persistence or privilege escalation technique is described in MITRE Technique T1543.003: Create or Modify System Process: Windows Service.  
+Event 7045 is the event A new service was installed. — This event indicates a successful installation of a Windows service, which is a routine event. However, when MCA is suspected, each of these event should be investigated to determine if the installed service is benign.
+The most relevant information to pay attention to in examining these logs is the Service Name, Service Type, and Service Start Type. Services that start automatically (Service Start Type 2) are highly favored by attackers for persistence.
+This event also logs when adversaries use the persistence technique is described in MITRE Technique T1543.003: Create or Modify System Process: Windows Service.  
+﻿
+
+﻿
+
+Table 9.3-4
+
+﻿
+
+﻿
+
+Table 9.3-5
+
+﻿
+
+Event 4688 is the event A new process has been created. — This event triggers often and is largely normal operating activity, so in a blind hunt, these logs are more noise than helpful. However, when the malicious process is known, searching for that process in these logs can reveal a great deal of information about how that process was spawned (i.e., potential vulnerabilities exploited) and other processes that were spawned by the malicious process as a parent (i.e., potential behavior post-compromise).
+This persistence or privilege escalation technique is described in MITRE Technique T1543: Create or Modify System Process.
+Event 4670 is the event Permissions on an object were changed. — This event is indicative of change of permissions on objects such as files, processes, registry, etc. If an attacker takes possession of such objects for privilege escalation or to encrypt/destroy them, this event may fire.
+An example of this event logging is when adversaries use the defense evasion technique described in MITRE Technique T1222.001: File and Directory Permissions Modification: Windows File and Directory Permissions Modification.
+Event 4657 is the event A registry value was modified. — Since the Windows registry is essentially the reference database for settings, data, and important facts that the OS and all applications within its use to function, this event logs often when auditing is enabled, because the registry is constantly being modified. Once MCA is confirmed, and the compromised user or process is identified, filtering these events for that suspect identifier yields important data about what an adversary was attempting to accomplish or what artifacts were left behind.
+This persistence or privilege escalation technique is described in MITRE Technique T1547.001: Boot or Logon Autostart Execution: Registry Run Keys/Startup Folder.  
+﻿
+
+These events, and many others, are described in the attached reference publication, along with which data in the events are worth analyzing.
+
+﻿
+
+Adjusting the amount of logging on a system and gathering meaningful data from the logs processed becomes a balancing act between the number of actions being logged, the speed at which the logs are received from the system, and the speed they are processed.
+
+﻿
+
+Additional Resources
+﻿
+
+Glean the following information from this event log:
+
+Subject: Security ID/Account Name: ID for the account that added the user to a security-enabled group
+Member: Security ID: Name of the user account added to the security-enabled group
+Group: Security ID/Group Name: Security-enabled group that the user was added to
+Logged : Time the event occurred 
+Keywords: If this includes Audit Success, then the user addition to the group was successful without error
+Computer: Device on which the action was performed and logged
+ Get-WinEvent -Path 'C:\Investigation\winevent\application_saved.evtx' | Select-Object -First 1
+
+PS C:\Windows\system32> Invoke-Command -ComputerName CDA-EXEC-1 -ScriptBlock {Get-WinEvent -FilterHashTable @{Path='C:\Investigation\sysmon\sysmon_saved.evtx';Id=22} | Where-Object -Property Message -match "199.63.64"} | Format-List Message
+
+PS C:\Windows\system32> Invoke-Command -ComputerName CDA-EXEC-1 -ScriptBlock {Get-WinEvent -FilterHashTable @{Path='C:\Investigation\sysmon\sysmon_saved.evtx';Id=11} | Where-Object -Property Message -match "Downloads"} | Format-List Message
+
+The registry value name used by the attacker to install a persistence mechanism was Zoom Updater. This value was placed within the registry subkey HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run and given a pointer to a malicious executable located at C:\Users\philip.holt\Appdata\local\ZoomUpdate.exe, where the threat actor made a copy of the original malicious download. By setting this registry key, an attacker can set their malware to automatically run when the machine is restarted and a user logs in. Another common key location for this type of persistence is HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run.
+
+
+You have successfully used Sysmon events to identify attacker activity that occurred on a machine. Below is a list of activities that occurred during the attack scenario, as well as a list of potentially useful Sysmon event IDs that provide insight into the activity.
+A malicious .exe file was downloaded from the internet. (Sysmon 3, 22, 11)The malicious .exe file was executed by the user. (Sysmon 1)The payload communicated to the attacker’s C2 server via the IP address 199.63.64.51.
+The malicious .exe file was copied to the user’s AppData folder — C:\Users\philip.holt\Appdata\Local\ZoomUpdate.exe. A Windows registry autorun key was set (HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Zoom Updater), which pointed at the malicious .exe file in the user’s AppData folder. (Sysmon 12 and/or 13 for registry modification events, Sysmon 1 for reg.exe spawning to perform the modification)
+
+4624, 4625, 4720, 4732, 7030, 7045, 4688, 4670, 4672, 1006, 1007, 4657
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
