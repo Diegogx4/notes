@@ -1,0 +1,777 @@
+The Open System Interconnect (OSI) model is comprised of seven Layers. While switching occurs on Layer 2, some switches are able to perform limited duties in Layer 3. This lesson covers an overview of Layer 2 devices, how switches determine which ports to forward received frames, Virtual Local Area Networks (VLAN), and Cisco Switch Configuration. Knowledge of these topics can be vital for analyzing existing networks, understanding traffic flow, and understanding how attacks take place.
+
+
+In addition, you are presented with several duties, which include configuring a switch to enable connectivity and conducting two hunts to analyze Layer 2 traffic to determine the actions of a malicious threat actor.
+
+Configuration File Overview
+Cisco Devices
+﻿
+
+Cisco devices are commonly found in many enterprise networks. While market share varies year on year, according to a Synergy Research Group report, Cisco’s market share in Q1 2020 for switches and routers was 51%.  Because of their ubiquity, many training resources either focus on them or use them as primary examples — this lesson is no exception. The concepts demonstrated here generally apply to all devices, however, some discussion of Cisco-specific proprietary protocols may be given here or in other lessons in this course.
+
+﻿
+
+Cisco devices tend to have several different methods for an administrator to connect to them. The most common methods follow:
+
+Direct connection to the console via the console or Auxiliary (AUX) port. This is generally a serial port connection and often requires the included Registered Jack (RJ)-45 to Recommended Standard (RS)-232 cable to connect to. The screen command or a terminal emulator can be used on Linux, while PuTTY or other terminal connection software is common on Windows.
+Connection to a virtual console, typically via Secure Shell (SSH) or Teletype Network (Telnet). Telnet is generally discouraged because its traffic is transmitted in plaintext. Binaries for SSH are available or commonly included on Linux systems and modern builds of Windows — though, PuTTY is still commonly used on Windows.
+Many modern Cisco devices also include web interfaces for viewing the status of and managing the device. These interfaces can be interacted with using standard browsers.
+While connected to any of the virtual or physical console connections, a command prompt displays the current hostname:
+
+﻿
+
+Hostname>
+﻿
+
+Cisco Security Model
+﻿
+
+The basic security model for Cisco devices consists of three privilege levels: Zero, User, and Privileged. While more can be configured, these are the default. The enable command can be used to raise privilege levels to 15 (Privileged), and the disable command can be used to lower the privilege levels to 1 (User). An enable password can be configured to require a password in order to raise the privilege level. These commands can optionally specify a specific privilege level (0,1,15) as discussed below.
+
+﻿
+
+The command prompt updates indicating the current privilege level:
+
+﻿
+
+Hostname>enable
+Hostname#
+﻿
+
+As demonstrated above, the prompt for lower privilege levels ends with >, while the highest privilege level ends in #.
+
+﻿
+
+Zero 
+
+﻿
+
+Privilege level 0 is the lowest level privilege defined by default on Cisco devices. When connected with privilege level 0, the connected user only has access to these commands:
+
+disable: Lower privilege level
+enable: Raise privilege level
+exit: Close the current session
+help: Interact with the help system
+logout: Close the current session
+These commands only allow leaving the session or attempting to increase or decrease the privilege level.
+
+﻿
+
+User
+
+﻿
+
+Privilege level 1. At this level — in addition to the above commands — some additional utilities are available for troubleshooting connectivity, such as the traceroute and ping commands. In addition, some configurations can be viewed via show commands. No configuration changes can be made at this level.
+
+﻿
+
+Privileged
+
+﻿
+
+Privilege level 15 is the highest level defined by default on Cisco devices. At this privilege level, all commands are available, and the device can be configured.
+
+﻿
+
+Cisco Configuration Mode
+﻿
+
+To make changes to the current configuration of the device, the configure terminal command must be used. For this command to be used, the current privilege level must be 15 (Privileged). As the configuration is navigated, the prompt changes to indicate what is currently being configured:
+
+﻿
+
+Hostname#configure terminal
+Hostname(config)#interface GigabitEthernet0/0
+Hostname(config-if)#
+﻿
+
+Whenever a configuration section has been entered, it can be left via the exit command:
+
+﻿
+
+Hostname(config-if)#exit
+Hostname(config)#
+﻿
+
+In addition, the configuration session can be left entirely via the end command (or the exit command if at the base configuration prompt:
+
+﻿
+
+Hostname(config)#exit
+Hostname#configure terminal
+Hostname(config)#interface GigabitEthernet0/0
+Hostname(config-if)#end
+Hostname#
+﻿
+
+Cisco Configuration Format
+﻿
+
+To examine the configuration file on a running Cisco device, the show running-config command can be used. Under typical conditions, this requires Privileged permissions:
+
+﻿
+
+Switch>enable
+Switch#show running-config
+﻿
+
+Cisco configuration files often contain commands that can be directly run on the same Cisco device to enact the change represented by that configuration line, however, specific modes might be required. 
+
+﻿
+
+Configuration sections are separated by exclamation points (!) for readability, which are for formatting and display purposes only.
+
+﻿
+
+An example configuration file (trimmed) follows:
+
+A breakdown of these sections follows:
+
+
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+service compress-config
+
+
+
+This section covers the version of the device, as well as some services that are configured:
+version: Indicates the Cisco Internetwork Operating System (IOS) version for this deviceservice timestamps: Determines how timestamps for debug and log entries are displayedservice password-encryption: Automatically encrypts passwords when a new password is saved; no variant of the command means this is disabledservice compress-config: Configuration is compressed automatically by this service
+NOTE: Password handling on Cisco IOS devices is a topic in and of itself. Relying on the password-encryption service to ensure that passwords cannot be cracked is not considered sufficient.
+
+
+hostname Switch
+no aaa new-model
+
+hostname: Sets the hostname for this device; shown in the command-line by default, may also be discovered by this name, or respond with this name during network discoveryaaa new-model: Authentication, Authorization, and Accounting (AAA); disabled, this device does not support AAA features, such as user accounts, user levels, or command-level logging as handled by the AAA feature
+ip cef
+no ipv6 cef
+
+
+
+Enables Cisco Express Forwarding (CEF), which is an alternate packet switching algorithm that is more efficient than standard caching logic. 
+
+
+Note that CEF is disabled for Internet Protocol version 6 (IPv6).
+
+
+login on-success log
+
+
+
+Any successful login is logged to the console — might also be logged to accounting systems.
+
+
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+vlan internal allocation policy ascending
+
+
+
+These configurations are related to VLANs, which are covered later in this lesson:
+spanning-tree mode: Determines the method used for Spanning Tree Protocol (STP)vlan internal allocation policy: Specific VLANs reserved for internal use — determines where these VLANs begin enumerating (ascending starts at VLAN Identifier [ID] 1006 and up, descending at 4095 and below)
+interface GigabitEthernet1/3
+ media-type rj45
+ negotiation auto
+ shutdown
+
+
+
+Only one interface is covered here, as the others are nearly identical. 
+interface: GigabitEthernet1/3 here indicates that this device is detected as a gigabit ethernet interface (as opposed to FastEthernet for 100 megabit ethernet) in slot zero, port zero; each internal slot may or may not contain multiple ports, depending on the interface cardmedia-type: RJ-45, Small Form-factor Pluggable (SFP), or Autonegotiation auto: Attempts to automatically negotiate speed and duplex settings with the connected device.shutdown: Port is administratively disabled, ensuring that the port is not usable
+no ip http server
+no ip http secure-server
+
+
+
+No web configuration is enabled.
+
+
+control-plane
+
+
+
+Control plane being enabled allows this device to have policies enabled that deal with Quality of Service (QoS), as well as mitigation of Denial of Service (DoS) and reconnaissance techniques. Simply being enabled does not mean these policies are in place, however.
+
+
+line con 0
+line aux 0
+line vty 0 4
+
+
+
+These configuration lines detail the settings used for connecting to the device:
+line con: First — and typically only — serial console is enabled for this device; no configurations have been set beyond default settingsline aux: First — and typically only — AUX port is enabled for this device; no configurations have been set beyond default settings. Traditionally, the AUX port was often used for remote modem connections.line vty: Five (0, 1, 2, 3, 4) virtual terminals (used for SSH or Telnet) are enabled. Unlike con and AUX ports, these are not physical.
+
+
+Additional Resource
+Cisco — Managing Configuration Files Configuration Guide: https://www.cisco.com/c/en/us/td/docs/ios/ios_xe/fundamentals/configuration/guide/TIPs_conversion/config_mgmt_xe_3s_Book/cf_config-files_xe.html 
+
+NOTE: In this environment, this connection is the equivalent of plugging a serial cable into the device. You may see messages left from the boot process, select Return to access the login screen.
+
+5. Run the show running-config command to view the current configuration:
+
+S1#show running-config
+
+NOTE: The spacebar can be used to page through the results.
+Packet Switching Logic
+Switches control which devices to forward frames to via algorithms known as Packet Switching. Switches maintain an internal database of MAC addresses — commonly called a MAC address table or Content Addressable Memory (CAM) table — that maps each known MAC address to a specific port on the switch, allowing the switch to determine the best port to forward onto.
+
+﻿
+
+The switch analyzes the incoming frame, and then forwards it based upon the addressing type, such as:
+
+﻿
+
+﻿
+
+Figure 10.1-3
+
+Unicast
+Single source to single destination. If the MAC address is not in the switch’s MAC address table, then the forwarding of the frame is treated the same as broadcast. Otherwise, the frame is sent to the device if directly connected, or forwarded to the next switch closer to the destination device.
+﻿
+
+﻿
+
+Figure 10.1-4
+
+Broadcast
+Single source to all devices on the LAN. This floods the entire network, sending the frame to all other active ports — any receiving switch is also sent the frame to each connected device as well. Any frames sent to FF:FF:FF:FF:FF:FF are broadcasted.
+﻿
+
+﻿
+
+Figure 10.1-5
+
+Multicast
+Single source to multiple devices. Clients must subscribe to receive frames that are multicasted. Switches learn which devices are subscribed using Internet Group Management Protocol (IGMP) snooping or via proprietary protocols or other means. If the switch is unable to learn which devices are subscribed, multicast frames are treated as broadcast frames.
+﻿
+
+These addressing and switching methods have some implications. Note that for multicast and unicast to not act like broadcast — and thus flood the entire network — addressing, the switch needs to be able to maintain information about the network, such as subscriptions for multicast and MAC address tables for unicast.
+
+Port Configurations and Virtual LANs
+Switch port configurations are important to the security of a network. Misconfigured switches can enable attackers to perform attacks such as VLAN Hopping. Some configurations for Cisco switches are covered here, however, similar features exist on managed switches from other vendors.
+
+﻿
+
+Link Aggregation
+﻿
+
+Link Aggregation allows for multiple ports to be combined into a single, logical, port. This can be performed for performance and stability reasons. It requires configuration on both the device and the switch the device is connected to. Link Aggregation can improve maximum bandwidth by allowing network traffic flow to travel among multiple ports with little configuration required for other devices on the network — the device and switch handle the configuration. Configuration is typically either handled using Link Aggregation Control Protocol (LACP) or via static configuration.
+
+﻿
+
+Port Status
+﻿
+
+Unused ports should generally be disabled, which is accomplished via shutdown configuration when applied to an interface on Cisco devices. In addition, unused ports can be directed to a separate quarantine VLAN, which can be accomplished — on Cisco switches — with the switchport mode access command and assigned to the quarantine VLAN with the switchport access VLAN <vlan-id> command. VLANs are covered next.
+
+﻿
+
+Port Security
+﻿
+
+Also known as whitelisting, on supported switches, switch ports can have configurations applied to them that restrict traffic only to known sources. By restricting traffic to known MAC addresses, this feature can increase the security of the network as well as mitigate some types of attacks.
+
+﻿
+
+VLANs
+﻿
+
+VLANs separate a physical network into logical network segments — each port assigned to a VLAN can communicate with each other as though they were all connected to a single logical switch (or they create a single broadcast domain) while being isolated from any other VLANs from a Layer 2 perspective. 
+
+﻿
+
+VLANs are defined in the IEEE 802.1Q standard, which states that 32 bits are allocated in the ethernet packet header for the following fields:
+
+Tag Protocol Identifier (TPID): 16-bit field set to 0x8100 to identify the 802.1Q packet
+Priority Code Point (PCP): 3-bit Class of Service (CoS) field; assigned to Layer 2 QoS between switches
+Drop Eligible Indicator (DEI): 1-bit field indicating whether the packet can be dropped when insufficient bandwidth is available on a link; when identified, indicates the potential use of Voice over IP (VoIP) traffic
+VLAN ID: 12-bit field specifying the VLAN associated with a network packet
+VLANs can be used to segregate or isolate network segments, which can have many benefits such as enhancing performance by limiting the range of broadcasts or improving security by helping control access to sensitive machines or data. VLAN traversal happens via routing on Layer 3 — so-called Layer 3 switches are able to control and allow machines on different VLANs to communicate with each other in a manner managed by the switch.
+
+﻿
+
+Trunk Ports
+﻿
+
+Managed switches connected to each other physically can designate those ports as trunk ports. Trunk ports are able to carry traffic designated for VLANs on other connected switches — for example, if a port on switch 1 has a VLAN of 20 assigned, this machine can communicate with another machine connected to a port on switch 2 assigned as VLAN 20 through connected trunk ports. These two machines would essentially be on the same broadcast domain even though they are physically connected to two different switches. Trunk ports can limit allowed VLANs through the trunk, which can be useful for physically segmenting VLAN IDs, or limiting the physical reach of specific VLANs.
+
+﻿
+
+On Cisco switches, Dynamic Trunking Protocol (DTP) is a proprietary protocol that can be used to automatically negotiate trunk ports between connected switches. While convenient, if enabled for ports not intended to connect to other trunk ports, this can lead to insecure configurations if an attacker is able to spoof a switch in order to negotiate trunk ports.
+
+﻿
+
+Access Ports
+﻿
+
+Access ports are the foundational building blocks of managed switches; each access port can only be assigned to one VLAN. Access ports carry traffic from the configured VLAN to the device connected or to other devices on the same VLAN on that switch. Packets received or transmitted on access ports do not carry 802.1Q tags.
+
+﻿
+
+By default, switches assign all unconfigured ports to VLAN 1. For Cisco switches, the ports can be manually configured as access ports with the switchport mode access command and assigned to a VLAN with the switchport access VLAN <vlan-id> command.
+
+﻿
+
+Private VLANs
+﻿
+
+﻿
+
+Figure 10.1-7
+
+﻿
+
+Private VLANs further subdivide VLANs, allowing for isolation of devices within a VLAN from each other. When assigning a private VLAN to a port, in addition to the primary VLAN, a community VLAN ID is required. Three types of private VLAN ports exist:
+
+Promiscuous
+Typically reserved for routers or other gateway devices, these ports can receive traffic from any of the ports in a VLAN, regardless of the private VLAN configurations of those devices.
+Isolated
+Only able to communicate with promiscuous ports, these ports are isolated from all other ports. However, communication with the primary VLAN is possible.
+Community
+Able to communicate with promiscuous ports and other community ports on the same community VLAN. Additionally, community ports can communicate with the primary VLAN.
+This allows for isolation of devices without using up the finite amount of VLANs to do so. 
+
+﻿
+
+Native VLANs
+﻿
+
+The 802.1Q standard states that any traffic transmitted or received on a trunk port without an 802.1Q VLAN tag is associated with the native VLAN. The default native VLAN for most switch vendors is VLAN 1. All switch control plane traffic is switched across the network using VLAN 1. Security best practices recommend changing the native VLAN to something other than VLAN 1. More specifically, an administrator should set it to a VLAN that does not have any hosts attached to it.
+
+﻿
+
+For a stable trunk to be established between switches, the native VLAN should match at both ends, or traffic can unintentionally change VLANs. For example, this configuration practice could mean that when a switch has a host connected to a trunk port with native VLAN 10, the host could communicate with hosts connected to access ports assigned to VLAN 10. This occurrence is called VLAN Leaking and can be leveraged by threat actors to capture traffic across broadcast domains. 
+
+﻿
+
+Defining the native VLAN is a port-specific configuration and can be changed with the switchport trunk native VLAN <vlan-id> interface command.
+
+﻿
+
+Management VLAN
+﻿
+
+As part of the network segmentation efforts to improve the security of a network, many network designs include a dedicated management VLAN — arbitrarily assigned amongst the available pool of VLANs. In switches, this is generally accomplished by assigning this VLAN to an internal interface. Special care is often taken or suggested with this VLAN, such as designing the connectivity of this VLAN to ensure that no connection loops exist. If a switch is misconfigured or misbehaving and STP — covered later in this lesson — is not able to resolve a loop, losing access to the management VLAN can greatly complicate recovery efforts.
+
+﻿
+
+Restricting VLANs
+﻿
+
+As stated earlier in the lesson, VLANs can be restricted from trunk ports for security reasons or as a method of traffic engineering. The interface switchport trunk allowed VLAN <vlan-ids> command defines the VLANs that can traverse the link. 
+
+Practical Implications
+Switch configurations have practical implications for the security of a network. Some examples of attacks that rely on the behavior of switches or misconfigurations follow:
+
+MAC Flooding
+This attack relies on switches having a limited amount of memory for storing the MAC address table, which is used to store MAC address-to-port associations. Due to the inability to store updates to this table, many switches failover to broadcast mode for all data frames — similar to network hubs. This allows an attacker physically attached to a switch to view all traffic passing through the switch, rather than just traffic intended to be bound for that machine.
+MAC Spoofing
+This attack merely has the attacker present a different MAC address to the switch than the actual hardware MAC. This can be done for various reasons, such as bypassing MAC filters, masquerading as a legitimate device, or evading information gathering by masquerading as a different device.
+VLAN Hopping
+This attack — accomplished via a handful of methods — allows the attacker to view or transmit to or from VLANs that would normally not be permitted. Since VLANs are often used for isolation, this may allow an attacker to view or communicate with sensitive machines.
+Address Resolution Protocol (ARP) Poisoning
+While technically a Layer 3 attack, mitigation is often the responsibility of switches on the network. This attack allows an attacker to falsify ARP tables by sending forged packets, which causes clients to forward packets to the wrong MAC address for a specified IP address. This can be used to Man-in-the-Middle (MitM) traffic bound for a specific host — including a gateway router — to observe traffic.
+﻿
+
+Mitigations
+﻿
+
+These attacks can be mitigated in various ways, some of which are covered in later lessons. A general overview of the mitigations for each of these follows:
+
+MAC Flooding/Spoofing
+Mitigations for these attacks depend on the network configuration. If MAC addresses are known, each port can be configured with a whitelist of each address allowed on that port. Alternately, authentication in some manner — such as AAA or 802.1x — can be used to ensure that only approved devices are allowed to connect to ports or wireless for Wireless Fidelity (Wi-Fi) switches.
+VLAN Hopping
+VLAN hopping can be mitigated via appropriate port configurations. Enforcing correct settings here involves ensuring that client ports are set to access only, disabling trunk auto-negotiation on client ports, and ensuring that the native VLAN for client ports is set to an inaccessible VLAN. More details about these attacks and their mitigations are covered in the VLAN Attacks and Defenses lesson.
+ARP Poisoning
+ARP Poisoning attacks can be mitigated in several ways, depending on the network and its configuration. Mitigating these attacks generally involves switch and/or router configuration. Wi-Fi-based mitigation can be accomplished via client isolation, which prevents Wi-Fi clients from sending ARP packets to each other; wired-based mitigation can involve rate-limiting, manually binding important IP addresses to specific ports, or using vendor-specific, anti-spoofing technology that validates ARP packets by validating against known hosts and blackholing unknown hosts that attempt to duplicate IP addresses. More details about these attacks and their mitigations are given in the MitM Attacks and Defenses lesson.
+﻿
+Introduction to Traffic Capture
+Visibility of network traffic is essential to the Cyber Protection Team (CPT) core functions: Hunt, Clear, Enable Hardening, and Assess. Terminal Access Point (TAP) devices as well as on-device traffic capture or redirection features (port mirroring) allow for full packet capture. The full PCAP provided by such methods is received by a CPT Security Information and Event Management (SIEM) solution, in which a variety of force-multiplying tools, such as Zeek and Suricata, are employed for further analysis in threat hunts or mission partner security posture compliance. Additionally, standalone tools like Arkime can process these PCAPs to provide insight and information on the traffic contained within.
+
+﻿
+
+Network TAPs
+﻿
+
+A TAP — sometimes called a Test Access Point — is an external device inserted at a certain point in a network to conduct monitoring by intercepting or mirroring, and then duplicating network traffic to a monitoring node or network without disrupting the original traffic. The TAP provides access to the traffic the Cyber Defense Analyst (CDA) needs to monitor and secure a network. These devices permit TAPping a network, or multiple networks, to collect traffic for analysis through the tool stack.
+
+﻿
+
+This can be accomplished in two ways — in-band and out-of-band — and each one behaves differently. When deploying a kit to the mission network, out-of-band is the easiest way to set up a TAP with minimal changes and impact.
+
+﻿
+
+In-band TAP
+
+﻿
+
+Setting up in-band — or inline — ensures no traffic is lost when dealing with a switch/router that has a larger traffic throughput. The network TAP is placed in line with the communication chain of the network (e.g., a device placed between two devices such that the original physical connection between the two devices is interrupted by the TAP, and all traffic flows through the TAP). Figure 10.1-27 shows this process. The downside to implementing the TAP this way, however, is that the link between two devices needs to be disconnected in order for a TAP to be placed inline between them.
+
+﻿
+
+Depending on the network, this may not be possible due to its critical nature. Another downside to placing a device inline is if the device fails, loses power, or reboots, it could prevent traffic from entering or leaving the network. Some devices allow the TAP to be put in place as fail open so there is no network interruption in case of a power loss or hardware failure.
+
+﻿
+
+﻿
+
+Figure 10.1-27
+
+﻿
+
+Out-of-band TAP
+
+﻿
+
+Operating out-of-band, the TAP/stack operates on its own network, receiving the mission network's traffic via one or more Switched Port Analyzer (SPAN) ports from devices on the network. A downside to running out-of-band, however, is that SPAN ports can become overwhelmed in some circumstances. For instance, if traffic flow exceeds the capacity of the SPAN port or if the SPAN port is misconfigured. There is a chance some packets are not collected if the device cannot handle the throughput for traffic collection.
+
+﻿
+
+Network TAPs vs. Port Mirroring
+﻿
+
+It is worth considering that an ethernet TAP is not always the correct traffic capture solution. The ideal method is to use a physical network TAP — such as that produced by commercial vendor Gigamon — given enough available access and resources. This guarantees that no packets are modified prior to collection. The other method is to mirror the collected interface to a network SPAN port, which directs all mirrored traffic to a collection platform.
+
+﻿
+
+Compared to the SPAN port mirroring option, a physical TAP places no additional load on a switch, as the traffic does not need to be duplicated by the switch to the SPAN port, nor does it risk the switch dropping or delaying packets due to utilization, malformation, or buffering. The physical TAP also provides complete visibility into full-duplex networks, being able to read both sending and receiving data streams simultaneously. The disadvantage is the potential purchase and additional installation of costly new equipment where such TAPs do not already exist. For these reasons, a physical TAP is ideal in a high-traffic network environment where dropping packets is not acceptable, and the cost-to-benefit of the equipment is advisable.
+
+﻿
+
+In a low-traffic network where a few dropped packets are permissible, the option to mirror a port to the monitoring device is much more cost-effective. It uses already-existing capabilities in the network architecture and also captures intra-switch traffic, which a physical network TAP cannot do if placed on the network side of the switch.
+
+﻿
+
+Port Mirroring — SPAN 
+﻿
+
+Enterprise-level-managed switches can support various forms of port mirroring to enable capturing traffic from a Layer 2 perspective by replicating all frames sent or received by specific ports to another port. A sensor or traffic capture workstation can be placed on the port mirror to capture a copy of all frames. Port mirroring is useful for traffic capturing and continuous monitoring. There are three primary ways to mirror switch ports:
+
+SPAN
+Mirrors traffic from one or more interfaces or VLANs to another port on the same switch.
+Remote SPAN (RSPAN)
+Allows mirroring of traffic over Layer 2 links — meaning that the port that replicates all frames need not be on the same device as the ports being monitored. The replicated data traverses a VLAN dedicated for this session, traversing any trunk ports necessary to reach the destination port that mirrors all duplicated frames. This type of mirror can enable an organization to centralize packet traffic and monitoring.
+Encapsulated Remote SPAN (ERSPAN)
+Similar to RSPAN, but the traffic being sent to the remote device is encapsulated in Generic Routing Encapsulation (GRE) packets. This enables port mirroring over Layer 3 networks, such as mirroring ports from a mission network onto kit hardware.
+﻿
+Spanning Tree Protocol
+The STP allows switches to become aware of other switches on the network through the advertisement of Bridge Protocol Data Units (BPDU). STP builds a Layer 2, loop-free topology by temporarily blocking traffic on redundant ports. It operates by selecting a specific switch as the best switch and running a tree-based algorithm identifying which redundant ports should not transmit network traffic.
+
+﻿
+
+STP has multiple versions:
+
+802.1D: The original version
+PVST: Per-VLAN Spanning Tree 
+PVST+: Per-VLAN Spanning Tree Plus 
+RSTP: 802.1W Rapid Spanning Tree Protocol
+MST: 802.1S Multiple Spanning Tree Protocol
+The original modes of STP and PVST are typically not found in new hardware. Modern switches support PVST+, RSTP, and MST. All three versions are backward compatible with 802.1D as well.
+
+﻿
+
+This lesson covers the basics of the original STP version 802.1D, which provides the building blocks for learning how all versions operate. The other versions are beyond the scope of this lesson.
+
+﻿
+
+IEEE 802.1D — Original Spanning Tree Protocol
+﻿
+
+The original STP is from IEEE's 802.1D standards and supports ensuring a loop-free topology for one VLAN. Therefore, this topic is vital to understand as a foundation for learning how the other STP iterations operate.
+
+﻿
+
+802.1D Port States
+
+﻿
+
+In the 802.1D STP protocol, ports transition through the following states:
+
+﻿
+
+1. Disabled: The port is in an administratively disabled configuration (shut down).
+
+﻿
+
+2. Blocking: The state right after the switch port is enabled. The port does not forward any traffic, which ensures that no loop is created. The switch in this state does not modify the MAC address table, and it only receives BPDUs from other switches.
+
+﻿
+
+3. Listening: The switch port has transitioned out of the blocking state and sends/receives BPDUs. At this point, it cannot transmit any other network traffic. The duration of the listening state correlates to the STP forwarding time. 
+
+﻿
+
+4. Learning:  While the switch port is in this state, the switch can modify the MAC address table with traffic that it receives. The switch port — up to this point — only forwards BPDUs. The duration of the learning state correlates to the STP forwarding time.
+
+﻿
+
+5. Forwarding: The switch can update the MAC address table, and the switch port can forward all network traffic. During normal operations, the switch port stays in the forwarding state. 
+
+﻿
+
+6. Broken: The switch has detected a problem on a port that can have a significant impact. The port drops packets as long as the situation persists.
+
+﻿
+
+NOTE: Configured with the default timers, the entire 802.1D STP initialization from Blocking to Forwarding takes about 50 seconds.
+
+﻿
+
+Spanning Tree Port Types
+
+﻿
+
+The 802.1D STP standard defines three port types:
+
+Root Port (RP): Each VLAN should only have one associated RP on a switch. The RP is a switch port that connects directly to the root bridge or an upstream switch in the spanning-tree topology. 
+Designated Port (DP): There should be only one active designated port on a link. A DP is a switch port that receives and forwards BPDU frames to other switches and connects to downstream devices and other switches. 
+Blocking port: A port that is not forwarding traffic because of STP calculations.
+STP Key Terminology
+
+﻿
+
+There are several key terms related to the STP:
+
+Root bridge: Most critical switch in the Layer 2 topology. All switch ports are in a forwarding state. Therefore, the Root Bridge is considered the top of the spanning tree for all path calculations by other switches. 
+BPDU: A BPDU default destination MAC address is the multicast address 01:80:c2:00:00:00. They are used by switches to build and notify of changes in the STP topology. Two types of BPDUs exist:
+Configuration BPDUs: Used to identify the root bridge, root ports, designated ports, and blocking ports. The configuration BPDU contains the following fields: root path cost, root bridge identifier, local bridge identifier, max-age, hello time, forward delay, and STP type.
+Topology Change Notification (TCN) BPDU: Used to notify other switches of the Layer 2 topology changes.
+Root Path Cost: Combined cost of a specific path to the root switch.
+System priority: A 4-bit value with a default value of 32,768. Determines the priority for a switch to be the root bridge.
+System ID extension: A 12-bit value indicating the VLAN that a BPDU belongs to. The system priority and ID extension combine to form the switch's root bridge identification.
+Root bridge identifier: Combination of the root bridge system MAC address, system ID extension, and system priority. Represented as system priority value added to the system ID extension value and resulting value concatenated with the root bridge system MAC address.
+Local bridge identifier: Combination of the local switch's bridge system MAC address, system ID extension, and system priority. Represented as system priority value added to the system ID extension value and resulting value concatenated with the root bridge system MAC address.
+Max-age: With a default value of 20 seconds, this is the time threshold before a bridge port saves its BPDU information. If a switch loses contact with the switch that originated the BPDU, the BPDU is still valid until the Max-Age timer expires.
+Hello time: Interval in which a BPDU is transmitted out of a port. The Hello Time default value is two seconds, though the value can be configured anywhere between 1–10 seconds.
+Forward delay: Interval a port stays in the listening and learning states. The Forward delay default value is 15 seconds, though this value can be configured to a value between 4–30 seconds.
+NOTE: STP was developed before modern switches existed. Ethernet bridges were the early adopters of the STP. Switches today perform the same role as bridges at a much higher speed and scale. The terms bridge and switch are interchangeable in this lesson.
+
+﻿
+
+Spanning Tree Path Cost
+
+﻿
+
+The STP interface cost is a critical component for calculating the path to the root switch because the root path is found calculating the sum of the interface STP costs to reach the root bridge. The STP interface cost was initially stored as a 16-bit value with a reference value of 20 Gb/s (Gigabits Per Second). However, as switches have developed with higher-speed interfaces, 10 Gb/s might not be enough. Therefore, another method was developed, called Long-Mode, which uses a 32-bit value with a reference speed of 20 Tb/s (Terabits Per Second). In current switching Operating Systems (OS), the default mode continues to be the Short-Mode.  
+
+﻿
+
+﻿
+
+Table 10.1-1
+
+﻿
+
+Building the STP Topology
+﻿
+
+Figure 30-23 shows a simple network topology to demonstrate important STP concepts. The switches are running the default settings for STP. The focus is on VLAN 1, but VLANs 19, 20, and 21 also exist in the topology. SW1 is the root bridge, and the RP, DP, and blocking ports have been identified visually to assist in the following sections.
+
+﻿
+
+﻿
+
+Figure 10.1-23
+
+﻿
+
+STP Root Bridge — Election
+
+﻿
+
+The first goal for STP is to identify the root bridge in the topology. As a switch OS comes online, it assumes that it is the root bridge, and proceeds to use its local bridge ID as the root bridge ID. Then it listens to its neighbors' configuration BPDUs by following these two steps:
+
+If the neighbor's system Root Bridge Identifier is a higher value than its own, the switch ignores that BPDU and continues to see itself as the root bridge.
+If the neighbor's system Root Bridge Identifier is a lower value than its own, the switch updates its own BPDUs to include the new root bridge ID and a new root path cost related to the total path cost to reach the new root bridge. This process continues until all switches in the network have identified the root bridge switch.
+STP considers a switch more preferable if the priority in the bridge ID is lower than the priority of the other switch's configuration BPDUs. However, if the priority is the same, the switch prefers the BPDU with the lower system MAC.
+
+﻿
+
+NOTE: Generally, older switches have a lower MAC address and are preferable paths. Administrators can manually configure switches to optimize the placement of the root switch in a Layer 2 topology.
+
+﻿
+
+﻿
+
+Figure 10.1-24
+
+﻿
+
+In Figure 10.1-24, SW1 has been elected the root bridge because its system MAC address is the lowest in the network topology. This can be verified by using the show spanning-tree root command to display the root bridge. The example below demonstrates this command being run on SW1. The command output includes the VLAN number, root bridge ID, root path cost, hello time, max-age, and forwarding delay. Because SW1 is the root bridge, all ports are designated ports, so the Root Port field is empty. This method is one way to verify that the connected switch is the root bridge for the VLAN.
+
+﻿
+
+NOTE: Since all traffic not local to a switch is forwarded to the root bridge, it is critical to identify the location of the root bridge for optimal placement of PCAPs or network sensors. 
+
+﻿
+
+In the output of SW1’s show spanning-tree command, notice that the root bridge priority on SW1 for VLAN 1 is 32,769 and not 32,768 — the default value. The priority in the configuration BPDU packets is the priority plus the sys-id-ext value, which is the VLAN number. You can confirm this by looking at VLAN 40, which has a priority of 32,808, 40 higher than 32,768.
+
+﻿
+
+SW1#show spanning-tree root
+
+                                        Root    Hello Max Fwd
+Vlan                   Root ID          Cost    Time  Age Dly  Root Port
+---------------- -------------------- --------- ----- --- ---  ------------
+VLAN0001          32769 0021.df11.a423         0    2   20  15                                   
+VLAN0040          32808 0021.df11.a423         0    2   20  15                  
+VLAN0050          32818 0021.df11.a423         0    2   20  15                  
+VLAN0060          32828 0021.df11.a423         0    2   20  15                               
+SW1#       
+﻿
+
+The advertised root path cost is always the calculated value on the local switch. To elaborate, as BPDUs are received, the local root path cost is calculated by adding the local interface port cost plus the advertised root path cost. Thus, the root path cost is always zero on the root bridge. Figure 30-25 illustrates the root path cost as SW1 advertises the configuration BPDUs toward SW2, and then SW2’s configuration BPDUs toward SW3.
+
+﻿
+
+﻿
+
+Figure 10.1-25
+
+﻿
+
+Verify the show spanning-tree root output on SW2 and SW3. The Root ID field is the same as SW1, but the root path cost has changed to 4 because both switches use a 1 Gbps uplink to reach SW1. In addition, interface Gi0/0 has been identified on both SW2 and SW3 as the root port.
+
+﻿
+
+SW2#show spanning-tree root
+
+                                        Root    Hello Max Fwd
+Vlan                   Root ID          Cost    Time  Age Dly  Root Port
+---------------- -------------------- --------- ----- --- ---  ------------
+VLAN0001          32769 0021.df11.a423         4    2   20  15 Gi0/0                                  
+VLAN0040          32808 0021.df11.a423         4    2   20  15 Gi0/0                 
+VLAN0050          32818 0021.df11.a423         4    2   20  15 Gi0/0                 
+VLAN0060          32828 0021.df11.a423         4    2   20  15 Gi0/0                              
+SW2#       
+SW3#show spanning-tree root
+
+                                        Root    Hello Max Fwd
+Vlan                   Root ID          Cost    Time  Age Dly  Root Port
+---------------- -------------------- --------- ----- --- ---  ------------
+VLAN0001          32769 0021.df11.a423         4    2   20  15 Gi0/0                                  
+VLAN0040          32808 0021.df11.a423         4    2   20  15 Gi0/0                 
+VLAN0050          32818 0021.df11.a423         4    2   20  15 Gi0/0                 
+VLAN0060          32828 0021.df11.a423         4    2   20  15 Gi0/0                              
+SW3#       
+﻿
+
+Locating Root Ports
+
+﻿
+
+Once the switches have identified the root bridge, they need to determine their RP. The root bridge continues to transmit configuration BPDUs out of all its ports. The other switches compare the BPDU information to identify the RP. The RP is selected following the below logic (where the next criteria are used to break a tie):
+
+﻿
+
+1. The interface associated with the lowest path cost is the most preferred.
+
+﻿
+
+2. The interface associated with the lowest system priority of the advertising switch is preferred next.
+
+﻿
+
+3. The interface associated with the lowest system MAC address of the advertising switch is preferred next.
+
+﻿
+
+4. When multiple links are associated with the same switch, the lowest port priority from the advertising switch is preferred.
+
+﻿
+
+5. When multiple links are associated with the same switch, the lower port number from the advertising switch is preferred.
+
+﻿
+
+﻿
+
+Figure 10.1-26
+
+﻿
+
+Notice that port Gi0/1 on SW2 is the DP and Port G0/1 on SW3 is Blocked (B). This is because SW2 has the lower MAC address, which meets the condition of tiebreaker #3 as the interface associated with the lowest MAC address.
+
+MAC Flooding Conclusion
+As shown, this PCAP is indeed consistent with a MAC flooding attack. As discussed before, mitigations to prevent this type of attack would likely involve the network owner implementing authentication, port security, or whitelisting. Exactly which solution — or combination of solutions — is appropriate depends on the network and its usage.
+
+﻿
+
+During this particular attack, the attacker was able to flood a switch with MAC addresses. While access to the switch is not given during this mission, assuming the switch has not been configured with these procedures to mitigate these types of attacks, the attacker may have had visibility into all traffic passing through this switch due to a failover to broadcast — or hub — mode.
+Hot Standby Router Protocol (HSRP): Cisco protocol that automates failover of gateway devicesARP: Used to advertise and request IP address to MAC address mappingsOpen Shortest Path First (OSPF): Routing protocol used to share and calculate routes between Layer 3 devices — its usage is covered in the Routing lesson
+These are all noisy protocols, and while flooding or spoofing is possible, that is out of the scope of this lesson.
+
+trategic TAP Placement | TAP Locations
+TAP Locations
+﻿
+
+Determining TAP placement in the network depends on the information required to complete the objectives of the engagement.
+
+﻿
+
+Figure 10.1-28 is an example of a simple network setup:
+
+﻿
+
+﻿
+
+Figure 10.1-28
+
+﻿
+
+Placement Considerations
+﻿
+
+What traffic is necessary to collect?
+
+﻿
+
+If the TAP is incorrectly located, vital mission data may be omitted or unnecessary data may be collected. For example, when conducting a hunt for a suspected compromise that has already penetrated external defenses, all network traffic in the internal network — behind the internal firewall — is to be collected. Placement on the External Router would be insufficient in that case.
+
+﻿
+
+Does one place a TAP on the router or the switches?
+
+﻿
+
+Tapping the Internal Router, the client-to-client communications or potential lateral movement from one workstation to another would be omitted. To effectively collect all the internal network traffic in this scenario, place TAPs or sensors in multiple locations.
+
+﻿
+
+Is seeing what is going to the Demilitarized Zone (DMZ) or External Router important?
+
+﻿
+
+That depends on the amount of traffic flowing to the DMZ. If seeing the traffic to the DMZ helps accomplish mission objectives, then it is a good idea to TAP at that location. However, make sure the necessary configuration requirements and filters are in place.
+
+﻿
+
+There are many elements to take into consideration when placing a TAP. If placing a TAP on the External Firewall before traffic is filtered by the device, one runs the risk of collecting more information than the sensor can process. Different routers and switches have their own hardware limitations that should be taken into consideration when placing a TAP.
+
+﻿
+
+Trust Boundaries
+﻿
+
+Sensors for full PCAP should be placed at trust boundaries, which are connections between trusted and untrusted networks. For example, if a firewall separates a trusted intranet and the untrusted internet, then the full PCAP sensor should be mirroring or tapping that device on the internal side. This allows monitoring of all communication that the firewall allows from the untrusted network and all information that trusted agents inside the intranet are sending out to the untrusted network.
+
+﻿
+
+Network Address Translation
+﻿
+
+The other consideration in TAP or sensor placement is that if the environment employs NAT, the collection should occur on the trusted side of translation. In the scenario in which a trusted system is compromised, if only the external translated address is available for analysis, then the specific system is unknown. However, by collecting on the trusted side, the internal address appears in captures and allows precise analysis of compromise and any lateral movement within the network.
+
+Executing a Network Hunt Conclusion
+Now that the malicious threat actor is quarantined, and traffic flow cannot leave this quarantine VLAN for this device, the on-site operators can take over from here. The device is to be monitored for a while, then taken offline and a forensic image created.
+
+﻿
+
+This device had access to other VLANs on the network through inter-VLAN routing. Because this device has been moved to the quarantine VLAN, it has no reachable routes that allow it to connect to other VLANs on the network.
+
+
