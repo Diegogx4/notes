@@ -7,7 +7,7 @@ In computer science, library has a few definitions. For the purposes of this cou
 
 Libraries are referenced by new programs via a process known as linking. Libraries are linked statically or dynamically. Static linking copies all the referenced portions of the library into the resulting program image, while dynamic linking references the library instead of copying the library.
 
-Static Libraries
+* Static Libraries
 
 On Windows, libraries that are intended to be statically linked use the .lib file extension by convention. Linux prepends these files with lib and the file ending with .a. Since static libraries are copied to, and included in, the resulting binary at compile time, updating these libraries generally requires recompiling the program.
 
@@ -16,7 +16,7 @@ Tradeoffs for static libraries:
 Each application that references a static library requires the library to be loaded separately.May have performance implications due to being embedded in the application. This often results in larger assembly size, however, less overhead exists for method calls.
 Application updates require recompilation and distribution of the executable in order to take advantage of security patches in newer versions of the library.Statically linked libraries require modification of the executable to tamper with the functions of the library, making them less susceptible to many library-based attacks.
 
-Dynamic Libraries
+* Dynamic Libraries
 
 
 On Windows, dynamic libraries use the .dll file extension by convention; Linux uses .so. These libraries are stored externally to the application, so they can be updated independently of the executable that uses them. In addition to compile-time linking, these libraries can be bound to at runtime — an example of which is using rundll32.exe to execute code found within a Dynamic Link Library (DLL).
@@ -31,7 +31,11 @@ Most OSs share memory for each loaded library, meaning some memory savings are a
 
 Windows Libraries
 
-On Windows, dynamic libraries can be found in various places. Libraries shared by multiple applications might exist in a specific shared library, like an installation in C:\Program Files\ or by convention by the library provider. Libraries are also found in an application’s directory or in Windows system folders like System32. On Windows systems, there are various readily available programs to view modules (libraries) loaded by processes including Process Explorer, Process Hacker, PowerShell’s Get-Process cmdlet, etc.
+On Windows, dynamic libraries can be found in various places. Libraries shared by multiple applications might exist in a specific shared library, like an installation in C:\Program Files\ or by convention by the library provider. Libraries are also found in an application’s directory or in Windows system folders like System32. On Windows systems, there are various readily available programs to view modules (libraries) loaded by processes including 
+Process Explorer,
+Process Hacker, 
+PowerShell’s Get-Process cmdlet, 
+etc.
 
 Processes with links to dynamic libraries typically search for libraries in the following ways:
 Checks if the library is already loaded in memoryChecks if knowndlls registry entry exists for the DLLControlled by HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs — intended to speed up access to specific DLLs, however some security implications may exist if an attacker has elevated permissions on the host.
@@ -104,7 +108,7 @@ One or more threads to execute instructions
 
 These elements work in tandem by containing the data and carrying out the instructions that allow a process to run properly.
 
-Virtual Memory Space
+* Virtual Memory Space  helps processes run faster
 
 In Windows, memory space is divided into an area that user-mode processes access and a second area that is used exclusively by the kernel and kernel processes. 
 The user mode virtual memory space is further divided between running processes. Each process’s user mode virtual memory space is private to that process; no processes are able to directly access another process’s virtual memory space. This is to prevent one process from interfering with another. However, such interference is possible through the Windows Application Programming Interface (API) and is demonstrated in other lessons. In contrast, kernel mode memory is shared by all processes on the system since there is only one kernel.
@@ -343,23 +347,7 @@ Service Host Process — svchost.exe
 
 Svchost.exe is a generic host process name for services that run from DLLs. Since DLLs cannot be run directly, the service host process is an executable shell that loads the Windows services libraries and executes them. There are often many svchost.exe entries in a running process list because if a single process was hosting every necessary Windows service, then the failure of that process would cause OS failure. So individual services are started from discrete instances of the service host process. Figure 8.2-41 is a screenshot of the Task Manager Details tab showing many svchost.exe processes running.
 
-﻿
-
-﻿
-
-Figure 8.2-41
-
-﻿
-
 Figure 8.2-42 shows the Services tab of Task Manager, which shows the services running inside the svchost.exe processes. Each group of services is a single svchost.exe process instance.
-
-﻿
-
-﻿
-
-Figure 8.2-42
-
-﻿
 
 Since this process is commonly seen but simultaneously poorly understood by the average user, this process name is a frequent target of masquerade by threat actors to attempt to hide through obfuscation, which is described in MITRE technique ID T1036.005 Masquerading: Match Legitimate Name or Location. Additionally, due to its role as a host for services running with NT\System level privileges, which are the highest possible privileges in a Windows OS, this process is a frequent target for process injection as well, described in MITRE technique ID T1055 Process Injection, or spoofing svchost.exe as a parent PID for a malicious process, described in MITRE technique ID T1134.004 Access Token Manipulation: Parent PID Spoofing.
 
