@@ -69,7 +69,7 @@ PS C:\Windows\system32> Get-CIMInstance win32_service | ?{$_.Name -like '*spool*
 lol
 Get-CIMInstance -ComputerName cda-dc win32_service | ?{$_.Name -like '*spool*'} | select *
 
-sc qc
+sc qc ' '
 sc query
 
 Module 9 Lesson 1 Extra Material Prep Job Sheet
@@ -243,23 +243,10 @@ Event 4624 is the event An account was successfully logged on. — This is gener
 The Logon Type field is especially important in this type of event. The types correspond to Table 9.3-2.
 This access technique usually follows successful reconnaissance using MITRE Technique T1589.001: Gather Victim Identity Information: Credentials. 
 ﻿
-
-﻿
-
-Table 9.3-2
-
-﻿
-
 Event 4625 is the event An account failed to log on. — This is the opposite and analogous case of 4624. A number of these logs in short succession on the same accounts is indicative of a brute force password attack in progress. 
 There are a number of codes indicating why the logon failed that help with analysis of these events. The most useful code in detecting a brute force attack is 0xC000006A, in occurs when a threat actor attempts numerous wrong passwords against a valid user account.
 This credential access technique is described in MITRE Technique T1110: Brute Force.  
-﻿
 
-﻿
-
-Table 9.3-3
-
-﻿
 
 Event 4672 is the event Special privileges assigned to new logon. — This event indicates that a user in a highly privileged group, such as local or domain administrators, has logged on and given the appropriate privileges to their logon session. If an adversary has obtained an administrator-level account, this event indicate those logins, so finding these events with an unauthorized administrator account is indicative of privileged adversary persistence in the network.
 This access technique usually follows successful reconnaissance to obtain administrator credentials using MITRE Technique T1589.001: Gather Victim Identity Information: Credentials.  
@@ -271,19 +258,7 @@ This persistence or privilege escalation technique is described in MITRE Techniq
 Event 7045 is the event A new service was installed. — This event indicates a successful installation of a Windows service, which is a routine event. However, when MCA is suspected, each of these event should be investigated to determine if the installed service is benign.
 The most relevant information to pay attention to in examining these logs is the Service Name, Service Type, and Service Start Type. Services that start automatically (Service Start Type 2) are highly favored by attackers for persistence.
 This event also logs when adversaries use the persistence technique is described in MITRE Technique T1543.003: Create or Modify System Process: Windows Service.  
-﻿
 
-﻿
-
-Table 9.3-4
-
-﻿
-
-﻿
-
-Table 9.3-5
-
-﻿
 
 Event 4688 is the event A new process has been created. — This event triggers often and is largely normal operating activity, so in a blind hunt, these logs are more noise than helpful. However, when the malicious process is known, searching for that process in these logs can reveal a great deal of information about how that process was spawned (i.e., potential vulnerabilities exploited) and other processes that were spawned by the malicious process as a parent (i.e., potential behavior post-compromise).
 This persistence or privilege escalation technique is described in MITRE Technique T1543: Create or Modify System Process.
@@ -327,257 +302,18 @@ The malicious .exe file was copied to the user’s AppData folder — C:\Users\p
 
 4624, 4625, 4720, 4732, 7030, 7045, 4688, 4670, 4672, 1006, 1007, 4657
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+cff explorer
+binary path c to .exe
+registry path = full
+import
+dll
+api calls bottom
+export specfic 
+none = good
+get-itemproperty up to run to see in folder
+{5454} =regedit
+dont look for any other service
+same for api
 
 
 
