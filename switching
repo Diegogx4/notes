@@ -774,4 +774,281 @@ Now that the malicious threat actor is quarantined, and traffic flow cannot leav
 
 This device had access to other VLANs on the network through inter-VLAN routing. Because this device has been moved to the quarantine VLAN, it has no reachable routes that allow it to connect to other VLANs on the network.
 
+Microsoft uses a layered approach to networking with each layer supporting the ones above and below. Very simplistically:
+Windows applications call high-level networking APIs, like WinHTTPHigh-level APIs use the Winsock API to package up the data and decide which transport protocols to use and the associated addressing used for those transport protocolsOne or more LSPs process the data and pass it to the corresponding TSPThe TSP then interfaces with the kernel drivers and APIs to actually craft packets and frames, and send out over the physical medium
+
+
+Winsock Kernel
+
+
+Winsock is based on the Berkeley Software Distribution (BSD) Sockets API that became the standard for UNIX systems. WSK is a kernel-mode network programming interface that interfaces with networking hardware to perform Input/Output (I/O) operations. User-mode operations with WSK occur using the Winsock 2 SPI. The Winsock 2 functions are implemented in ws2_32.dll. WSK provides network communication using socket-like programming you may already be familiar with. 
+
+
+A client using the Winsock API uses the following sequence and function calls to send and receive network traffic:
+Calls a Winsock initialization functionCreates a socketCalls getaddrinfo to obtain the address of the server it wants to connect to (such as an Internet Protocol version 4 [IPv4] address)Calls connect — includes the server address/port returned from getaddrinfo — to start a connectionCalls send and recv to send and receive data across the socket
+A server using the Winsock API uses the following sequence to send and receive network traffic:
+Calls a Winsock initialization functionCreates a socketBinds the new socket to listen on a local address using bind. The address (local interface — or all interfaces — and a port number for TCP and UDP) it binds to is usually pre-defined and does not change so that clients always know how to connect to that server application (for example HTTP usually binds to TCP port 80)For connection-oriented services (e.g., TCP, Sequenced Packet Exchange [SPX]) the application performs a listen with a backlog (the number of connections the server asks Winsock to hold in reserve until it is able to accept them)Call accept, which waits for a connection from a client, and will create a new socket for the connection  between the server and client, and leaves the original socket still listening for new connectionsCalls send and recv to send and receive data across the socket
+
+Notice that the display is similar to that seen in Wireshark’s Follow Stream displays (shown in earlier lessons). Arkime shows a summary of the various encapsulated protocols (e.g., Ethernet, UDP) and includes a display of the source and destination data. This example is a hex output of the bytes included in the data portion of the packet. Some of the output that was seen in the nbtstat command earlier can be seen in the response from 172.16.4.4 (cda-exec-3). NetBIOS and RPC communication can also be analyzed in Kibana using the event.dataset.keyword: dce_rpc filter.
+
+
+Packet filtering firewall (stateless): Operates at the network layer and compares incoming and outgoing packets to ACL. These ACLs are basic and typically only include Internet Protocol (IP) addresses, protocols, ports, and an action such as approve or deny. Each packet is checked against the rule without any additional tracking of connections or state.Circuit-level gateways: Similar to packet filtering firewalls, except they check the session-level protocols for a valid connection. They typically operate on User Datagram Protocol (UDP) and Transport Control Protocol (TCP) and create a virtual circuit with the internal host. The connection to the external host appears to come from the gateway. This is similar to how Network Address Translation (NAT) and Port Address Translation (PAT) function, except the gateway creates a separate connection and ensures a connection is valid before continuing to forward packets.Stateful inspection firewall: Similar to packet filtering firewall, except they also keep track of established connections and create dynamic rules based on a state table. The state table is built when a connection is completed (using a connection-based protocol like TCP) and includes the source and destination IP addresses and ports. A dynamic rule is added to allow packets that match an established connection’s state and drops packets that are not part of an established connection. Due to the increased processing of the packets/sessions, they consume more resources than packet filtering firewalls and circuit-level gateways.Application-level gateway (proxy firewalls): Similar to circuit-level gateways, but provide much deeper inspection, including the same functions as a stateful firewall. The internal and external hosts do not directly connect, instead there are separate connections made to the proxy. The proxy performs state inspection and has complete access to the communication so rules can be very specific about the internals or details of the data traversing the proxy. This is also called deep-packet inspection. Deep-packet inspection can be bypassed or enabled based on conditions set by the administrator. The more processing of a packet/session a proxy conducts, the more processing power and resources it requires, which can be a significant bottleneck for network throughput.
+Vendors also market next-generation firewalls, which do not have a standard, so the features they employ are dependent on what the vendor implements. These next-generation firewalls are operating at the application-level like proxy firewalls. Additional features a next-generation firewall employs may include:
+Zero-trust sandboxing: Placing devices in an isolated enclave until certain security checks have been completed (e.g., antivirus scan, patch scan, etc.)Role-based: Specify rules based on a configured role assigned to a user (e.g., only certain users can connect with wireless devices)Artificial Intelligence (AI)/Machine Learning (ML): May use AI/ML to dynamically create rules to allow or block trafficSecure Sockets Layer (SSL)/Transport Layer Security (TLS) decryption: Requires internal clients to create an encrypted connection with the proxy, which creates a separate encrypted connection to the external host. This allows the device to decrypt and inspect data traversing the proxy (very resource intensive).IDS/IPS functions: May include IDS (passive) or IPS (active) defenses instead of using a separate device or server
+
+Host IDS/IPS
+There are many different types and products that can perform IDS/IPS functions, which are usually included as part of a host security or Endpoint Detection and Response (EDR) software suite. Many vendors provide feature comparisons and rankings, but for most CPT missions, the EDR product is already deployed. As an example, Figure 11.2-13 shows eSecurity Planet’s product comparison table from July 2021.
+
+﻿
+
+﻿
+
+Figure 11.2-13 — Image from eSecurity Planet
+
+﻿
+
+As can be seen, there are many different features and functions that can be included in these endpoint products, and different vendors use different models for specific features they include. Many of these products have cloud-based analysis solutions that use AI/ML on data from their customer’s networks to identify emerging threats and for behavioral analysis and detection. As off-premises — or outside of an enterprise network — solutions use data from within a protected network. Understanding what data is sent to the cloud analysis platform — and how it is protected or otherwise attributed to the network being monitored — is critical in the design and acceptance of these solutions.
+
+﻿
+
+DoD systems use a Host Based Security System (HBSS) based on McAfee, Inc’s HIPS, Asset Publishing Service (APS), Rouge System Detection (RSD), Assets Baseline Module (ABM), Device Control Module (DCM), Policy Auditor (PA), and ePolicy Orchestrator (ePO) products. 
+
+﻿
+
+Advanced threat actors — and those associated with nation states — often test their toolset against the capabilities of the security device and software vendors. This is why a strong defense-in-depth architecture is important. A threat actor’s tool may not be detected by a single security application/device so having layered security — to include network monitoring, network security devices, log analysis tools, etc. — is critical to preventing, detecting, and clearing MCA from protected networks.
+
+﻿
+
+Network IDS/IPS
+﻿
+
+Network IDS/IPS systems — like Snort and Suricata — rely on network packet capture to analyze the data that is traversing a network. These systems use rules to generate passive alerts or active defenses to detect and protect against active threat-related traffic. An active defense may include adding a firewall rule to stop the suspected malicious traffic, sending ICMP unreachable packets to stop communications, or send TCP Reset (RST) packets to tear down TCP connections. Sensor placement is critical for these systems to ensure there are no gaps in coverage to protect the network.
+
+﻿
+
+Suricata
+﻿
+
+Suricata is an open-source Network Security Monitoring (NSM) solution that can be used as a NIDS and an IPS. Suricata uses rules to perform actions — like alerting a security analyst — on live or recorded Packet Capture (PCAP) data. The rule format Suricata uses is compatible with other NSM applications — including Snort — and also supports the Lua scripting language to extend processing and alerting beyond the traditional rules format. While Snort has been around longer than Suricata, Suricata has several features that are not currently available in Snort. Suricata features include:
+
+Multithreaded: Supports running many threads to take advantage of multi-core Central Processing Units (CPU)
+Hardware acceleration: Supports using graphics cards to process and inspect network traffic
+File extraction: Supports recognizing, extracting, and saving files from network traffic
+Scripting: Uses the Lua scripting language
+The Suricata documentation includes the full feature set.
+
+﻿
+
+Security Onion and Suricata
+﻿
+
+Suricata is often deployed as part of the Security Onion (SO) suite. SO has three alerting engines: Suricata, Wazuh, and Playbook. Each of these engines has its own alerting system and severity, which SO converts into a standard level:
+
+﻿
+
+﻿
+
+Table 11.2-1
+
+﻿
+
+The security community has compiled an open-source set of rules using the Emerging Threats (ET) — under the Open Information Security Foundation — repository maintained by Proofpoint, Inc. These rules are submitted and validated by volunteers and distributed under the BSD license and GNU Public License (GPL). The ET ruleset consists of two portions: 
+
+ET rules are prefaced with ET
+Snort rules — under the GPL license — are prefaced with GPL
+This allows analysts to differentiate from which portion of the ruleset an alert/rule was triggered. There are other rulesets available — some of which require a paid subscription — but the format and configuration is the same as Snort rules.
+
+﻿
+
+Suricata alerts can be seen in the Alerts section of SO or in Kibana with the built-in dashboard for Suricata or a custom dashboard.
+
+﻿Suricata Rules
+Suricata rules are comprised of three parts:
+
+Action: What happens when the signature matches
+Header: Describes the protocol, IP address, ports, and network flow direction of the rule
+Rule options: Specifics of the rule
+﻿
+
+Figure 11.2-14
+
+﻿
+
+Figure 11.2-14 is an example of a Suricata rule with the three parts colored for clarification.
+
+﻿
+
+Actions
+﻿
+
+﻿
+
+Figure 11.2-15
+
+﻿
+
+The action describes what happens when Suricata matches the rule with some traffic that has been captured. Suricata can act in a passive mode — IDS — where only alerts are generated, or in a more active — IPS — role where the rule defines some action to affect the attempted network communication. For Suricata to act as an IPS, it needs to be placed inline with the network it is protecting, as discussed in earlier lessons. The actions available are:
+
+alert: Generates an alert; the only option available in a passive role
+pass: Stops further inspection of the packet; typically because it is expected or not suspicious
+drop: Drops the packet and generates an alert; similar to a firewall that drops a packet
+reject: Sends a packet with the RST flag and/or an ICMP unreachable packet to the sender — originator — of the matching packet; this closes any TCP session in the process of being setup
+rejectsrc: Same as reject
+rejectdst: Sends a RST/ICMP unreachable to the destination host; the matching packet was addressed
+rejectboth: Sends a RST/ICMP unreachable to both sides of the conversation
+When Suricata is in an IPS mode, any of the reject actions also drop the packet from further forwarding. The example rule shown in Figure 11.2-15 is a passive rule. Active IPS rules are discussed further in later courses.
+
+﻿
+
+Header
+﻿
+
+﻿
+
+Figure 11.2-16
+
+﻿
+
+Protocol: The first field in the header is the protocol, in this case TCP. There are a variety of application layer protocols available, some related to OT — such as ICS and SCADA — require additional configuration to enable.
+
+﻿
+
+﻿
+
+Table 11.2-2
+
+﻿
+
+NOTE: To enable or disable protocols, make the appropriate changes to the suricata.yaml configuration file (location dependent upon installation). Rules are disabled if the first character in the line is the # character.
+
+﻿
+
+Source and Destination: The second and third fields are for the source of the traffic. This can be a single IP address, an IP address range, a grouping of IP addresses, or a variable defined in the configuration files. The $HOME_NET variable is intended to hold the IP addresses/ranges associated with the network being protected. The in-range Suricata instance is configured with the following variables
+
+﻿
+
+﻿
+
+Figure 11.2-17
+
+﻿
+
+The rule in Figure 11.2-17 matches sources from any IP address and any port ($EXTERNAL_NET is any) with the destination of one of the IP addresses in the $HOME_NET variable and port 22. The -> arrow indicates the direction of packets. A rule that matches packets going both directions will have a <> arrow.
+
+﻿
+
+Rule Options
+﻿
+
+﻿
+
+Figure 11.2-18
+
+﻿
+
+The Options section of a Suricata rule is composed of keywords and settings. Not all keywords have settings, but there may be multiple settings separated by commas — keywords are separated by semicolons. In Figure 11.2-18, the keywords are:
+
+msg: The alert message associated with this rule
+flow: flow:to_server matches packets from a client to a server
+flags: flags:S,12 matches TCP SYN packets or TCP packets with the two reserved bits set
+threshold: A threshold used to control the rule’s alert frequency
+threshold:type both, track by_src, count 5, second 120 only alerts when a threshold of five matched packets from the same source IP address is exceeded within 120 seconds and only alerts five times in 120 seconds. The threshold: type setting has three options:
+threshold: Only alerts when the count setting is exceeded in the second time period
+limit: Only alerts count number of times in the second time period
+both: Only alerts when the count setting is exceeded in the second time period and alerts at maximum count times in the second time period
+reference: A reference to where more information about the signature/alert can be found
+classtype: Classification of the rule and alert; consists of a short name, and optionally, a long name, and priority
+sid: Signature Identifier (ID)
+rev: Revision of the signature
+metadata: Additional non-functional information about the signature
+Keywords can be negated using the exclamation point (!) prior to the keyword to negate:
+
+﻿
+
+alert tcp $EXTERNAL_NET any -> $HOME_NET !22
+﻿
+
+ This changes the rule from matching traffic destined for port 22 to traffic destined not for port 22 on the $HOME_NET.
+
+﻿
+
+There are hundreds of keywords and settings that are tailored to specific protocols and configurations discussed in the Suricata documentation. Additionally, Suricata has keywords associated with datasets to allow matching against large amounts of data. For example, a DNS blacklist or the Alexa Top 1 Million Sites dataset. The Top 1 Million Sites dataset is a compiled list of domains or websites that are found to have the most traffic and is maintained by the internet company Alexa — Alexa has paid products as well. Since the domains created by threat actors do not typically have listings in this top million sites, creating alerts for DNS lookups that are not in the top million sites can create a much smaller subset of DNS lookups for analysts to review. This may highlight activity in an early stage of a threat actor’s campaign. If a specific domain is known to be used by a threat actor, an alert and rule can be created to highlight those specific domains, or other Indicators of Compromise (IoC).
+
+et -suricata
+gpl -snort
+
+OT Network Considerations
+OT networks often use bus- and serial-related protocols to communicate among devices, but also typically have some management bridge between the OT segment and one or more devices on a TCP/IP protocol stack. OT is used to refer to a variety of networks including: 
+
+SCADA
+ICS
+Distributed Control Systems (DCS)
+Programmable Logic Controllers (PLC)
+Shipboard Hull Mechanical and Electrical (HM&E)
+Remote Terminal Units (RTU)
+These systems are used in everything from nuclear power plants, water and gas distribution systems, automotive vehicle Controller Area Networks (CAN), building environmental controls, and security systems. These systems — when originally developed — were not intended to be joined on an interconnected network, rather in completely closed looped systems. It is now much more common to have both IT and OT networks interconnected using a security device to separate the enclaves.
+
+﻿
+
+Many of the OT network protocols are built on proprietary equipment manufacturer requirements and may not be documented or publicly available. Some of the more common OT network protocols include: 
+
+DNP3
+Modbus
+Process Field Bus (Profibus)
+Local Operating Network (LonWorks)
+Digital Addressable Lighting Interface (DALI)
+Building Automation and Control Network (BACnet)
+Konnex (KNX)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
