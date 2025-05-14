@@ -1,0 +1,423 @@
+What is a SIEM?
+
+
+A SIEM is central to the modern Information Technology (IT) infrastructure. It is a software solution that aggregates and analyzes activity from many different resources. A SIEM processes data coming into and departing from networks and systems that are under an organization’s control. Some SIEMs come with extensive functionality for data indexing, presentation, and alerts. However, the data ingested into a SIEM is only as useful as the accuracy of the data indices and filtering capabilities. The success of a SIEM is directly related to the administrator’s expertise with the accuracy of the data.
+
+
+A SIEM collects data from hosts on the network including: switches, routers, servers, Domain Controllers (DC), and workstations. SIEMs store, normalize, and aggregate data analytics, which allows analysts to discover trends, detect threats, and enable organizations to investigate alerts.
+
+Capabilities and Applications
+A SIEM has a range of capabilities that, when combined and integrated, offer security monitoring and correlation of multiple data sources. The software allows security teams to gain insights on the attacker with threat rules derived from attacker Tactics, Techniques, and Procedures (TTP) and known Indicators of Compromise (IOC). The common capabilities and applications of a SIEM include:
+
+Data Aggregation
+SIEMs aggregate and consolidate data from across the enterprise’s network devices and endpoints. Each node on the network continually processes large amounts of data. A SIEM is able to aggregate the data being processed.
+Data Normalization
+Aggregated data often has disparities and different fields. Data normalization is the process of structuring data commonly found in a relational database or SIEM. The data is structured in accordance with a series of normal forms. The normal forms are filters designed to reduce data redundancy and improve data integrity. The filters process the data by organizing it to avoid:
+Data Redundancy: Unintentional occurrence of the same piece of data being held in two separate places
+Insertion Anomaly: Inability to add data to the database or SIEM due to absence of other data
+Update Anomaly: Data inconsistency that results from data redundancy
+Deletion Anomaly: Unintended loss of data due to deletion of other data
+Centralized Dashboard
+SIEMs aggregate and consolidate data from across the enterprise’s network devices and endpoints into one centralized dashboard. The dashboard is updated in realtime and allows an analyst to see a live snapshot of the enterprise. A sample dashboard is provided in Figure 13.1-2:
+﻿
+Analysis and Security Event Correlation
+SIEM enables analysts to access data and make decisions regarding potential signs of a data breach, threat, attack, or vulnerability.
+﻿
+Use Cases
+
+
+There are multiple scenarios and use cases for when a SIEM is useful and should be implemented. An organization should leverage a SIEM’s capabilities to help in the following scenarios: 
+Anomaly DetectionOutliers and deviations from typical or expected behavior is an indicator of potentially Malicious Cyberspace Activity (MCA). SIEM enables the ability to detect anomalous behaviors; these are behaviors out of the norm or unexpected. Users take the information provided by the SIEM detection and further investigate the behavior. For instance, the domain administrator on a network typically logs in at approximately 0800 and logs out at approximately 1600. The domain administrator follows this routine, give or take an hour, on a weekly basis. However, recently the domain administrator's account was recorded as logging in and out at 0300. The SIEM collects the data regarding the anomaly and potentially alerts analysts. 
+Incident Response (IR)SIEM does not provide IR alone; it enables analysts to see a real-time view of their network and make decisions regarding IR. Analysts have a centralized view of machines and/or devices that may be affected. SIEM allows responders to query the network based on necessary requirements and make decisions quickly. 
+Insider Threat PreventionsInsider threats are a major vulnerability to organizations. Users who have access to the network need to be constantly monitored. SIEM enables user monitoring; an analyst can create alerts and notifications based on anomalous or questionable activity that may occur on the network. Analysts are quickly able to identify the activity and make informed decisions.
+
+SIEMs provide all required security monitoring — free from user analysis or input. -- false
+
+For a SIEM, how is data normalization best defined?
+Aggregates and consolidates data from across the enterprise’s network devices
+
+Which best describes Process in the Data Science Lifecycle?
+Data mining, clustering/classification, data modeling, data summarization
+
+Operationalizing Data Science
+Data science enables Security Operations (SecOps) to more effectively protect systems. Data scientists take the large amount of security information collected by SIEM and provide meaningful algorithms and schema. Security analysts are able to review the model output and make informed decisions. 
+
+﻿
+
+Data science is critical to SecOps. Operationalizing security-related data and increasing SecOps posture is possible with data scientists. 
+
+﻿
+
+Data engineering enables SecOps by developing, constructing, testing, and maintaining databases and large-scale processing systems. Data engineers typically deal with raw data more than data scientists. Data engineers handle the data that is unformatted and unvalidated. It is a primary responsibility of data engineers to recommend and aid in implementing methods to improve data reliability, efficiency, and quality. 
+
+﻿
+
+Data science and data engineering allow for the following:
+
+The creation, development, and maintenance of usable and scalable data repositories.
+The ability to ingest data in a proper fashion, in order to maximize value and minimize expense (storage requirements, processing power, etc.).
+The ability to ask advanced questions of a data set. For example, correlating multiple log sources together via advanced methods to produce a better picture of what is actually going on in an environment.
+A better understanding of the inner workings of data platforms and data sets, so that results are properly and responsibly contextualized, communicated, and understood.
+
+Data science has enabled SecOps to more effectively protect systems.
+true
+
+SIEM Parts and Pieces
+Below is a representation of a common SIEM architecture: 
+
+Data Sources
+﻿
+
+Data is collected at the source. The source can be from a variety of nodes on the network:
+
+Network devices: Routers, switches, gateways
+Security devices: Firewalls, proxies, Intrusion Detection Systems (IDS)
+Hosts: Workstations and servers
+An agent can be deployed on the node; the agent is responsible for collecting data from the device it is installed on. The agent packages and ships the data to the data management stage of the SIEM architecture. Often, network devices such as routers and switches do not have agents, but leverage existing built-in functionality. Network devices may use Simple Network Management Protocol (SNMP) and System Logging Protocol (Syslog) to send data to a centralized server or directly to the SIEM.
+
+﻿
+
+Data Management
+﻿
+
+At the Data Management phase of the SIEM architecture, data aggregation takes place; data is delivered from agents across the enterprise. The role of data management is to properly aggregate the data by type, location, etc. Data management is also responsible for data storage, where data is maintained and made available for access. 
+
+﻿
+
+Models and Analytics
+﻿
+
+The Models and Analytics stage is where data science plays a key role. At this point of the architecture models, mathematics and schema are applied to the data; the result is data analytics. The analytics developed and applied at this stage drive analysis and decision-making by security analysts. 
+
+﻿
+
+User Interface
+﻿
+
+At the User Interface (UI) phase of the SIEM architecture, data is displayed for the end-user via dashboards. The dashboards are populated by the data — both raw and manipulated — collected from the agents deployed across the enterprise. At this point, analysts view the models and analytics being executed — as well as create their own. The dashboards allow for customization and are able to be tailored to their exact purpose. The UI also allows analysts to query all the data collected. 
+
+Which is NOT a phase of the SIEM architecture?
+Data Allocation
+
+Users can only query data that has been included in the Models and Analytics phase of the SIEM architecture.
+False
+
+Data Source Types and Manual Ingestion
+Host-Based Security Systems (HBSS)
+What is it?
+HBSS is a suite of Commercial-Off-The-Shelf (COTS) applications created by McAfee. HBSS provides anti-virus detection rules. If a detection rule is triggered the user is alerted of the potentially harmful activity. 
+How does it pertain to an investigation?
+HBSS notifications of detection rule positive hits allow for starting points in IR. When the anti-virus is triggered users are able to gather the information — what behavior triggered the notification, which node or network layer is affected, etc. — and start the investigation. 
+Data Source and MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK)
+Adversaries may attempt to get a listing of services running on remote hosts, including those that may be vulnerable to remote software exploitation. Methods to acquire this information include port and vulnerability scans using tools that are brought onto a system.
+﻿
+
+Windows Events
+What is it?
+Windows Operating Systems (OS) provide system process tracking through Windows event logs; viewable in Windows Event Viewer and exportable through .evtx files. Windows event logs track unique occurrences on Windows OSs in the network. These occurrences include:
+Successful/failed logons
+Account creation
+Running a program
+How does it pertain to an investigation?
+Windows event logs enable analysts to track events that occur on a Windows OS. Analysts are able to view and connect occurrences of events and the time and date stamp associated with them.
+Data Source and MITRE ATT&CK
+Adversaries may disable Windows event logging to limit data that can be leveraged for detections and audits. The data is used by security tools and analysts to generate detections.
+Adversaries may target system-wide logging or just that of a particular application. By disabling Windows event logging, adversaries can operate while leaving less evidence of a compromise behind; this creates an anomaly and is potentially detectable.
+﻿
+
+System Monitor (Sysmon)
+What is it?
+Windows Sysmon is a service installed on Windows OSs. Sysmon monitors and logs activity to the Windows event log. It provides detailed information about a wide variety of processes and connections including:
+Process creations
+Network connections
+Changes to file creation time
+How does it pertain to an investigation?
+Similarly to Windows events, Sysmon enables analysts to track specific events that occur on a Windows OS. Analyst are able to view and connect occurrences of events and the time and date stamp associated with them.
+Data Source and MITRE ATT&CK
+Adversaries may disable Sysmon logging to limit data that can be leveraged for detections and audits. The data is used by security tools and analysts to generate detections.
+Adversaries may target system-wide logging or just that of a particular application. By disabling Sysmon event logging, adversaries can operate while leaving less evidence of a compromise behind.
+﻿
+
+Web Proxy
+What is it?
+A web proxy is a tool that facilitates a user’s connection from their machine to a distant endpoint, normally external to their network and often specific to a particular service(s). The proxy server interrupts the connection between the client system and the end server. It acts as a go-between for the two endpoints. Web proxies log all traffic via web proxy log files. These files include:
+Session duration
+Hypertext Transfer Protocol (HTTP) status, method, and version
+Bytes in/out
+Uniform Resource Locator (URL) category, hostname, and path
+Filename
+User agent
+How does it pertain to an investigation?
+Web proxy log files enable analysts to review connections made with external websites. They can help determine what external system was reached and if data was transferred, and if so, how much was transferred.
+Data Source and MITRE ATT&CK
+Adversaries may use a web proxy to act as an intermediary for network communications to a Command and Control (C2) server to avoid direct connections to their infrastructure. Many tools exist that enable traffic redirection through proxies or port redirection. Adversaries use these types of proxies to manage C2 communications, to provide resiliency in the face of connection loss, or to ride over existing trusted communications paths to avoid suspicion.
+﻿
+
+Web Server
+What is it?
+A web server is an external-facing server on a domain. Web servers are responsible for hosting software supporting a website. The web server log files log traffic coming to the website the server is hosting on. Every time a browser or user agent — Google included — requests any resource (pages, images, javascript file, etc.) from the web server, the activity is logged.
+How does it pertain to an investigation?
+Web server log files enable analysts to view who has accessed their external-facing website. Web server log files also enable analysts to see what might have been taken from the website.
+Data Source and MITRE ATT&CK
+Adversaries may backdoor web servers with web shells to establish persistent access to systems. A web shell is a web script placed on a breached web server to allow an adversary to use the web server as a gateway into a network. A web shell provides a set of functions to execute or a Command Line Interface (CLI) on the system that hosts the web server.
+﻿
+
+Assured Compliance Assessment Solution (ACAS) — Extensible Markup Language (XML) Ingestion
+What is it?
+ACAS is an enterprise vulnerability scanning capability for networks and components that are owned or operated by the Department of Defense (DoD).
+How does it pertain to an investigation?
+ACAS scans are used to locate potentially compromised systems based on the vulnerabilities that may be present in the network.
+Data Source and MITRE ATT&CK
+Adversaries may attempt to get a listing of services running on remote hosts, including those that may be vulnerable to remote software exploitation. Methods to acquire this information include port and vulnerability scans using tools that are brought onto a system.
+﻿
+
+Electronic Mail (Email)
+What is it?
+Email traffic that occurs through the email server on the network is logged through email log files. Email log files include information such as:
+Mail event (was the email delivered or received)
+Email addresses
+Remote host
+Size of the message
+How does it pertain to an investigation?
+Email log files enable analysts to see email communication across the network.
+Data Source and MITRE ATT&CK
+Adversaries may target user email to collect sensitive information. Emails may contain sensitive data, including trade secrets or Personally Identifiable Information (PII) that can prove valuable to adversaries. Adversaries can collect or forward email from mail servers or clients.
+Adversaries may also use access to a compromised server to further their phishing campaigns for additional internal exploitation or exploitation of partner organizations.
+﻿
+
+Firewall
+What is it?
+A network firewall is the gateway into and out of the network, or portions of the network. The firewall evaluates traffic crossing it, destined for it, or coming from it against a set of defined criteria (rules). It determines what should happen with the traffic based on the definition of those rules. Firewall log files include information such as:
+Source Internet Protocol (IP) address
+Source port
+Destination IP address
+Destination port
+A host-based firewall is typically located on a specific host on the network. A firewall protects the host from untrusted devices located on the same network. Once configured, the firewall also protects the host from devices attempting to potentially attack the host via open ports and services.
+How does it pertain to an investigation?
+Firewall log files enable analysts to view traffic that has attempted to or has successfully made it into and out of the network.
+Data Source and MITRE ATT&CK
+Adversaries may disable or modify system firewalls in order to bypass controls limiting network usage. Changes include disabling the entire mechanism as well as adding, deleting, or modifying particular rules. This can be done numerous ways depending on the OS, including via CLI, editing Windows registry keys, and Windows control panel.
+Adversaries might try to enumerate the rules of a firewall to determine what they can use to get through the firewall, and what capabilities they need to employ for C2 or data exfiltration once in.
+﻿
+
+Domain Name System (DNS)
+What is it?
+DNS is frequently referred to as the phonebook of the internet. When a request to access a domain is made, for example a user attempting to access ESPN.com, DNS takes that request and follows a set hierarchy to find the authoritative domain, and requests — normally — the IP address associated with the Fully Qualified Domain Name (FQDN). Requests made via DNS are logged in DNS log files.
+How does it pertain to an investigation?
+DNS log files enable analysts to view requests made by users to domains. Analysts are able to view websites visited by users on their domain. They are able to link the domains in the logs to known or suspicious domains.
+Data Source and MITRE ATT&CK
+Adversaries may dynamically establish connections to C2 infrastructure to evade common detections and remediations. DNS logs contain information that helps to identify such activity.
+﻿
+
+Packet Capture (PCAP)
+What is it?
+PCAP is an Application Programming Interface (API). The API captures live packet data from the network and stores it in PCAP files. PCAP files capture packets traveling through multiple network layers. PCAP files contain information such as network packets sent using Transmission Control Protocol (TCP)/IP and User Datagram Protocol (UDP).
+How does it pertain to an investigation?
+PCAP files enable analysts to conduct packet analysis. Packet analysis allows analysts to monitor bandwidth usage, identify Dynamic Host Configuration Protocol (DHCP) servers, and DNS resolution.
+Data Source and MITRE ATT&CK
+Adversaries may sniff to collect the network traffic to capture information about an environment, including authentication material passed over the network and is included in PCAP files. Network sniffing refers to using the network interface on a system to monitor or capture information sent over a wired or wireless connection. An adversary may place a network interface into promiscuous mode to passively access data in transit over the network, or use Switched Port Analyzer (SPAN) ports to capture a larger amount of data.
+Network sniffing may also reveal configuration details, such as running services, version numbers, and other network characteristics (e.g., IP addresses, hostnames, Virtual Local Area Network Identifiers [VLAN ID]) necessary for subsequent lateral movement and/or defense evasion activities.
+﻿
+
+Question:
+﻿
+
+What type of log files include information such as traffic in and out of the network, source IP address and port, and destination IP address and port?
+Firewall
+
+What type of log files include information such as traffic in and out of the network, source IP address and port, and destination IP address and port?
+Firewall
+
+What type of log files include information such as duration, HTTP status, method, version, bytes in/out, URL category, hostname, path, file name, and user agent?
+Web Proxy
+
+What type of data source enables packet analysis?
+PCAP
+
+Deploying a Log Forwarder
+Elastic Stack
+﻿
+
+This task utilizes the Elastic Stack. 
+
+﻿
+
+Elastic Stack was previously referred to as the ELK Stack. ELK refers to the three open-source projects:
+
+Elasticsearch
+Logstash
+Kibana
+Elasticsearch is an open-source, distributed, JavaScript Object Notation (JSON)-based search engine. It stores, searches, and analyzes large volumes of data in near real-time and provides answers in milliseconds.
+
+﻿
+
+Logstash ingests, transforms, and ships data regardless of format or complexity. Data is often scattered or distributed across many systems in many formats. Logstash supports a variety of inputs that synchronously pulls in events from a multitude of common sources. To help users ingest data of different formats and schema, Logstash allows for custom filters and pipelines.
+
+﻿
+
+Kibana is a free and open frontend application that sits on top of the Elastic Stack, providing search and data visualization capabilities for data indexed in Elasticsearch. Kibana searches across all documents to create the visualizations and dashboards.
+
+﻿
+
+In addition to the Elastic Stack is software called Beats. Beats gathers data (such as Windows event logs). Beats agents sit on servers with containers and centralizes the data in Elasticsearch. Beats ships data that conforms with the Elastic Common Schema (ECS). ECS is an open-source specification, developed with support from the Elastic user community. ECS defines a common set of fields to be used when storing event data in Elasticsearch, such as logs and metrics. ECS specifies the names and Elasticsearch datatypes for each field and provides descriptions for each. If the data fits into the ECS, it can be directly imported into Elasticsearch, otherwise it has to be forwarded to Logstash.
+
+﻿
+
+A critical distinction is that the Elastic Stack on its own is not a SIEM. How it is used and the analytics and alerting functions added to the Elastic Stack are what make it a SIEM. 
+
+Log Forwarder
+A log forwarder is a tool that runs on a network device or endpoint’s OS and automatically forwards event log records to a central collection server or SIEM. Log forwarders send events, based on the event source, event ID, users, computers, and keywords in the event. The events are delivered to the SIEM and allows analysts to take further action against the event. Log forwarders: 
+
+Automatically send specified event types to the SIEM according to its configuration
+Export event data from network devices and endpoints
+Filter events to forward by source, type ID, tool used, and specific keywords
+Forward events to external systems to enable alerting, storing, and auditing activity on the network
+This task walks through deploying a log forwarder agent on an endpoint. Deploying a log forwarder allows users to collect information and data on specific nodes. Winlogbeat is utilized in this task. Winlogbeat is a data aggregation and forwarding agent that collects windows events and data. The information is packaged and delivered to Elastic Stack.
+
+﻿Manually Uploading Logs to Elastic Stack
+This task walks through uploading a Windows event log. The Windows event logs are uploaded manually to Elastic Stack and used for investigation. Situations occur where you need to manually import event logs into your SIEM. For example, if a supporting commander does not allow your team to install endpoint agents onto their systems. In this case, request that event logs be exported by the local defenders and imported into your SIEM. This is where manually uploading logs is useful. In this task, the cda-hr-2 node may have experienced some potential MCA. Export the Windows event logs from the cda-hr-2 VM. 
+
+﻿
+
+Accessing and Saving Windows Event Logs
+﻿
+
+Prior to uploading Windows event logs, the logs need to be accessed and saved locally. This task walks trainees through locating and saving Windows event logs. 
+
+﻿Uploading Windows Event Logs to Elastic Stack
+This task walks through manually uploading a Windows event log to Elastic Stack. Not all machines are equipped with Winlogbeat to send logs to Elastic Stack. Manually uploading logs provides users another option to deliver logs to Elastic Stack (and Kibana), and investigate specific logs that may contain useful information. An endpoint may have experienced potential MCA that was picked up by a local defender software; uploading the logs in question to the Elastic Stack allows for enhanced analysis. In this scenario, Windows event logs are uploaded from the machine where the logs originated. Often times logs are transported back to and uploaded from a hunt machine. 
+
+﻿
+
+Workflow
+
+﻿
+
+1. On the cda-hr-2 VM, open Windows PowerShell and navigate to the following path:
+
+﻿
+
+C:\ProgramData\Elastic\Beats>
+﻿
+
+2. To initiate the manual upload of the event logs, run the following script:
+
+﻿
+
+C:\ProgramData\Elastic\Beats> .\UploadScript.ps1
+﻿
+
+3. Enter the following information at each prompt:
+
+Enter target directory path containing EVTX logs or folders grouping them by system (i.e., C:\Users\zburnham\EVTX-Logs): C:\Users\Trainee\Desktop\Host-Upload
+Do you have nested folders labeled by system within this directory? (Default is NO) (y/n): n
+Enter Client Name: hr-2
+Enter Case # (i.e., Resolvn): 8888
+Enter a searchable identifier or note for this evidence upload (i.e., coda-hr-2) Identifier: CDA
+The following banner appears to indicate the logs are being uploaded and disappears when the logs have been successfully uploaded to Elastic Stack:
+
+
+NOTE: The Kibana upload may take about three minutes to complete. In the next task, the logs uploaded to Elastic Stack are indexed, and the data is readable for an investigation.
+
+Upload Script for .evtx Log Files
+UploadScript.PS1 contains the script used in the upload of the .evtx log file. It is a custom script that has variable assignments specific to range configuration.
+
+﻿
+
+The script searches for the Winlogbeat configuration file. The Winlogbeat configuration file has been modified, specifically the Outputs and Hosts sections, to reflect the IP of the Elastic Stack instance. The script searches the configuration file looking for the required outputs. 
+
+﻿
+
+A key portion of the script is the Winlogbeat registry file (evtx-registry.yml). The Winlogbeat registry file is created for Winlogbeat to keep track of the files already uploaded. The evtx-registry file is created in this configuration file to separate it from the official one used by Winlogbeat during typical use as a service. The script performs different tasks depending on the folder structure of the provided directory. In this case, the script is pointed to the Host-Upload folder containing .evtx logs. The script packages the event logs located in the folder Host-Upload and ships them to Elastic Stack, which allows analysts to view the logs in Kibana. The script also takes the console output for Winlogbeat and records it in a text file labeled by date within the elk-logging folder in the parent directory for the Winlogbeat folder. 
+
+﻿
+
+Attached to this task is a sample configuration file and upload script. These two files, along with the instructions listed in the additional resources section at the end of the lesson, can be modified to fit the particular needs of your future mission requirements. 
+
+Data Quality in a SIEM
+Data Filtering
+﻿
+
+SIEMs are responsible for the collection of large amounts of data. Each device on the network generates an event (data) when something happens. The data that is generated can be forwarded in realtime to the SIEM or is stored locally or in a database, and then sent to the SIEM at a later time. To make the data useable for analysis, SIEMs must standardize and save the data in uniform formats. A SIEM collects log data from the network it resides on, however, not all, not even the majority of it, is useful for SecOps. Only a small portion of the million logs that are collected by SIEM are useful to analysts. In order to get the data down to this 1%, the data is entered in a hypothetical funnel within the SIEM. The funnel applies algorithms, schema, and models that slowly whittle away the pertinent data. The data that remains is indexed, which allows for fast search and analysis. 
+
+﻿
+
+Data Normalization
+﻿
+
+Data is collected from different devices across the network. Each device on the network produces unique event data, the types and frequency of events vary by device. In order to compare and analyze the data collected from the different devices across the network, data normalization must occur.
+
+﻿
+
+Data normalization:
+
+Is the process of structuring data in a standard process to reduce data redundancy and improve data integrity.
+Consists of taking the log files and breaking them down into variables and fields that are similar and relevant.
+Enables the analysis and comparison of activity across log types.
+The example below is a log file from a firewall:
+
+﻿
+
+<;;5>logver=54 dtime=1536072238 devid=cda-hr-1 devname=firewall-fort 
+vd=External date=2021-03-04 time=01:38:24 slot=4 logid=0000000013 type=traffic 
+subtype=forward level=notice srcip=10.10.10.05 srcport=44000 srcintf=”DMZ” d
+stip=192.168.32.12 dstport=443 dstintf=”External” poluuid=55555555-5b5b-5a5a-5c5c-5a5b5c5d5f55 
+sessionid=555555555 proto=6 action=close policyid=55 policytype=policy dstcountry=”Canada” 
+srccountry=”United States” trandisp=snat transip=Pub-IP-Address transport=44000 
+service=”tcp_1-65535″ duration=11 sentbyte=1699 rcvdbyte=6002 sentpkt=16 
+rcvdpkt=13 appcat=”unscanned”
+﻿
+
+This log file has very pertinent information, however, is not easily readable in its current construct. SIEMs are able to make sense of this log file, via data normalization. The SIEM identifies relevant fields within the event data including:
+
+Hostname
+Date and time
+Destination IP
+Source IP
+Source port
+Destination port
+Response by the firewall
+Source country
+Destination country
+Application discovered 
+Translated IP address 
+The output, as shown in Table 13.1-1, is useful to the analysts and end-users.
+
+Data Joining
+﻿
+
+Since SIEMs receive data logs from every device on the network, it is common for the need to combine data sets. Data joining, or joins, is the process of combining data from different sources/sets into one. There are a few methods when joining data:
+
+Data filtering is best described as…
+The process of applying algorithms, schema, and models that slowly whittles away non-pertinent data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
