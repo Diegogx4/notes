@@ -1022,11 +1022,174 @@ C:\Users\trainee>nmap.exe -sn 172.16.0.0/28 172.16.1.0/28 172.16.2.0/28 172.16.3
 
 The network-all.xml scan results will be used later in this exercise.
 
+in-band wonnt get those issues vvv
+span port || mirror port outta band tapping
+can miss info
 
+sh ip ospf neigh
+sh up route ospf
+show ip bgp neigh
+show ip bgp "net id"
+sh ip bgp summary
+sh i[ bgp routes
+sh run
 
+nbtstat
 
+ntroduction
+﻿
 
+﻿
 
+Open-Source Intelligence (OSINT) is a methodology employed by the intelligence community to find, analyze, and decide how to handle data accessible from publicly-available sources. Trainees learn about the types of data available, where to find it, and what to do with it after it is compiled. They are introduced to various tools available online and locally that contribute to the collection of OSINT for missions and other general purposes.
+
+﻿
+
+Estimated time to complete: 1.0 hour
+
+﻿
+
+Topics
+Overview of OSINT
+Online and local search tools
+Social media
+Google hacking
+Data visualization
+﻿
+
+Enabling Learning Objectives
+12.1.1: COLLECT intelligence via various open-source methods. 
+12.1.2: IDENTIFY various tools and techniques to gather OSINT.
+﻿
+
+Toolkit
+﻿
+
+_IntelligenceX
+
+﻿
+
+﻿
+
+﻿
+
+_IntelligenceX brings several search engines and tools together under one website in an organized manner so that you can conduct your OSINT queries.
+
+﻿
+
+Shodan
+
+﻿
+
+﻿
+
+﻿
+
+Shodan is a search engine for internet-connected devices. Web search engines, such as Google and Bing, are great for finding websites.
+
+﻿
+
+Gramho
+
+﻿
+
+﻿
+
+Gramho is an Instagram account analyzer and viewer.
+
+﻿
+
+OSINT Combine
+
+﻿
+
+﻿
+
+﻿
+
+The purpose of this tool is to provide rapid data visualization from local Comma-Separated Value (CSV) files directly in the browser without the requirement for third party tools.
+
+﻿
+
+Social Bearing
+
+﻿
+
+﻿
+
+﻿
+
+Social Bearing is an advanced Twitter search tool allowing users to search with various degrees of options, and once the search is complete, filter and display the results in many different views.
+
+﻿
+
+OSINT Framework
+
+﻿
+
+﻿
+
+﻿
+
+The OSINT Framework contextualizes many of the open-source intelligence sources that are currently available.
+
+﻿
+
+TinEye
+
+﻿
+
+﻿
+
+﻿
+
+TinEye is an image search and recognition online tool.
+
+﻿
+
+Google Hacking Database
+
+﻿
+
+﻿
+
+﻿
+
+The Google Hacking Database (GHDB) is a categorized index of internet search engine queries designed to uncover interesting — and usually sensitive — information made publicly available on the Internet. GHDB is hosted on Offensive Security's Exploit Database website.
+
+﻿
+
+Recon-ng
+
+﻿
+
+﻿
+
+﻿
+
+Recon-ng is a full-featured reconnaissance framework designed with the goal of providing a powerful environment to conduct open source web-based reconnaissance quickly and thoroughly.
+
+﻿
+
+theHarvester
+
+﻿
+
+﻿
+
+A tool that assists in gathering data to help determine a company's external threat landscape on the internet.
+
+﻿
+
+DNSDumpster
+
+﻿
+
+﻿
+
+﻿
+
+DNSdumpster.com is a free domain research tool that can discover hosts related to a domain.
 
 
 
