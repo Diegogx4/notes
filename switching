@@ -1191,6 +1191,14 @@ DNSDumpster
 
 DNSdumpster.com is a free domain research tool that can discover hosts related to a domain.
 
+sh ip ospf neigh - peer
+sh ip route ospf - setup 
+sh ip bgp neigh - both int and ext and connection states
+sh ip bgp "network id" - shows info regarding routing entry for netowrk id, do not use qoutes around network id
+sh ip bgp summary - display local asn and bgp neigh (connections)
+sh ip bgp routes - shows all routes for bgp look for as_path and read right to left 
+right asn is origin as
+sh run - local asn, look for bgp section
 
 
 
