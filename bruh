@@ -1,0 +1,848 @@
+Deploying a Log Forwarder
+Elastic Stack
+
+This task utilizes the Elastic Stack. 
+
+Elastic Stack was previously referred to as the ELK Stack. ELK refers to the three open-source projects:
+
+Elasticsearch
+Logstash
+Kibana
+Elasticsearch is an open-source, distributed, JavaScript Object Notation (JSON)-based search engine. It stores, searches, and analyzes large volumes of data in near real-time and provides answers in milliseconds.
+
+Logstash ingests, transforms, and ships data regardless of format or complexity. Data is often scattered or distributed across many systems in many formats. Logstash supports a variety of inputs that synchronously pulls in events from a multitude of common sources. To help users ingest data of different formats and schema, Logstash allows for custom filters and pipelines.
+
+Kibana is a free and open frontend application that sits on top of the Elastic Stack, providing search and data visualization capabilities for data indexed in Elasticsearch. Kibana searches across all documents to create the visualizations and dashboards.
+
+In addition to the Elastic Stack is software called Beats. Beats gathers data (such as Windows event logs). Beats agents sit on servers with containers and centralizes the data in Elasticsearch. Beats ships data that conforms with the Elastic Common Schema (ECS). ECS is an open-source specification, developed with support from the Elastic user community. ECS defines a common set of fields to be used when storing event data in Elasticsearch, such as logs and metrics. ECS specifies the names and Elasticsearch datatypes for each field and provides descriptions for each. If the data fits into the ECS, it can be directly imported into Elasticsearch, otherwise it has to be forwarded to Logstash.
+
+
+A critical distinction is that the Elastic Stack on its own is not a SIEM. How it is used and the analytics and alerting functions added to the Elastic Stack are what make it a SIEM. 
+
+yml
+Log Forwarder
+A log forwarder is a tool that runs on a network device or endpoint’s OS and automatically forwards event log records to a central collection server or SIEM. Log forwarders send events, based on the event source, event ID, users, computers, and keywords in the event. The events are delivered to the SIEM and allows analysts to take further action against the event. Log forwarders: 
+
+Automatically send specified event types to the SIEM according to its configuration
+Export event data from network devices and endpoints
+Filter events to forward by source, type ID, tool used, and specific keywords
+Forward events to external systems to enable alerting, storing, and auditing activity on the network
+This task walks through deploying a log forwarder agent on an endpoint. Deploying a log forwarder allows users to collect information and data on specific nodes. Winlogbeat is utilized in this task. Winlogbeat is a data aggregation and forwarding agent that collects windows events and data. The information is packaged and delivered to Elastic Stack.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Log in to the cda-win-hunt Virtual Machine (VM) using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. Open Google Chrome and select the Security Onion bookmark.
+
+﻿
+
+3. Access Security Onion using the following credentials:
+
+﻿
+
+Username: onion@cda.corp
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+4. Select Kibana.
+
+﻿
+
+﻿
+
+Figure 13.1-6
+
+﻿
+
+5. Select Security Onion - Home from the menu button:
+
+﻿
+
+﻿
+
+Figure 13.1-7
+
+﻿
+
+6. Change the Time Range filter to May 25, 2021 @ 18:00:00.000 → now.
+
+﻿
+
+7. Notice in the Security Onion - Log Count By Node module on the dashboard, cda-exec-2 is not reporting logs to Elastic Stack. As shown in Figure 13.1-8, the cda-exec-2 node is not included in the table: 
+
+﻿
+
+﻿
+
+Figure 13.1-8
+
+﻿
+
+NOTE: To have a node send logs to Elastic Stack, the proper log forwarder must be enabled. Head to the cda-exec-2 workstation and enable Winlogbeat — the log forwarder located on the machine. 
+
+﻿
+
+Additionally, the number in the Security Onion - All Logs may differ from the one in Figure 13.1-8. The change in number is due to the activity that is occurring in realtime on the network. This number is variable. 
+
+﻿
+
+8. Log in to the cda-exec-2 VM using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+9. Open Windows File Explorer, by selecting the following icon: 
+
+﻿
+
+﻿
+
+﻿
+
+10. Select This PC > Local Disk (C:).
+
+﻿
+
+11. Navigate to View > Show/hide. Check Hidden Items:
+
+﻿
+
+﻿
+
+Figure 13.1-9
+
+﻿
+
+12. Navigate to ProgramData > Elastic > Beats > winlogbeat.
+
+﻿
+
+NOTE: The ProgramData folder is a critical system folder. It contains the data for Windows classic and Universal Windows Platform (UWP) applications. To make the enterprise safer, the ProgramData folder is hidden by default. The folder is hidden because it is not meant to be seen by anyone or tampered with. No user should attempt to rename, move, or delete the ProgramData folder. 
+
+﻿
+
+13. In the winlogbeat folder, right click on the winlogbeat.yml and select Edit with Notepad++:
+
+﻿
+
+﻿
+
+Figure 13.1-10
+
+﻿
+
+The winlogbeat.yml file is the configuration file for Winlogbeat. The configuration file typically includes two sections that helps to define the tasks that Winlogbeat completes. This first section defines the data to collect and how to handle it. The second defines the location to send the data. Beats configuration files are written in a YAML Ain't Markup Language (YAML) format. The configuration file contains a group of key-value pairs, however, it can contain lists, strings, and various data types. Beats installation packages typically include a configuration file example, useful for learning and implementing what is required. 
+
+﻿
+
+14. In the winlogbeat.yml file, navigate to the Logstash Output section.
+
+﻿
+
+﻿
+
+Figure 13.1-11
+
+﻿
+
+NOTE: Logstash is a central component of the Elastic Stack. Logstash ingests, transforms, and ships data regardless of format or complexity. Data is often scattered or distributed across many systems in many formats. Logstash supports a variety of inputs that synchronously pulls in events from a multitude of common sources.
+
+﻿
+
+15. In the Logstash Output section, delete the # before the hosts: [“x.x.x.x:x”] line to uncomment.
+
+﻿
+
+16. Replace the x with the IP address of the Security Onion Logstash forwarder:
+
+﻿
+
+hosts: [“199.63.64.92:5044”]
+﻿
+
+NOTE: Security Onion is a free and open-source IDS, security monitoring, and log management solution. Security Onion offers full packet capture (both network-based and host-based IDSs), and includes powerful indexing, search, visualization, and analysis tools to make sense of the data. Elastic Stack sits on top of the Security Onion software. 
+
+﻿
+
+17. Select Save.
+
+﻿
+
+18. Open a Windows Terminal instance by selecting the following icon from the Taskbar:
+
+﻿
+
+﻿
+
+﻿
+
+19. In Terminal, run the following command:
+
+﻿
+
+services.msc
+﻿
+
+This accesses the services running on the machine; the Services window should look similar:
+
+﻿
+
+﻿
+
+Figure 13.1-12
+
+﻿
+
+20. In Services, navigate to Elastic Winlogbeat-Oss 7.9.3. Right-click the service and select Properties.
+
+﻿
+
+NOTE: Elastic Winlogbeat service is not native to the Windows OSs. The software requires installation and configuration. 
+
+﻿
+
+21. In the Elastic Winlogbeat-Oss 7.9.3 Properties window, navigate to the Startup type drop-down menu, select Automatic > Apply.
+
+﻿
+
+22. Under Service Status, select Start > Ok.
+
+﻿
+
+﻿
+
+Figure 13.1-13
+
+﻿
+
+23. Navigate back to the cda-win-hunt VM and access Kibana.
+
+﻿
+
+24. In the Time and Date section of the Dashboard Security Onion - Home, select Last 15 minutes > Refresh:
+
+﻿
+
+NOTE: You may have to wait a couple of minutes for the logs to be processed. If the logs do not show up, select the Refresh button again.
+
+﻿
+
+﻿
+
+Figure 13.1-14
+
+﻿
+
+25. Notice in the Security Onion - Log Count By Node module, cda-exec-2 (cda-exec-2.cda.corp) appears as data from the node is being forwarded to Elastic Stack:
+
+﻿Manually Uploading Logs to Elastic Stack
+This task walks through uploading a Windows event log. The Windows event logs are uploaded manually to Elastic Stack and used for investigation. Situations occur where you need to manually import event logs into your SIEM. For example, if a supporting commander does not allow your team to install endpoint agents onto their systems. In this case, request that event logs be exported by the local defenders and imported into your SIEM. This is where manually uploading logs is useful. In this task, the cda-hr-2 node may have experienced some potential MCA. Export the Windows event logs from the cda-hr-2 VM. 
+
+﻿
+
+Accessing and Saving Windows Event Logs
+﻿
+
+Prior to uploading Windows event logs, the logs need to be accessed and saved locally. This task walks trainees through locating and saving Windows event logs. 
+
+﻿
+
+Workflow
+
+﻿
+
+1. Log in to the cda-hr-2 VM using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. From the Windows Start menu, enter event viewer. Open Event Viewer.
+
+﻿
+
+﻿
+
+Figure 13.1-16
+
+﻿
+
+3. Select Windows Logs > Security.
+
+﻿
+
+﻿
+
+Figure 13.1-17
+
+﻿
+
+NOTE: Viewing and analyzing event logs in Windows Event Viewer is difficult. Uploading event logs to the Elastic Stack and viewing with Kibana enables easier analysis. 
+
+﻿
+
+4. Right-click Security and select Filter Current Log… to define a filter for the Security log.
+
+﻿
+
+5. Check Audit Failure from the dropdown for Keywords and select OK.
+
+﻿
+
+﻿
+
+Figure 13.1-18
+
+﻿
+
+6. Right-click on the Security log and select Save Filtered Log File As… Name the file CDA-SECURITY and save it to the Host-Upload folder on the desktop.
+
+﻿
+
+﻿
+
+Figure 13.1-19
+
+﻿
+
+NOTE: Verify the file type is a .evtx file.
+
+﻿
+
+﻿
+
+Figure 13.1-20
+
+﻿
+
+Upon selecting Save, the following dialog box may appear:
+
+﻿
+
+﻿
+
+Figure 13.1-21
+
+﻿
+
+7. Select No display information > OK.
+
+Uploading Windows Event Logs to Elastic Stack
+This task walks through manually uploading a Windows event log to Elastic Stack. Not all machines are equipped with Winlogbeat to send logs to Elastic Stack. Manually uploading logs provides users another option to deliver logs to Elastic Stack (and Kibana), and investigate specific logs that may contain useful information. An endpoint may have experienced potential MCA that was picked up by a local defender software; uploading the logs in question to the Elastic Stack allows for enhanced analysis. In this scenario, Windows event logs are uploaded from the machine where the logs originated. Often times logs are transported back to and uploaded from a hunt machine. 
+
+﻿
+
+Workflow
+
+﻿
+
+1. On the cda-hr-2 VM, open Windows PowerShell and navigate to the following path:
+
+﻿
+
+C:\ProgramData\Elastic\Beats>
+﻿
+
+2. To initiate the manual upload of the event logs, run the following script:
+
+﻿
+
+C:\ProgramData\Elastic\Beats> .\UploadScript.ps1
+﻿
+
+3. Enter the following information at each prompt:
+
+Enter target directory path containing EVTX logs or folders grouping them by system (i.e., C:\Users\zburnham\EVTX-Logs): C:\Users\Trainee\Desktop\Host-Upload
+Do you have nested folders labeled by system within this directory? (Default is NO) (y/n): n
+Enter Client Name: hr-2
+Enter Case # (i.e., Resolvn): 8888
+Enter a searchable identifier or note for this evidence upload (i.e., coda-hr-2) Identifier: CDA
+The following banner appears to indicate the logs are being uploaded and disappears when the logs have been successfully uploaded to Elastic Stack:
+
+﻿
+
+﻿
+
+Figure 13.1-22
+
+﻿
+
+NOTE: The Kibana upload may take about three minutes to complete. In the next task, the logs uploaded to Elastic Stack are indexed, and the data is readable for an investigation. 
+
+Upload Script for .evtx Log Files
+UploadScript.PS1 contains the script used in the upload of the .evtx log file. It is a custom script that has variable assignments specific to range configuration.
+
+﻿
+
+The script searches for the Winlogbeat configuration file. The Winlogbeat configuration file has been modified, specifically the Outputs and Hosts sections, to reflect the IP of the Elastic Stack instance. The script searches the configuration file looking for the required outputs. 
+
+﻿
+
+A key portion of the script is the Winlogbeat registry file (evtx-registry.yml). The Winlogbeat registry file is created for Winlogbeat to keep track of the files already uploaded. The evtx-registry file is created in this configuration file to separate it from the official one used by Winlogbeat during typical use as a service. The script performs different tasks depending on the folder structure of the provided directory. In this case, the script is pointed to the Host-Upload folder containing .evtx logs. The script packages the event logs located in the folder Host-Upload and ships them to Elastic Stack, which allows analysts to view the logs in Kibana. The script also takes the console output for Winlogbeat and records it in a text file labeled by date within the elk-logging folder in the parent directory for the Winlogbeat folder. 
+
+﻿
+
+Attached to this task is a sample configuration file and upload script. These two files, along with the instructions listed in the additional resources section at the end of the lesson, can be modified to fit the particular needs of your future mission requirements. 
+
+SIEM and Elastic Stack Architecture
+﻿
+
+﻿
+SIEM and Elastic Stack Overview
+﻿
+
+Before defining the Elastic Stack, a SIEM must first be defined. Elastic Stack in the field, once configured, can operate as a SIEM.
+
+﻿
+
+SIEM
+
+﻿
+
+A SIEM is central to the modern Information Technology (IT) infrastructure. It is a software solution that aggregates and analyzes activity from many different resources. A SIEM processes data coming into and departing from networks and systems that are under an organization’s control. Some SIEMs come with extensive functionality for data indexing, presentation, and alerts. However, the data ingested into a SIEM is only as useful as the accuracy of the data indices and filtering capabilities. The success of a SIEM is directly related to the administrator’s expertise with the accuracy of the data.
+
+﻿
+
+A SIEM collects data from hosts on the network including: switches, routers, servers, Domain Controllers (DC), and workstations. A SIEM stores, normalizes, aggregates, and applies analytics to data, which allows analysts to discover trends, detect threats, and enable organizations to investigate alerts.
+
+﻿
+
+Elastic Stack
+
+﻿
+
+Elastic Stack was previously referred to as the ELK Stack. ELK refers to the three open-source projects:
+
+Elasticsearch
+Logstash
+Kibana
+﻿
+
+The stack has grown as Beats was recently added to the Elastic Stack. 
+
+﻿
+
+﻿
+
+Figure 13.2-1 — Image from logz.io
+
+﻿
+
+One important distinction is that Elastic Stack by itself is not a SIEM. Rather, Elastic Stack is the platform that a SIEM can be built upon. To make Elastic Stack a SIEM, analytics and reporting must be added. Software and tools provided in Security Onion allow for analytics and reporting.
+
+﻿
+
+Beats
+
+﻿
+
+Beats gathers data (such as Windows event logs). Beats agents sit on servers with containers, and centralize the data in Elasticsearch. Beats ships data that conforms with the Elastic Common Schema (ECS). ECS is an open-source specification, developed with support from the Elastic user community. ECS defines a common set of fields to be used when storing event data in Elasticsearch, such as logs and metrics. ECS specifies field names and Elasticsearch datatypes for each field and provides descriptions. If the data fits into the ECS, it can be directly imported into Elasticsearch, otherwise, it has to be forwarded to Logstash.
+
+﻿
+
+This lesson covers the use of Winlogbeat, however, numerous other types of Beats exist. The Beats that are supported by Elastic are listed in the table below:
+
+﻿
+
+﻿
+
+Table 13.2-1
+
+﻿
+
+NOTE: In addition to the Beats listed above, there are Beats developed by the open-source community. A selection of community developed Beats can be found using the link in the Additional Resources section at the end of the lesson.
+
+﻿
+
+Logstash
+
+﻿
+
+Logstash ingests, transforms, and ships data regardless of format or complexity. Data is often scattered or distributed across many systems in many formats. Logstash supports a variety of inputs that synchronously pulls in events from a multitude of common sources. To help users ingest data of different formats and schema, Logstash allows for custom filters and pipelines. The customization means that regardless of the log or data input structure — or the fields included — a user can write a filter to parse and index the data as desired.
+
+﻿
+
+Elasticsearch 
+
+﻿
+
+Elasticsearch is an open-source, distributed, JavaScript Object Notation (JSON)-based search engine. It is often referred to as a Non-Structured Query Language (NoSQL) database, or document-oriented database as it does not require a user to specify a schema upfront. It stores, searches, and analyzes large volumes of data in near real-time and provides answers in milliseconds.
+
+﻿
+
+Kibana
+
+﻿
+
+Kibana is a free and open frontend application that sits on top of the Elastic Stack, providing search and data visualization capabilities for data indexed in Elasticsearch. Kibana queries the data residing in Elasticsearch, and searches across all documents to create visualizations and dashboards. 
+
+﻿
+
+Security Onion and Elastic Stack
+
+﻿
+
+Security Onion is a free and open Linux distribution for threat hunting, enterprise security monitoring, and log management. Security Onion offers full packet capture (both network-based and host-based Intrusion Detection Systems [IDS]), and includes powerful indexing, search, visualization, and analysis tools to make sense of those mountains of data. The Elastic Stack has become a central component of recent versions of the Security Onion Linux distribution.
+
+_id is the reference point for every event in kibana, will pull out to see where that pcap is stored
+
+event.module.keyword: windows_eventlog
+
+A search head is responsible for parsing search queries into search jobs and distributing those search jobs to indexers. Indexers process a search job against the indexes stored within that indexer, and return the results of the search job back to the search head. The search head performs any necessary post-processing of the results before making the results available to the interface that queried the search head. Interfaces are discussed briefly in the Splunk Instances section.
+
+
+Splunk Deployment
+
+
+Figure 13.3-1 shows how the main components of a Splunk deployment fit together and allow for data to be ingested, indexed, and searched.
+
+
+
+
+
+Figure 13.3-1
+
+
+Splunk Instances
+
+
+Each component detailed in Figure 13.3-1, with the exception of the universal forwarder, is part of an instance of Splunk. A Splunk instance can be configured to act as one or more of the above components. For example, a single Splunk Enterprise instance running on a machine can act as:
+A heavy forwarder: Collecting and pre-processing raw data from the local machine or a remote source
+An indexer: Parsing raw data into events and storing those events in indexes
+A search head: Tasking search jobs to the local indexer
+
+
+An instance of Splunk Enterprise also contains additional features such as the Splunk web interface. The interface allows searches to be run against the local search head, and the configuration of the components deployed within that instance. The components made available within a single instance of Splunk are detailed in Figure 13.3-2. Note that while a single instance of Splunk may contain one or more of the interface layers (the top row of Figure 13.3-2), the core components of a Splunk instance are contained within the Spunk engine, (the bottom of Figure 13.3-2). Turning on and off different components of the engine heavily affects the capabilities available to a Splunk instance.
+
+
+
+
+
+Figure 13.3-2 — Image from Splunk
+
+
+Splunk instances can be configured to act very differently from each other, allowing them to take on niche roles when required. These roles include:
+Cluster managers: Manage clusters of indexesDeployment servers: Act as centralized configuration managers for other Splunk instancesLicense masters: Manage Splunk licenses for multiple other Splunk instances
+
+
+These roles are not discussed further in this lesson, since they are usually only present in large-scale Splunk deployments.
+
+Introduction to Splunk
+This section provides an overview of Splunk’s architecture, including important components of the Splunk platform. It is important to note that the concepts discussed relate to a generic Splunk Enterprise deployment. Other deployments of Splunk do exist, such as Splunk Cloud or Splunk Enterprise Security, but operate on similar principles as what is described here.
+
+﻿
+
+There are three main components that make up a full Splunk deployment; the forwarder, the indexer, and the search head. These components can be combined together and deployed as a Splunk instance.
+
+﻿
+
+Forwarder
+
+﻿
+
+A forwarder is responsible for collecting data from a source, and forwarding (i.e., sending) that data to another forwarder or to an indexer. There are two types of forwarders: universal forwarders and heavy forwarders.
+
+﻿
+
+A universal forwarder is a lightweight forwarder that only performs basic forwarding functionality. It is not capable of acting as a full instance of Splunk; it simply collects raw data from a source and sends that raw data to a destination.
+
+﻿
+
+A heavy forwarder provides additional functionality that a universal forwarder is not capable of. These additional capabilities include pre-processing data, or routing that data to different destinations based on defined conditions. Because a heavy forwarder can perform this extra processing, it commonly forwards data directly to indexers rather than to other forwarders. A heavy forwarder can act as a full instance of Splunk. The additional components of a Splunk instance are discussed in more detail under the Splunk Instances section.
+
+﻿
+
+Indexer
+
+﻿
+
+An indexer handles data processing and storage via the indexing process. In the indexing process, raw data is parsed and transformed into events. These events are then stored in an index located on the indexer. Multiple indexes can exist on a single indexer.
+
+﻿
+
+In advanced Splunk deployments, multiple indexers may exist. Usually, these indexers handle data coming from different sources. Advanced deployments may choose to set up multiple indexers to act as a cluster. Clustered indexers receive and replicate the same data across each indexer in the cluster. This can increase performance of the Splunk deployment, and act as protection against data loss.
+
+﻿
+
+Search Head
+
+﻿
+
+A search head is responsible for parsing search queries into search jobs and distributing those search jobs to indexers. Indexers process a search job against the indexes stored within that indexer, and return the results of the search job back to the search head. The search head performs any necessary post-processing of the results before making the results available to the interface that queried the search head. Interfaces are discussed briefly in the Splunk Instances section.
+
+﻿
+
+Splunk Deployment
+﻿
+
+Figure 13.3-1 shows how the main components of a Splunk deployment fit together and allow for data to be ingested, indexed, and searched.
+
+﻿
+
+﻿
+
+Figure 13.3-1
+
+﻿
+
+Splunk Instances
+﻿
+
+Each component detailed in Figure 13.3-1, with the exception of the universal forwarder, is part of an instance of Splunk. A Splunk instance can be configured to act as one or more of the above components. For example, a single Splunk Enterprise instance running on a machine can act as:
+
+A heavy forwarder: Collecting and pre-processing raw data from the local machine or a remote source
+An indexer: Parsing raw data into events and storing those events in indexes
+A search head: Tasking search jobs to the local indexer
+﻿
+
+An instance of Splunk Enterprise also contains additional features such as the Splunk web interface. The interface allows searches to be run against the local search head, and the configuration of the components deployed within that instance. The components made available within a single instance of Splunk are detailed in Figure 13.3-2. Note that while a single instance of Splunk may contain one or more of the interface layers (the top row of Figure 13.3-2), the core components of a Splunk instance are contained within the Spunk engine, (the bottom of Figure 13.3-2). Turning on and off different components of the engine heavily affects the capabilities available to a Splunk instance.
+
+﻿
+
+﻿
+
+Figure 13.3-2 — Image from Splunk
+
+﻿
+
+Splunk instances can be configured to act very differently from each other, allowing them to take on niche roles when required. These roles include:
+
+Cluster managers: Manage clusters of indexes
+Deployment servers: Act as centralized configuration managers for other Splunk instances
+License masters: Manage Splunk licenses for multiple other Splunk instances
+﻿
+
+These roles are not discussed further in this lesson, since they are usually only present in large-scale Splunk deployments.
+
+Detection Engineering Overview
+﻿
+
+﻿
+
+Figure 13.4-1
+
+﻿
+What is Detection Engineering?
+﻿
+
+Detection Engineering is the process of developing new processes and algorithms to identify and alert on any behavior that the defenders have identified as anomalous, often MCA. A detection rule — also referred to as a signature, analytic, or detector — is comprised of three main parts: a subject, a method, and enrichment attributes. The subject is what the engineer is trying to detect. For instance, if an engineer is searching for a piece of malware, the malware is the subject. The method is how to identify the subject. For instance, querying Zeek logs to examine Domain Name System (DNS) traffic may be a method for detecting network traffic anomalies.  Enrichment attributes help provide additional context or notes for the detection. Enrichment attributes may define how the rule maps to MITRE ATT&CK.  When the criteria for a defined rule is met, a detection alert is pushed to the user. Each rule has a specific Identifier (ID) associated with it. 
+
+﻿
+
+Figure 13.4-2 details a sample output of a detection rule.
+
+﻿
+
+NOTE: This detection rule, which utilizes Sigma’s schema, is looking for a Zeek-sourced file type used as a beacon — as part of the 2020 SolarWinds cyber attack. Zeek and other detection tools are discussed later in the lesson. 
+
+False Positives in Detection Engineering
+﻿
+
+﻿
+
+﻿
+
+Figure 13.4-4
+
+﻿
+
+False positives occur when the detection rule being used returns positive results for the defined criteria, however, the traffic/behavior is expected and should not return positive results of potential MCA. A generic detection rule leads to a higher rate of false-positive returns. Detection engineering should cast a wide net to identify all traffic and behavior as a start. As the tactics, techniques, and timeframe become more specific, the detection logic should also become more narrowly focused. As a result, the number of false positives should decrease. 
+
+﻿
+
+False Positive Scenario
+﻿
+
+The information security team is looking to detect failed logons in relation to a brute force attack across workstations in their Human Resources (HR) department. At first, the security team queries Elasticsearch, using Kibana in the SIEM, searching for all occurrences of Windows event Identifier (ID) 4625, using the following query:
+
+﻿
+
+event.code: 4625
+﻿
+
+As a result of this detection strategy, hundreds of positive results are returned to the security team. Is the brute force attack included in the results returned? It is possible. However, there are numerous results of daily failed logons that occur from users who are authorized to be on the network and utilizing the workstations. To prevent the false positives from occurring, more criteria needs to be applied to the detection logic. 
+
+﻿
+
+The following query would better define the detection:
+
+﻿
+
+event.code: 4625 AND department.code: HR
+﻿
+
+However, included with the query is a more defined timeframe for when the failed logons occur. The brute force technique is used to gain access to accounts when passwords are unknown or when password hashes are obtained. A typical indicator of a brute force attack is the adversary systematically guessing the password using a repetitive or iterative mechanism. This mechanism may include numerous guesses at the credentials in a very short period of time. A following time frame is appropriate:
+
+﻿
+
+July 6 @ 11:00:00 - July 6 @ 11:15:00
+﻿
+
+A review and analysis of the logs returned from the query finds that certain workstations experienced a high occurrence of Windows event ID 4625 within a very short amount of time — seconds apart from one another. Another possible addition to the detection logic includes querying to see if an account was locked out. An account lockout occurs when five failed logons occur within a 120-second window.
+
+﻿
+
+event.code: 4625 AND department.code: HR AND account.locked: YES
+﻿
+
+July 6 @ 11:00:00 - July 6 @ 11:15:00
+﻿
+
+Refining the detection logic to include timeframes and detailed criteria helps provide less false positives and allows analysts to determine potential MCA. The logic performing pattern-matching or using regular expressions is often more likely to alert on more activity without additional limiters. Logic to limit alerts to requests from outside a domain or Internet Protocol (IP) address range may help analysts identify initial exploitation attempts, and widen detection rules to identify any activity that may be occurring within the domain.
+
+﻿
+
+Additional Resource
+
+MITRE ATT&CK Brute Force Attack Overview:  https://attack.mitre.org/techniques/T1110/
+
+
+
+Referenced in the Enrichment Attributes section of the detection rules is the MITRE ATT&CK tactic or technique the rule is designed to identify. For this detection, the rule refers to Command and Control (C2) technique T1071.001.
+
+﻿
+
+Additional Resource
+
+MITRE ATT&CK T1071.001 — Application Layer Protocol: Web Protocols:  https://attack.mitre.org/techniques/T1071/001/  
+
+Overview of Sigma
+﻿
+
+﻿
+
+﻿
+
+Figure 13.4-5 – Image from login>soft 
+
+﻿
+
+Sigma is an open-source platform that allows defined rules to be used and shared across various organizations. Sigma is similar to that of a travel metasearch engine website, such as Trivago or Kayak. Instead of searching for flights by each carrier, the metasearch engine website consolidates and brings all the options to one centralized location. Sigma is a metasearch engine for detection engineering. Sigma accesses a repository of rules; each rule has the proper format and definition for the application that utilizes the rule. The centralized location assists users by not requiring them to visit each application’s specific rule repository and format. 
+
+﻿
+
+Benefits of Sigma:
+
+Supports several SIEMs (such as Elastic and Splunk)
+Built to handle log files (such as Snort, YARA, and Zeek)
+Enables analytics to re-use and share across the organizations
+Schema is easily understood
+
+Reading Sigma Schemas
+This task walks through reading Sigma schema. Sigma schema provides detailed metadata that is useful when executing a detection rule. 
+
+﻿
+
+Workflow
+
+﻿
+
+1.  Open the cda-win-hunt Virtual Machine (VM) using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. On the Taskbar, open Sublime Text 3 by selecting the icon:
+
+﻿
+
+﻿
+
+﻿
+
+Figure 13.4-6
+
+﻿
+
+3. In Sublime Text 3, select File > Open File…. From the Detection Rules folder on the desktop, open Possible Unknown Exchange 0 day March 2021 (via web) - Rule.yml, as shown in Figure 13.4-7:
+
+﻿
+
+﻿
+
+﻿
+
+Figure 13.4-7
+
+﻿
+
+The rule applied for the detection is outlined in Figure 13.4-8. The detection queries the logs to look for any matches — referred to as positives:
+
+﻿
+
+﻿
+
+﻿
+
+Figure 13.4-8
+
+﻿
+
+This rule monitors web server logs with Universal Resource Identifiers (URI). The rule looks for logs containing the following paths, or matching the shown Regular Expression (regex) and using the POST Hypertext Transport Protocol (HTTP) data method:
+
+﻿
+
+/owa/auth/Current
+/ecp/default.flt
+/ecp/main.css
+/owa/auth./current/themes/resources
+﻿
+
+NOTE: A regex is a special text string for describing a search pattern. Regexes are used for quick and effective searches sifting through large amounts of data. 
+
+﻿
+
+The HTTP POST data method is a method for sending data between two points. The data transmitted is typically relatively small and is sent as a package in a separate communication with the processing script. The data sent through the POST method will not be visible in the URL, as parameters are not sent along with the URI, making it an attractive method for adversaries. 
+
+﻿
+
+4. In Sublime Text 3, select File > Open File.... Open Elastic - Possible Unknown Exchange 0 day March 2021 from the Detection Rules folder on the desktop, as shown in Figure 13.4-9:
+
+﻿
+
+﻿
+
+﻿
+
+Figure 13.4-9
+
+﻿
+
+The Elastic - Possible Unknown Exchange 0 day March 2021 file schema is the format Elastic uses for detection rules. Notice the Sigma schema provides detailed metadata around the detection logic information to provide the user context for the rule. The above detection logic is the same one executed in the Sigma schema, however, Elastic schema only provides the query for the detection.
+
+﻿
+
+NOTE: Not all SIEMs use enrichment attributes or other clarifying statements — some only provide the detection logic. The detection logic can be entered directly into the Search on the Kibana Discovery page. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
