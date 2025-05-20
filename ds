@@ -1,0 +1,930 @@
+nderstanding Active Directory Domain Services
+This section provides an overview of Active Directory Domain Services (AD DS) and discusses the threat perspective of these services. Discussion involves the challenges of investigating potential MCA and how logging plays an important part. Later, investigate a potentially compromised server locating vital information about the server's role and features.
+
+﻿
+
+﻿
+
+Figure 14.1-1
+
+﻿
+
+A directory is a hierarchical structure that stores information about objects on the network. A directory service, such as AD DS, provides the methods for storing directory data and making this data available to network users and administrators. For example, AD DS stores information about user accounts including names, passwords, phone numbers, etc., and enables other authorized users on the same network to access this information.
+
+﻿
+
+AD stores information about objects on the network and makes this information easy for administrators and users to find and use. AD uses a structured data store as the basis for a logical, hierarchical organization of directory information.
+
+﻿
+
+This data store, also known as the directory, contains information about AD objects. These objects typically include shared resources such as servers, volumes, printers, and the network user and computer accounts.
+
+﻿
+
+Security is integrated with AD through logon authentication and access control to objects in the directory. With a single network logon, administrators can manage directory data and organization throughout their network, and authorized domain users can access resources based on authorization. Policy-based administration eases the management of even the most complex network.
+
+﻿
+
+Key terms in AD DS include:
+
+Schema: The set of user-configured rules that govern objects and attributes in AD DS.
+Global Catalog: The container for all objects in AD DS. For example, a name associated with a user or a computer is stored in the global catalog.
+Query and Index Mechanism: This system allows users to find each other in AD. A good example would be when typing a name in the mail client, and the mail client shows possible matches.
+Replication Service: The replication service makes sure that every DC on the network has the same Global Catalog and Schema.
+Sites: Sites are representations of the network topology, so AD DS knows which objects go together to optimize replication and indexing.
+Lightweight Directory Access Protocol (LDAP): LDAP is an industry-standard application protocol that allows AD to communicate with other LDAP-enabled directory services across platforms. Example of its use includes creating a centralized management of AD users for validating access to various applications and services.
+Services provided in AD DS include: 
+
+Domain Services: The collection of software and processes that store information about the enterprise, including users and computers. 
+Certificate Services: Allows the domain controller to serve and authenticate digital certificates, signatures, and public key cryptography. 
+Lightweight Directory Services: The foundation that supports LDAP. LDAP is a vendor-agnostic, industry-standard, protocol used to access and maintain directory information services distributed over an Internet Protocol (IP) network. A common use of LDAP is to provide a central place to store usernames and passwords.
+Directory Federation Services: Provides Single Sign-On (SSO) authentication for multiple applications in the same session. SSO allows users to only use one set of credentials to log on to multiple applications. 
+Rights Management: The rules and configurations that control information rights and data access policies. The configurations defined using this service will determine which users can access which files, folders, and/or applications. 
+AD can be manipulated by an Advanced Persistent Threat (APT) to achieve numerous types of malicious activity. Post-initial-access-related Tactics, Techniques, and Procedures (TTP) span every category of threat techniques within the MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) Framework. This means a threat could potentially abuse Windows AD to achieve Initial Access, Execution, Persistence, Privilege Escalation, Defense Evasion, Credential Access, Discovery, Lateral Movements, Collection, Exfiltration, and Impact. Additionally, these actions are often difficult to detect and prevent on large enterprise-scale environments. Often, modification is required for servers and workstations to log the necessary information to aid in the investigation of potential MCA. Investigations require input from multiple teams and individuals to deconflict user actions performed in an attempt to validate if the activity is truly malicious.
+
+﻿
+
+Microsoft AD DS configurations are implemented within the Department of Defense (DoD) in accordance with the National Institute of Standards and Technology (NIST) Security Technical Implementation Guides (STIG). STIGs are configuration standards detailing cyber security requirements for a specific product.  They are a good resource when evaluating the security posture of a supported system.  
+
+﻿
+
+Table 14.1-1 comes from MITRE ATT&CK, which outlines the techniques and sub-techniques that can be mitigated through the proper configuration of AD. 
+
+﻿
+
+﻿
+
+Table 14.1-1
+
+﻿
+
+Throughout the remainder of this lesson, think back to the domain services that make up Windows AD; think about how a threat actor could abuse the associated functionality to potentially achieve malicious objectives. Leveraging Windows AD is very common in most post-exploitation activities where a threat requires a mechanism for privilege escalation, lateral movement, or information exfiltration. Also note that the logs required to perform an investigation, may not be configured or accessible in a default environment.
+
+Operating Environment
+Throughout this lesson the cda.corp domain is leveraged for executing configuration and investigative actions. The Key Terrain in Cyberspace (KT-C) for this lesson is the cda-dc DC with investigative actions being performed via the cda-win-hunt Virtual Machine (VM). Any MCA discovered during this lesson must be evaluated. At the completion of this lesson, you should be able to evaluate and, if appropriate, change or propose configuration changes for mission partner systems.
+
+﻿
+
+Threat Intelligence
+﻿
+
+According to threat intelligence, there are several known threat actors that have been observed evading defenses and or increasing the attack surface through the modification of Windows domain polices. The focus of this activity has been in relation to the MITRE ATT&CK Group Policy Modification sub-technique, which allows APTs to subvert established controls through modification. The modification of domain policies and services has gone relatively undetected and increased auditing is required for accurate detection.
+
+﻿
+
+Current Events
+﻿
+
+Domain policy modification as part of post-exploitation activities can be pursued to perform MCA-enablement of privilege escalation, lateral movement, and defense evasion activities. As Group Policy Objects (GPO) are commonly leveraged by systems administrators to enable security, they can just as easily be abused to achieve malicious gain while minimizing detection.
+
+﻿
+
+Federal Agency Compromised by Malicious Cyber Actor — September 2020
+
+﻿
+
+The Cybersecurity and Infrastructure Security Agency (CISA) responded to a recent threat actor’s cyberattack on a federal agency’s enterprise network. By leveraging compromised credentials, the cyber threat actor implanted sophisticated malware — including multi-stage malware that evaded the affected agency’s anti-malware protection — and gained persistent access through two reverse Socket Secure (SOCKS) proxies that exploited weaknesses in the agency’s firewall. The actor enumerated the AD and Group Policy key, modified a registry key for the Group Policy, and enumerated compromised systems. Leveraging Group Policy as part of post-exploitation activities the actor was able to achieve MCA while going undetected.
+
+Server Manager Interface
+In this task, use Windows Server Manager to review currently running AD services operating locally and remotely within the domain. These actions could be performed as part of terrain mapping to identify the KT-C related to a particular domain.
+
+3. Select Local Server.
+
+4. Review each section for local server-related details:
+Properties: Provides an overview of the local server's current configuration and settings.Events: Provides an overview of the local server's Windows events by Identifier (ID). NOTE: These events can be useful when investigating potential MCA.Services: Provides an overview of the services running on the local server. NOTE: This information can be useful in determining the potential attack surface of the server.Roles and Features: Provides an overview of the types and paths of various roles and features of the server. This provides a good overview of what the server's role and capability is within the domain.
+
+Locating Services Efficiently
+Locating services using the Get-Service cmdlet, is not efficient due to the large number of services returned. In some cases, it may be better to search for only a single service to determine its status. Fortunately, the Get-Service cmdlet has switches for many service attributes so they can be filtered in the return of the cmdlet. The following list of Get-Service switches are helpful when filtering a search:
+
+﻿
+
+[-Name <String>] [-DependentServices] [-RequiredServices] [-DisplayName]
+
+﻿
+
+﻿
+
+Figure 14.1-4
+
+﻿
+
+The previous use of the Get-Service cmdlet returned local system services. In enterprise environments, the ability to remotely execute a command is important in order to quickly query settings and configurations. Using the [-ComputerName <String>] switch — and defining a host name such as cda-dc as the string — returns services for that server only.
+
+
+
+Which Get-Service cmdlet provides the best way to filter a search based on the service that provides configurations of IP addresses on cda-exec-1?
+-computername dasfji -name dhcp
+Identifying Running Services
+In the previous task, the get-service -computername cda-exec-1 -name Dhcp cmdlet was used to return only the status of the DHCP service of the cda-exec-1 VM. This provides quick query-specific information from a remote machine. 
+
+﻿
+
+﻿
+
+Figure 14.1-5
+
+﻿
+
+To quickly identify only services that are currently running, the output of Get-Service can be piped to the Where-Object cmdlet to quickly identify services that are running. This makes identifying services that are running easy work when mapping KT-C. 
+
+﻿
+
+Get-Service | Where-Object {$_.status -eq ”Running”}
+﻿
+
+Create a command that only returns services currently running on the cda-exec-1 workstation within the domain.
+  
+Reviewing and Implementing Group Policies
+﻿
+
+Figure 14.1-6
+
+﻿
+
+As defined by Microsoft, a GPO is a collection of Group Policy settings that define what a system looks like and how it behaves for a defined group of users. Every GPO has two parts: a user configuration and a computer configuration. Computer-related policies specify system behavior, application settings, security settings, assigned applications, and computer startup and shutdown scripts. User-related policies specify system behavior, application settings, security settings, assigned and published applications, user logon and logoff scripts, and folder redirection. Be aware that computer-related settings override user-related settings.
+
+﻿
+
+A GPO can represent policy settings in the file system and in the AD. GPO settings are evaluated by clients using the hierarchical nature of AD. Objects can span the entire enterprise made up of Organizational Units (OU), domains, trees, and forests. OUs can be linked directly to GPOs making enterprise management simpler. An OU is the lowest unit that GPOs can be applied to and is a subdivision within an AD that can hold users, groups, and computers. The OU goals are to visually organize objects, group objects so Group Policies can be assigned to them, and group objects so permissions can be delegated to them so they can be managed by a subset of administrators. Relationships between the domains and forests allow for further distribution of GPOs across the enterprise.
+
+﻿
+
+﻿
+
+Figure 14.1-7 — Image from distributednetworks.com 
+
+﻿
+
+To create GPOs, an administrator can use the GPO Editor as an extension to an AD container, and define Group Policy based on the selected Scope of Management (SOM). The extension to the container requires a snap-in. A snap-in is a software module for the Microsoft Management Console (MMC) that provides administrative capabilities for a particular type of device. Snap-ins are available in two types:
+
+﻿
+
+Stand-alone
+
+﻿
+
+A stand-alone snap-in, when loaded in a console, performs its designated management task as the only snap-in loaded in the console. 
+
+﻿
+
+Extension
+
+﻿
+
+An extension snap-in adds functionality to a stand-alone snap-in. Extension snap-ins add their own nodes as children of the stand-alone snap-in's node. They can also add contextual menu items, toolbar buttons, property pages, and taskpad tasks to the stand-alone snap-in's node.
+
+﻿
+
+Examples of AD-related snap-ins include the Remote Server Administration Tools (RSAT), Active Directory Users and Computers (ADUC) and the Active Directory Sites and Services.
+
+﻿
+
+Security policy settings are rules that administrators configure on a computer or multiple devices for the purpose of protecting resources on a device or network. As part of a security strategy, you can create GPOs with security settings policies configured specifically for the various roles in your organization, such as DCs, file servers, member servers, and clients.
+
+﻿
+
+Security settings control:
+
+Domain user authentication
+Resources users are permitted to access
+Recording user or group actions in the event log
+Membership within a group
+﻿
+
+Using GPOs allows administrators to implement and enforce security settings throughout an enterprise-level domain. The following detail where GPOs could be used to apply security settings as mitigations within Windows AD to mitigate attacks and reduce the overall attack surface. 
+
+﻿
+
+Disabling Storage of Local Area Network (LAN) Manager Hash
+﻿
+
+Windows stores user account passwords by hashing them — a hash is the result of a one-way algorithm that transforms the original plaintext password into a secure string. Theoretically, this hash cannot be reversed to retrieve the original password. Unfortunately, not all hashing algorithms are created equal. Older versions of the Windows OS used authentication protocols such as LAN Manager (LANMAN or LM) or New Technology LAN Manager (NTLM), which include hashing algorithms that were not developed with modern computing power in mind. These hashing algorithms are now considered weak or insecure, and are easily cracked by attackers. These hashing algorithms are still present in Windows for backwards compatibility reasons, but Windows should be prevented from storing an LM or NTLM hash of a password when possible.
+
+﻿
+
+Limit Access to Command Prompt
+﻿
+
+Command prompts can be used to run commands that give high-level access to users and evade other restrictions of the local system. To limit access and ensure system resource security, it is wise to disable command prompt access for most users. This provides the user with a display message stating that some settings are preventing the action they are trying to perform. 
+
+﻿
+
+Disable Removable Media
+﻿
+
+Removable media poses a real risk spanning multiple phases of the cyber attack lifecycle. Removable media — Universal Serial Bus (USB) drives, Compact Discs (CD), and Digital Versatile Discs (DVD) — can be weaponized in a number of different ways. If a user infects a domain-joined computer, it could quickly spread throughout the entire domain. It is best practice to disable removable media completely, but if that is not feasible, strictly control access to its use. Replication through removable media has long been an attack vector of choice for nation state actors. 
+
+﻿
+
+Table 14.1-2 shows weaponized uses of removable media devices:
+
+﻿
+
+﻿
+
+Table 14.1-2
+
+﻿
+
+Noteworthy Removable Media Attacks
+﻿
+
+There have been several notable high-profile breaches where an attack has infected an air-gapped network using the technique. The following high-profile APTs have been observed employing this technique.
+
+APT28 used a tool to infect connected USB devices and transmit itself to air-gapped computers when the infected USB device was inserted. Microsoft Security Intelligence Report Volume 19. Retrieved December 23, 2015.
+APT30 targeted removable drives to spread to other systems by modifying the drive to use Autorun to execute or by hiding legitimate document files and copying an executable to the folder with the same name as the legitimate document. APT30 and the Mechanics of a Long-Running Cyber Espionage Operation. Retrieved May 1, 2015.
+In May of 2020, attackers accessed air-gapped networks of the Taiwanese and Philippine militaries. Attackers used USBferry, a malware strain that contains a feature allowing it to self-replicate to removable USB devices such as thumb drives and portable storage systems.    ﻿
+﻿
+
+Restrict the Installation of Software
+﻿
+
+When users are given the ability to install software, they may unintentionally (or intentionally) install malware or software that creates unintended effects. In each case, this activity could lead to a breach. Supply chain attacks have been on the rise with attacks stemming from the software supply chain or a compromise through software dependencies or supply chain. It is advisable to prevent software installation by unprivileged users regardless of the source of the software. 
+
+Highly Evasive Attacker Leverages SolarWinds Supply Chain to Compromise Multiple Global Victims with SUNBURST Backdoor. December 13, 2020 — FireEye Threat Research Blog
+Sandworm Team Distributed NotPetya Through the Use of Legitimate Ukrainian Accounting Software M.E.Doc. June 28, 2017 — SecureWorks
+﻿
+
+In most situations, administrators are the only personnel given access to install software. The control of installation privileges is implemented in an effort to block such breaches and compromises.  Any new software to be introduced should be thoroughly tested before being implemented in a production environment.
+
+﻿
+
+Raise Minimum Password Length
+﻿
+
+GPOs can also be used to set the minimum password length, enforce password history, set maximum age, and create complexity requirements. For example, passwords for non-privileged users could be set to at least 14 characters and enforce a maximum age of 30 days. Enforcing these rules through GPOs ensures standards are met across the entire enterprise.
+
+﻿
+
+Control and Monitor Group Policy Changes
+﻿
+
+To ensure the security of Group Policy settings, access should be restricted and monitored for unwanted changes. This access should be controlled by allowing access only to users who are required to manage GPOs within the enterprise. Proper monitoring requires continuous auditing of GPOs by utilizing a specific configuration of event logging. Any changes to GPOs should be thoroughly vetted and documented using established change management procedures.
+
+  Reviewing and Creating Group Policies
+In this task, policies are created to limit the potential of MCA by requiring NTLM version 2 (NTLMv2) authentication for connected Windows domain servers. To complete this action, a GPO is created for servers to require NTLMv2 responses only, in accordance with STIG V-226330. As described in the STIG, the Kerberos v5 authentication protocol is the default for authentication of users who are logging on to domain accounts. NTLM, which is less secure, is retained in later Windows versions for compatibility with clients and servers that are running earlier versions of Windows or applications that still use it.
+
+﻿
+
+Proper management of Group Policy and application hardening techniques can reduce the attack surface and mitigate a large number of techniques. Either executing these actions or proposing them to local defenders can reduce the threat's ability to pivot once inside the domain. A GPO is created to alter server-side authentication settings for the current domain. These changes are made as one part of a multi-faceted approach to hardening against AD-related attacks. 
+
+﻿
+
+Open Group Policy Editor
+﻿
+
+Workflow
+
+﻿
+
+1. Log in to the cda-dc VM using the following credentials:
+
+﻿
+
+Username:  trainee 
+Password:  Th1s is 0perational Cyber Training!
+﻿
+
+2. Select the Windows Start icon, and enter Group Policy Management.
+
+﻿
+
+3. Open Group Policy Management:
+
+﻿
+
+﻿
+
+4. Navigate to the Group Policy Objects section, which lists the current GPOs, by browsing to: Group Policy Management > Forest: cda.corp > Domains > cda.corp > Group Policy Objects in the navigation pane on the left.
+
+﻿
+
+5. To review the information relating to an existing policy, double-click a specific GPO name, which opens several tabs displaying associated information. The Details tab provides specifics that could be used as part of an investigation. 
+
+﻿
+
+﻿
+
+Figure 14.1-8
+
+﻿
+
+Creating a New GPO
+﻿
+
+To create a new GPO perform the following steps.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Select Group Policy Objects in the Group Policy Management menu. Right-click in the white space of the right pane and select New.
+
+﻿
+
+﻿
+
+Figure 14.1-9
+
+﻿
+
+2. In the Name field, enter NTLMv2 and select OK.
+
+﻿
+
+3. Open the newly-created NTLMv2 Group Policy and select the Settings tab.
+
+﻿
+
+﻿
+
+Figure 14.1-10
+
+﻿
+
+4. Right-click Computer Configuration, and select Edit.
+
+﻿
+
+5. Navigate to the GPO section: Computer Configurations > Policies > Windows Settings > Security Settings > Local Policies > Security Options; find the policy Network Security: LAN Manager authentication level.
+
+﻿
+
+﻿
+
+Figure 14.1-11
+
+﻿
+
+6. Open Network Security: LAN Manager authentication level.
+
+﻿
+
+7. Select the Define this policy setting checkbox.
+
+﻿
+
+8. Select Send NTLMv2 response only > Apply  > Yes > OK.
+
+﻿
+
+﻿
+
+Figure 14.1-12
+
+﻿
+
+NOTE: If prompted to Confirm Setting Change, select Yes.
+
+﻿
+
+9. Close the Group Policy Management Editor.
+
+﻿
+
+Linking the New GPO 
+﻿
+
+1. Right-click cda.corp — the name of the domain that the GPO is applied to — and select Link an Existing GPO….
+
+﻿
+
+﻿
+
+Figure 14.1-13
+
+﻿
+
+2. Select NTLMv2 > OK.
+
+﻿
+
+Although the created GPO was only applied to the single domain, it could also be directly linked to an OU. 
+
+﻿
+
+Update the Group Policy
+﻿
+
+In order to force Group Policy to update and query the status of the new Group Policy, perform the following steps.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Open Windows PowerShell from the Windows Start menu.
+
+﻿
+
+﻿
+
+2. Right-click the icon and select Run as administrator. When prompted by User Access Control (UAC), select Yes to accept.
+
+﻿
+
+3. Execute the following command within PowerShell:
+
+﻿
+
+PS C:\windows\system32> Invoke-GPUpdate -Force
+﻿
+
+﻿
+
+Figure 14.1-14
+
+﻿
+
+The command used above invokes GPUpdate and forces the operation to run without asking for user confirmation. If the Force switch is not used, the operation is only scheduled and not set to run at the time of execution.
+
+﻿
+
+4. Execute the following command within PowerShell:
+
+﻿
+
+PS C:\windows\system32> Get-GPO -Name NTLMv2
+﻿
+
+﻿
+
+Figure 14.1-15
+
+﻿
+
+The GPO cmdlet allows for the retrieval of information in relation to a specified GPO using the display name or Globally Unique Identifier (GUID). The output of the cmdlet demonstrates that all settings have been applied to the cda.corp domain.
+
+﻿
+
+Utilizing the above methods, Group Policies can be used to limit the attack surface and minimize the success of a threat actor. Disabling legacy authentication features such as NTLM could prevent future occurrences of MCA-related execution, privilege escalation, and lateral movement.
+
+﻿
+
+Checking Resultant Set of Policies
+﻿
+
+After GPOs have been applied to a domain, it is useful to ensure that the appropriate controls have been applied to the proper devices or AD objects. The Resultant Set of Policies management console (rsop.msc) and the parallel command-line tool gpresult are the necessary utilities for conducting such checks. The Graphics User Interface (GUI) management console may be started from a Windows Command Line or PowerShell prompt.
+
+﻿
+
+Workflow
+﻿
+
+1. Open an Administrator PowerShell terminal
+
+﻿
+
+2. Open the RSOP management console by entering the command:
+
+rsop.msc
+﻿
+
+﻿
+
+Figure 14.1-16
+
+﻿
+
+3. When the windows opens, navigate to the GPO item being reviewed, and open the setting.  For example, to ensure that the audit command-line history attribute is governed by the audit policy, find that setting.
+
+﻿
+
+﻿
+
+Figure 14.1-17
+
+﻿
+
+4. Navigate to the Precedence tab. The GPO that governs this setting is listed highest, if multiple GPOs apply.
+
+﻿
+
+﻿
+
+Figure 14.1-18
+
+﻿
+
+The gpresult tool, along with some filtering powered by PowerShell, can speed this process along.
+
+﻿
+
+If the registry key modified by the GPO is ProcessCreationIncludeCmdLine_Enabled, then search for that key or a portion of it.
+
+﻿
+
+5. In the PowerShell terminal, enter the command:
+
+gpresult /SCOPE "COMPUTER" /V | Select-String -Pattern "ProcessCreationIncludeCmdLine_Enabled" -Context 1
+﻿
+
+Here, Select-String searches for a specific text pattern in the output, and Context indicates that one line above and below the selected text are to be displayed.
+
+﻿
+
+Alternatively, when the registry key is not known, all GPOs may be perused by simply searching the output for the GPO term, and the modified registry keys are printed with the context output.
+
+﻿
+
+6. Run the following command to see all GPOs applied to a device with the gpresult tool:
+
+gpresult /SCOPE "COMPUTER" /V | Select-String -Pattern "GPO" -Context 1
+﻿
+
+For both of these tools, any GPOs that govern settings in the Advanced Audit Policy are not reflected in either the GUI or command-line output. To view the state of those settings, the utility auditpol.exe is useful.
+
+﻿
+
+7. In a PowerShell terminal, view the state of advanced auditing by entering the following command:
+
+auditpol.exe /get /category:* 
+﻿
+
+This command retrieves all settings, though specifying a category by name with the /category flag or a subcategory with the /subcategory flag fllters the results further. This tool does not mention which GPO has set the policy, but by opening the Group Policy Management console, one can manually view those setting for each GPO listed.
+
+Disable Access to Removable Storage Devices
+This task walks through securing the domain by denying the use of removable storage devices. Group Policy Management Editor is used to implement settings and configurations to prevent any removable storage device from being used on a machine connected to the domain. 
+
+﻿
+
+Workflow
+
+﻿
+
+1. Within Group Policy Management Editor, navigate to Computer Configuration > Policies > Administrative Templates: Policy definitions (ADMX files) retrieved from the local computer > System > Removable Storage Access. 
+
+﻿
+
+﻿
+
+Figure 14.1-27
+
+﻿
+
+NOTE: If Group Policy Management Editor was closed, select the Windows icon > Run. Enter gpedit.msc, and select OK.
+
+﻿
+
+Within the Removable Storage Access folder, users can configure all deny accesses to removable storage. Enabling each of the settings on the page ensures that removable storage device is denied on the systems.
+
+﻿
+
+2. To ensure each setting is denied, open the setting, select Enabled > Apply > OK. 
+
+﻿
+
+﻿
+
+Figure 14.1-28
+
+﻿
+
+3. Repeat Step 2 for all the settings within the Removable Storage Access folder. Enabling all settings denies all removable storage devices and increases the security of the system. 
+
+﻿
+
+4. To ensure the new policy changes are enforced across the domain, right-click the Windows icon on the taskbar. Select Command Prompt (Admin). If prompted Do you want to allow the following program to make changes to this computer?, select Yes. 
+
+﻿
+
+5. In Command Prompt, enter:
+
+﻿
+
+C:\windows\system32>gpupdate /force
+
+Auditing AD Changes
+Windows event logging is leveraged as a resource for investigating potential MCA within an enterprise-level environment. Forwarding Windows event logs to a Security Information and Event Management (SIEM) allows for even greater capability while allowing quick threat-hunting over multiple systems and data sources simultaneously. 
+
+﻿
+
+Within the Group Policy Management Editor, security settings can be defined and enabled. The security audit policy settings under Advanced Audit Policy Configuration allows an organization to audit compliance with important security-related rules by tracking precisely defined activities including:
+
+Administrator has added other users to an administrative group
+Administrator disabled a security policy enabling a legacy protocol
+Correct System Access Control list (SACL) is applied to critical files and folders or registry keys on a computer or file share as a verifiable safeguard against undetected access.
+Audit policy settings can be accessed through the Local Security Policy snap-in on the local computer or by using Group Policy Manager.
+
+﻿
+
+These Advanced Audit Policy Configuration settings allow the selection of behaviors that need to be monitored. Generally, it is good to exclude audit results for behaviors that do not aid in the investigation, or behaviors that create an excessive number of log entries. In addition, because security audit policies can be applied through domain GPOs, audit policy settings can be modified, tested, and deployed to selected users, groups, and workstations with relative simplicity. 
+
+﻿
+
+Listed are the audit policy categories found within the Advanced Audit Policy Configuration menu:
+
+Account Logon: Policy settings to help document attempts to authenticate account data on a DC or on a local Security Accounts Manager (SAM). Unlike Logon and Logoff policy settings and events, which track attempts to access a particular computer, settings and events in this category focus on the account database that is used.
+Account Management: Security audit policy settings used to monitor changes to user and computer accounts and groups.
+Object Access: Policy settings and audit events to track attempted access to specific objects or types of objects on a network or computer. To audit attempted access to a file, directory, registry key, or any other object, enable the appropriate Object Access auditing subcategory for success and/or failure events.
+Policy Change: Audit events to track changes to important security policies on a local system or network. Because policies are typically established by administrators to help secure network resources, monitoring changes or attempts to change these policies can be an important aspect of security management for a network.
+Privilege Use: Security policy settings and audit events to track the use of certain permissions on one or more systems. Permissions on a network are granted for users or computers to complete defined tasks. 
+System: Security policy settings and audit events to track system-level changes to a computer that are not included in other categories and have potential security implications.
+Global Object Access Auditing: Policy settings allowing administrators to define computer SACLs per object type for the file system or the registry. The specified SACL is automatically applied to every object of that type. Auditors can prove that every resource in the system is protected under an audit policy by viewing the contents of the Global Object Access Auditing.
+Having the necessary logs either makes or breaks an investigation of potential malicious behavior. This is especially true when investigating changes made to AD. By default, most audit policies are disabled due to the sheer number of Windows events that are reported during basic operation. Ignore these facts in this lesson for the purposes of demonstrating the capability of Windows Server's native functionality. The baseline recommendations shown in the first task, along with the recommended settings to help detect compromise, are intended only as a starting guide. Each organization must make its own decisions regarding the threats faced, the acceptable risk tolerances, and the audit policy categories or subcategories enabled/disabled.
+
+Configuring Domain Audit Policies
+Audit policies allow tracking changes to user accounts and groups and identifying originating workstations. Auditing policies may not be configured by default and may need to be configured manually. The Group Policy Management Editor snap-in is used to manage the audit policies on Windows Server 2008 R2 or higher. This task walks through accessing and configuring domain audit policies on the primary DC.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Log in to the cda-dc VM using the following credentials:
+
+﻿
+
+Username:  trainee 
+Password:  Th1s is 0perational Cyber Training!
+﻿
+
+2. Click the Windows Start menu, and enter Group Policy Management.
+
+﻿
+
+3. Open Group Policy Management.
+
+﻿
+
+﻿
+
+NOTE: Group Policy Management can also be accessed by selecting Run, entering gpmc.msc, and selecting OK.
+
+﻿
+
+﻿
+
+Figure 14.1-29
+
+﻿
+
+4. In the navigation pane, select Forest: cda.corp > Domains > cda.corp > Domain Controllers.
+
+﻿
+
+﻿
+
+Figure 14.1-30
+
+﻿
+
+5. Right-click Default Domain Controllers Policy and select Edit. The Group Policy Management Editor opens: 
+
+﻿
+
+﻿
+
+Figure 14.1-31
+
+﻿
+
+6. In Group Policy Management Editor, select Computer Configuration > Policies > Windows Settings > Security Settings > Advanced Audit Policy Configuration > Audit Policies > DS Access. 
+
+﻿
+
+﻿
+
+Figure 14.1-32
+
+﻿
+
+The DS Access Policy Audit Policy configures the tracking of Directory Services including accesses, replication, and changes to AD objects. In Figure 14.1-32, the Audit Events for all the policies are Not Configured. This means that the policies are not tracked. As previously mentioned, auditing policies may not be configured by default and may need to be configured manually.
+
+﻿
+
+7. To define a policy, right-click the desired policy (such as Audit Directory Service Changes) and select Properties: 
+
+﻿
+
+﻿
+
+Figure 14.1-33
+
+﻿
+
+NOTE: It is critical to audit both successes and failures of each policy. Both success and failures can aid in an investigation by providing more data. Selecting successes or failures may only tell half of the story. 
+
+﻿
+
+8. Select Configure the following audit events, Success, and Failure. Select Apply and OK. 
+
+﻿
+
+﻿
+
+Figure 14.1-34
+
+﻿
+
+NOTE: It is critical to audit both successes and failures of each policy. Both success and failures can aid in an investigation by providing more data. Selecting successes or failures may only tell half of the story. 
+
+﻿
+
+9. Repeat Steps 7 and 8 for all the policies listed in the Audit Policy. Once completed, the Audit Policy should look like Figure 14.1-35: 
+
+﻿
+
+﻿
+
+Figure 14.1-35
+
+﻿
+
+NOTE: In Group Policy Management Editor, users can define policies for a variety of system events. You can review the audit policies and determine which policies need to be configured and enforced. The more policies that are tracked, the more data is available, which can aid in an investigation. 
+
+﻿
+
+10. To ensure the new policy changes are enforced across the domain, right-click the Windows icon on the taskbar. Select Command Prompt (Admin). If prompted Do you want to allow the following program to make changes to this computer?, select Yes. 
+
+﻿
+
+11. In Command Prompt, enter:
+
+﻿
+
+C:\windows\system32>gpupdate /force
+﻿
+
+﻿
+
+Figure 14.1-36
+
+﻿
+
+This command refreshes the group policies on the DC. The workstation on the domain can enter this command to refresh the GPO, however, the machines receive the updated GPO on a set time interval or when rebooted. 
+
+﻿
+
+12. To quickly assess the policies that are defined and being enforced, within the Command Prompt (Admin) enter the following command:
+
+﻿
+
+C:\windows\system32>auditpol /get /category:*
+﻿
+
+The command uses the auditpol.exe Command-Line Interface (CLI), which configures and manages audit policy settings. The /get portion of the command pulls the current status of the policy. The /category:* portion of the command selects which auditing category is selected. The wildcard (*) selects all the categories. 
+
+﻿
+
+﻿
+
+Figure 14.1-37
+
+﻿
+
+Not configured indicates the policy is not defined or configured and is not being enforced. Success and Failure indicates the policy is defined or configured and is being enforced; tracking success and failures.
+
+ccount and Groups Affected
+The visualization in Figure 14.1-43 shows all of the accounts and groups that experienced Windows event ID 5136 by the user name Leonard Blevins. An important distinction about the visualization, including the user.name:leronard.blevins ensures the query only returns data that is associated with the potentially compromised account. 
+
+﻿
+
+﻿
+
+Figure 14.1-43
+
+﻿
+
+Deletion of Objects
+﻿
+
+The initial review conducted by the SOC team did not include any deletion of objects within the directory. However, be sure to capture any deletions that might have occurred. 
+
+Click "Finish" to exit the event.
+
+Deleted Objects
+Windows event ID 5141 indicates a directory service object was deleted. Critical to the capturing, event ID 5141 is the correct audit policy being defined and enabled. Luckily, the cda.corp network has the required policy defined, configured, and enforced. 
+
+﻿
+
+Modify the visualization used earlier in the investigation to help determine how many occurrences of event ID 5141 occurred via Leonard Blevins’s account between 11:30am and 1:30pm on June 30, 2021. 
+
+Windows Event ID 5136
+Windows event ID 5136 indicates a directory service object was modified. Throughout normal daily activities in domain administration, event ID 5136 is expected. However, a large amount of occurrences of ID 5136 in a small timeframe is suspicious.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  accesschk "Domain\user" -a * >> priveledge
+
+auditpol.exe /get /category:* >> enforeced
+
+GPM >> NAME OF GPO
+  LSP >> LOCAL
+  RSOP.MSC >> USING RSOP
