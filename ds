@@ -807,78 +807,1519 @@ Modify the visualization used earlier in the investigation to help determine how
 Windows Event ID 5136
 Windows event ID 5136 indicates a directory service object was modified. Throughout normal daily activities in domain administration, event ID 5136 is expected. However, a large amount of occurrences of ID 5136 in a small timeframe is suspicious.
 
+Introduction
+﻿
 
+﻿
 
+Domain Services is comprised of multiple tools that facilitate objects and users within the domain. This lesson provides an overview of the domain services such as Lightweight Directory Access Protocol (LDAP) and Domain Controller Synchronization (DCSync), and their use in Defensive Cyberspace Operations (DCO).
 
+﻿
 
+LDAP provides language that applications use to communicate with other directory services servers. LDAP manages single sign-on (SSO) making it a critical asset to protect for DCO. 
 
+﻿
 
+DCSync is a credential dumping technique leading to the compromise of user credentials, and a prelude to the creation of a Golden Ticket. Adversaries often use DCSync to leverage access to key systems. 
 
+﻿
 
+Trainees learn the practical aspects of how to secure the domain including configuring LDAP, modifying settings to secure LDAP, analyzing a DCSync attack, and utilizing Windows Event Viewer to aid in an investigation.
 
+Understanding Lightweight Directory Access Protocol
+LDAP is traditionally used in medium-to-large organi­zations. LDAP supplies the syntax that services and applications use to connect and communicate with directory services servers. Directory services store information regarding users' profiles such as passwords and computer accounts. Directory services share the information collected with organizations on the network. LDAP servers exist at two levels: large public servers (universities and libraries) and smaller LDAP servers for workgroups. A domain administrator may use an LDAP server to look up contact information. While every email program has a personal address book, the questions remain: How do you locate an individual’s email address if they have never sent you an email? How do organizations keep a current contact list that everyone can access?
 
+﻿
 
+These questions led several big-name companies to support a standard called LDAP. LDAP-aware client programs ask LDAP servers to index all the entry data. Filters can be applied to particular people or groups, the filter will only return with applicable data. 
 
+﻿
 
+LDAP contains and handles more than contact information about people or groups, it is also used to query encryption certificates, connections to printers, and provide single sign-on (SSO) services. SSO  is a structure where one user’s password is shared between many services. Security for SSO is critical for DCO, as compromised credentials could grant the adversary access to multiple systems on the network. LDAP works with all directory-like information, where rapid requests and less-frequent updates are expected.
 
+﻿
 
+LDAP does not define how programs work or interact with each other. LDAP’s primary purpose is to define the language employed by client programs (e.g., email provider, a printer hub, a contact book, etc.) to talk to servers — and servers to servers, too. The server may or may not communicate via LDAP, there are numerous other method of communication; LDAP may be an add-on method. 
 
+###
 
+LDAP also defines:
 
+Permissions: These are set by an administrator to allow certain people to access the LDAP database and keep certain data private.
+Schema: Describes the format and attributes of data on the server. A schema entered in an LDAP server might define a groovyPerson entry type, which has attributes of directMessageAddress and waterFlavorPreference. The standard attributes of name, email address, etc., are inherited from one of the standard schemas, which are rooted in X.500. ﻿
 
 
 
+Which Windows feature must be installed and configured to utilize LDAP?
+remote server admin tools
 
+Which statement best describes LDAP?
+manage users and computers and allow amin to organize
 
+In the Server Manager Dashboard, which tab provides the LDAP’s current status?
+lds
 
+Scroll to verify that all options under Remote Server Administration Tools (RSAT) are checked. RSAT must be installed on the client to establish an LDAP connection.
 
+LDAP Settings
+In this portion of the lesson, walk through the settings pertaining to LDAP, specifically the settings to enable improved protection for the domain against potential Malicious Cyberspace Activity (MCA). 
 
+﻿
 
+LDAP Binding
+﻿
+Bind operations serve multiple purposes including:
 
+Providing directory server authentication for clients; includes the users or applications behind the clients.
+Establishing an authorization identity for subsequent operations processed via the connection.
+Specifying the client’s LDAP protocol version.
+Authentication typically consists of two parts: identifying the need for authentication, and providing proof of identity — a password, a certificate, a hardware/software token, and/or biometric information. There may be additional steps (e.g., checking password policy state or other constraints) that must be completed prior to successfully binding.
 
+﻿
 
+LDAP bind requests use either simple or Simple Authentication and Security Layer (SASL) authentication. In simple authentication, the authenticated account is identified by the entry’s Distinguished Name (DN) for the account, and a password is used as the identity proof. Since the password is not obfuscated when transmitted, the use of an encrypted connection (e.g., secured by Secure Sockets Layer [SSL]/Transport Layer Security [TLS] or StartTLS) is strongly recommended. Providing an empty string as the bind DN and password works for an anonymous simple bind. While the Lightweight Directory Access Protocol version 3 (LDAPv3) specification states only the password needs to be empty, this has led to multiple security issues. Given this, most servers request an empty DN if using the empty password.
 
+﻿
 
+An LDAP bind request is comprised of three elements:
 
+The client’s desired LDAP protocol version. Version 3 is the most current, however, older clients may use version 2. Any newly created application should be developed for version 3.
+The user’s DN for authentication. Leave this empty for anonymous simple authentication; it is usually empty for SASL authentication, too. For non-anonymous simple authentication, it must be populated.
+The user’s credentials for authentication. The password for the user specified by the bind DN is required for simple authentication; this may be empty for anonymous binds. SASL authentication expects an encoded value containing the SASL mechanism name and a set of encoded SASL credentials (optional).
 
+Discover Clients not Using the Require Signing Option
+Microsoft describes the process to discover clients not using the Require signing option as:
 
+﻿
 
+After making the configuration change, clients often find their binds cease working if they are relying on unsigned SASL LDAP binds or on LDAP simple binds over a non-SSL/TLS connection. To assist in identifying these clients, the AD DS or Lightweight Directory Server (LDS) directory server logs a summary event Identifier (ID) 2887 once every 24 hours, which indicates how many such binds occurred. It is recommended to configure these clients not to use such binds. After these events cease for an extended period, configure the server to reject such binds in the future.
 
+﻿
 
+Configure the directory server to provide more detailed logs, if more information is required to identify such clients. An event ID 2889 is logged when a client attempts an unsigned LDAP bind. The log entry captures the IP address and identity that tried to authenticate. Setting the 16 LDAP interface events diagnostic setting to 2 (Basic) enables the logging.
 
+﻿
 
+The directory server logs a summary event ID 2888 once every 24 hours when a rejected unsigned SASL LDAP bind or LDAP simple bind over a non-SSL/TLS connection occurs.
 
+Finding Potentially Harmful Activities Using AD Tools
+DCSync is a credential dumping technique leading to the compromise of user credentials, and a prelude to the creation of a Golden Ticket — DCSync compromises the Kerberos Ticket Generating Ticket Account (KRBTGT) password. The KRBTGT is a hidden account that encrypts all authentication tokens for the DC. The Golden Ticket is the KRBTGT account’s Kerberos authentication token. The Golden Ticket can use a Pass-the-Hash technique to log into any account, allowing attackers to move around the network unnoticed.
 
+﻿
 
+DCSync attacks occur when an adversary compromises a user’s Replicating Directory Changes All and Replicating Directory Changes privileges — administrators, domain administrators, enterprise administrators, and DC groups have these privileges by default. If necessary, any user can be granted these specific privileges. Once obtained, an adversary replicates data (including credentials) from AD using the Directory Replication Service (DRS) remote protocol.
 
+﻿
 
+In addition to DCs, some applications (such as Azure Active Directory Connect) have legitimate requirements for replication permissions. These applications are often targets for adversaries because of the requirements.
 
+﻿
 
+Protecting an organization from a Golden Ticket attack is no different than from any other malware or infiltration attack. Since an attacker requires privileged access to create the Golden Ticket, the more difficult it is for them to steal credentials, the better protected the organization is. Follow these procedures to help defend from a Golden Ticket attack:
 
+Train users to recognize and avoid bad links
+Enforce a least privilege model
+Limit user access to only what they need
+Limit administrator and domain administrator access
+Use administrator accounts sparingly and only for approved changes
+Install endpoint protection to block attackers from loading modules like Mimikatz
+Create a choke point for access to the DCs, adding another layer of protection
+Create a terminal server that can only talk to the DCs
+Configure the DCs to only accept administrative connections from that terminal server
+Monitor file activity and user behavior
+Alert on known behavior that indicates Golden Ticket attacks
 
+DCSync Using Mimikatz as an Attacker
+Mimikatz is a post-exploitation tool that dumps passwords from memory, hashes, PINs, and Kerberos tickets. It enables Pass-the-Hash and Pass-the-Ticket attacks, and builds Golden Kerberos tickets. This makes post-exploitation lateral movement easy for attackers inside a network.
 
+﻿
 
+Using Mimikatz, this DCSync attack is designed to weaponize native AD replication tools — to request and receive sensitive information about accounts from AD such as Windows New Technology LAN Manager (NTLM) password hashes. This type of attack is very difficult to detect since an attacker does not have to physically log on to the DC.
 
+NOTE: The dcsync command is used in the CDA domain to request the credentials for the krbtgt user. The krbtgt user is the Kerberos Service Account, which can be used to create Golden Tickets. 
 
 
 
+Mimikatz was utilized to access credentials and obtain the NTLM Hash of the Kerberos Service Account. The account replicated the Administrator account’s credentials, thus completing a Golden Ticket attack. Attackers utilize the NTLM Hash to obtain the account’s password and weaponize the service account’s privileges. 
 
+AD was accessed to verify permissions often utilized in a DCSync attack. It is important that the permissions are only granted to users who absolutely require them to carry out their job.  
 
 
 
+6. Under Permissions for Rhett A. Smith in the CDA.corp Properties, locate the following two permissions:
+Replicating Directory Changes
+Replicating Directory Changes All
+7. Set the permissions to Allow. These are needed for a user to perform a DCSync attack.
 
 
+8. To make the domain safer, change the permissions to Deny. Select Apply > OK. 
 
+User and Group Objects
+User and group objects can be created in an AD domain in order to facilitate access control. 
 
+﻿
 
+User Objects
+﻿
 
+A user object represents an account within a domain. A set of permissions can be assigned to that user object in order to allow the account access to various resources. The term user is commonly used as shorthand to refer to a user object or account.
 
+﻿
 
+Group Objects
+﻿
 
+A group object is an object that references a collection of other objects, usually to make it easier to administer an AD domain. Each object referenced by a group is considered to be a member of that group — permissions can be assigned to a group object in order to allow its members access to various resources. Group objects can be nested within other group objects. For example, group object C may be a member of group object B, which is a member of the final group object A — any permissions assigned to group object A can be inherited by members of group objects B and C. The term group is commonly used as shorthand to refer to a group object.
 
+﻿
 
+Local vs. Domain
+﻿
 
+A distinction should be made between local users and groups and domain users and groups. Local users, groups, and any associated permissions are only applied to a single computer. Domain users, groups and their associated permissions can apply to many resources across an entire AD domain or forest.
 
+﻿
+
+A common example of a local user account is the default Administrator account, which is present by default on all Windows Operating Systems (OS) unless explicitly disabled. This account has access to many secured resources on the local computer, such as the system directory C:\Windows\System32\. However, the local administrator account does not have access to other resources elsewhere within the domain.
+
+﻿
+
+Privileges vs. Access Rights
+﻿
+
+Another important distinction to understand is the difference between privileges and access rights, which are both types of permissions.
+
+﻿
+
+Privileges
+
+﻿
+
+A privilege is a permission that is assigned to a user or group in order to allow that object to perform system-level operations on an individual computer. For example, any accounts with the SE_SHUTDOWN_NAME privilege are allowed to shut down the computer, as long as they are logged into it locally. The SE_REMOTE_SHUTDOWN_NAME privilege is a separate privilege that allows an account to remotely shut a computer down. Privileges are assigned to users and groups by a system administrator, usually via the deployment of local or group policy. In order for a privilege to apply, it must also be enabled on the local system — certain accounts may be granted a privilege, but be unable to exercise it because that privilege has been disabled on the system.
+
+﻿
+
+A list of privileges can be viewed within a few different snap-ins in the Microsoft Management Console (MMC). Privileges within MMC are listed as easy-to-digest descriptions — the real privilege name (e.g., SE_SHUTDOWN_NAME) is used at deeper layers within the OS to uniquely identify a privilege.
+
+﻿
+
+Figure 15.1-1 demonstrates the list of privileges that are available within the Windows OS, via the Security Templates snap-in within MMC.
+
+﻿
+
+﻿
+
+Figure 15.1-1
+
+﻿
+
+Important Privileges
+
+﻿
+
+Table 15.1-1 contains some of the more important privileges that an attacker can leverage to achieve their goals. The privilege name and description were originally taken from Microsoft’s Privilege Constants documentation, but the description has been paraphrased and given additional context showcasing how it might be useful to an attacker.
+
+﻿
+
+﻿
+
+Table 15.1-1
+
+﻿
+
+Access Rights
+
+﻿
+
+Whereas privileges allow an object to perform a specific action on a system, access rights allow an object to perform some action against a securable object. Some examples of securable objects include folders, files, registry keys, and processes. Securable objects use different sets of access rights depending on the type of securable object. For example, Figure 15.1-2 shows the access rights available on a file or folder.
+
+﻿
+
+﻿
+
+Figure 15.1-2
+
+﻿
+
+Access Right Implementation
+
+﻿
+
+A system keeps track of a Discretionary Access Control List (DACL) for each securable object present on that system. Each DACL contains a list of Access Control Entries (ACE), which each tie a list of access rights that a trustee (i.e., a user, group, or specific logon session) has to a securable object. An ACE can be one of six types — three of these types are supported by all securable objects:
+
+Access-allowed ACEs: Grant a trustee the set of access rights specified within the ACE
+
+Access-denied ACEs: Deny a trustee the set of access rights specified within the ACE
+
+System-audit ACEs: Used to audit a trustee’s attempts to exercise any of the access rights specified within the ACE
+
+﻿
+
+The other three ACEs are supported by specific directory services objects, and are not relevant to the rest of this lesson.
+
+﻿Individual and Group Account Management
+Proper administration of AD accounts — and the permissions assigned to those accounts — can drastically impact the security posture of one or more federated domains. Accounts that have excessive or useful permissions, or are members of important groups, are often targeted by threat actors to achieve malicious gain across the entire enterprise. Access to these accounts can aid a threat actor in establishing persistence, further escalating privileges, evading defenses, accessing additional credentials, and achieving lateral movement. Accounts and groups need to be properly managed to effectively protect resources throughout an enterprise.
+
+﻿
+
+Principle of Least Privilege
+
+﻿
+
+A concept that is widely acknowledged as a best practice throughout the industry is the Principle of Least Privilege. This principle refers to assigning the minimum required permissions that are needed for an account to perform essential actions.
+
+﻿
+
+There are two primary access control strategies that have been developed in order to implement the Principle of Least Privilege. 
+
+﻿
+
+Role-Based Access Control (RBAC) is focused on tying a user’s job role to the specific systems or resources that they need access to. An example of RBAC is a user in a company’s marketing department being assigned to a role named AdCampaign01, which gives them the appropriate permissions to access files related to that ad campaign.
+
+﻿
+
+Attribute-Based Access Control (ABAC) combines different security attributes, such as the role assigned to a user, via the implementation of Boolean logic. These combinations of attributes are built into a policy that can then be applied to users or groups in order to grant them appropriate permissions. This approach provides a high degree of flexibility, since the policy logic can easily be modified later to account for small changes that must be implemented. This strategy is sometimes referred to as Policy-Based Access Control (PBAC). Applying ABAC to the marketing example given above, access to the ad campaign resources might require that the user have two roles, Marketing and AdCampaign01 — a user lacking either of these roles would be unable to view the ad campaign resources.
+
+﻿
+
+Importance of Proper Account Management
+
+﻿
+
+The MITRE Adversarial Tactics, Techniques, and Common Knowledge (ATT&CK) Navigator chart serves as a visual overview of various attacker techniques and sub-techniques that rely on abusing account management flaws to be successful. The chart demonstrates that threat techniques related to account management span almost all of the Enterprise ATT&CK categories, and provides insight into which attacker techniques might be investigated, addressed, or hardened as part of a Cyber Protection Team (CPT) mission. This visual goes beyond the scope of Windows AD, and represents information on additional platforms, which may be affected by account management processes. 
+
+Inspecting User and Group Properties
+In this task, multiple Windows interfaces are used to review AD users and groups within the cda.corp domain. Within the context of a CPT mission, the actions to perform might normally be performed as part of terrain mapping, in order to enumerate users and groups within an AD environment, or as part of a hunt mission in order to collect contextual information about a suspicious set of users or groups.
+
+﻿
+
+Active Directory Users and Computers Interface
+﻿
+
+The Active Directory Users and Computers interface provides graphical access to domain objects of different types for review and management.
+
+2. Open Active Directory Users and Computers from the taskbar:
+
+﻿
+
+﻿
+
+﻿
+
+Active Directory Users and Computers opens, which provides an overview of users, groups, and computers for each of the domains listed. Note that only a single domain — cda.corp — is listed.
+
+3. Select Users. 
+
+﻿
+
+4. Review each column for specific details:
+
+Name: Name of each object.
+Type: Type of object displayed (for example, User or specific group type such as Security Group or Distribution Group).
+Description: Provides additional information regarding the object. Default groups and users usually contain detailed descriptions that come pre-configured from Microsoft. 
+
+Accessing User Properties
+﻿
+
+1. Open John Doe by double-clicking it within the User list. The Properties menu for the John Doe account appears:
+
+This menu provides access to specific user settings, which includes Account, Organization, and Member Of information.
+
+﻿
+
+2. Select the Account tab.
+
+
+This tab lists specific information for the user, including various configuration options for the account. Familiarize yourself with some of the options available on this tab.
+
+﻿
+
+3. Select the Member Of tab.
+
+This lists all the groups that the user is a part of. Additionally, users can be added to or removed from groups using this menu. 
+
+﻿
+
+4. Close the John Doe Properties window.
+
+﻿
+
+Accessing Group Properties
+﻿
+
+1. Open Domain Admins by double-clicking it within the Users list. 
+
+This window provides access to specific group information.
+
+﻿
+
+2. Select the Members tab.
+
+This tab provides a list of the members that are a part of the group. Additionally, users can be added to or removed from the group using this menu. 
+
+﻿
+
+3. Select the Member Of tab.
+
+This tab lists all of the groups that the Domain Admins group is a member of. Recall that groups can be nested, and inherit the rights of other groups they are members of. Additional groups can be added within this tab to make the Domain Admins group a member of those groups.
+
+﻿
+
+4. Close out of the Domain Admins Properties window.
+
+﻿
+
+The interfaces explored make it easy to manage AD users and groups. They can be used to review and modify specific information about a user or group in order to assist an investigation, provide information on the threat landscape, or institute least privilege principles.
+
+Querying AD Using Net Commands
+The Windows Command Prompt provides a CLI to review and manage local or remote domain attributes. By utilizing the net commands, specific domain information can be queried. 
+
+﻿
+
+NOTE: Depending on the command being executed, an administrator-level command prompt may be required. The trainee account that was used to sign in to the cda-dc VM already has administrator privileges.
+
+﻿
+
+1. Open Command Prompt from the taskbar.
+
+﻿
+
+﻿
+
+﻿
+
+2. Execute the following commands while observing the specific output:
+
+﻿
+
+C:\windows\system32>net user
+﻿
+
+﻿
+
+Figure 15.1-12
+
+﻿
+
+This net command outputs a list of local user accounts found on the machine. These accounts may exist within the domain, but must have a local profile on the current machine in order to be visible
+
+﻿
+
+3. Enter the following command:
+
+﻿
+
+C:\windows\system32>net user /domain
+﻿
+
+﻿
+
+Figure 15.1-13
+
+﻿
+
+This net command provides an output of all the users for the currently joined domain. The /domain switch is a common addition used within net commands to retrieve results from the currently joined domain, rather than just the local computer.
+
+﻿
+
+4. Enter the following command:
+
+﻿
+
+C:\windows\system32>net user Administrator /domain
+﻿
+
+﻿
+
+Figure 15.1-14
+
+﻿
+
+This command returns information about the specified user — Administrator — from the domain. Some of the important information returned includes Password last set date, Last logon date, and Global Group memberships. 
+
+﻿
+
+5. Enter the following command:
+
+﻿
+
+C:\windows\system32>net localgroup
+﻿
+
+﻿
+
+Figure 15.1-15
+
+﻿
+
+This net command provides an output of all the local groups for the current system.
+
+﻿
+
+6. Enter the following command:
+
+﻿
+
+C:\windows\system32>net group /domain
+﻿
+
+﻿
+
+Figure 15.1-16
+
+﻿
+
+This net command provides an output of all the domain groups for the current domain.
+
+﻿
+
+7. Enter the following command:
+
+﻿
+
+C:\windows\system32>net group "Domain Admins" /domain
+﻿
+
+﻿
+
+Figure 15.1-17
+
+﻿
+
+This command returns an output for the specified group — Domain Admins. The output includes a list of users that are part of the specific group.
+
+﻿
+
+Additional Resource
+
+Question:
+
+
+Which command would provide all related properties for the leonard.blevins user, and write the output to a file?
+• Get-ADUser leonard.blevins -Properties * | Export-CSV -Path “leonard.blevins.csv”
+
+Securing User Accounts
+﻿
+
+Figure 15.1-24
+
+﻿
+
+Privileged Accounts
+Basic user accounts: Accounts used by the general population of network users. These accounts usually require less privileges as they are generally used for basic job functions.
+Privileged accounts: Accounts with specific elevated rights that grant them access to information and resources, or the ability to administer changes. Listed below are some examples of what privileged accounts could be commissioned for:
+An account for a healthcare employee that grants access to specific resources that contain Personally Identifiable Information (PII) required for them to execute their job function. Additionally, this account may provide access to an application or service that helps the employee manage and interact with that data.
+A local administrator account used by an IT employee to make changes to a local system, but not to the wider network or domain.
+A domain administrator account allowing an administrator to modify information within, and make configuration changes to, an AD domain. These actions might include the commission and decommission of new users, the ability to modify user and group permissions, or the addition, removal, or modification of any object within the domain. Generally, domain administrator accounts are also granted a high level of privileges on individual endpoints within that domain.
+An enterprise-level administrator account made for an administrator to manage all trees, domains, and Organizational Units (OU) within the AD forest. 
+Shared accounts: Accounts shared by two or more users. These accounts are not recommended and should be generally prohibited, since they present many challenges when auditing user activity and providing attribution for actions. If shared accounts are required, it is highly recommended that the privileges provided to these accounts follow the Principle of Least Privilege in order to reduce the risk and impact of malicious use. 
+Service accounts: Accounts associated with an application or service in order to provide a security context for that service to run under. It is common for service accounts to have elevated privileges, making them a juicy target for threat actors. A good method of identifying MCA performed by service accounts is to confirm that service accounts have no interactive sessions associated with them and few child processes.
+﻿
+
+Generally, it is recommended that high-privileged accounts be separate from everyday user accounts, and that the high-privileged accounts only be used when these privileges are necessary to perform an essential job function. Using the John Doe user as an example, best practice implementation would mean they would have a jdoe@cda.corp account for every day, non-privileged use, and a separate jdoe.admin@cda.corp (or similar convention) for required elevated privileges in order to perform essential actions. Monitoring for suspicious activity that occurs on these high-privileged accounts is made easy, because the accounts should only be used for a small amount of essential activity — any activity that oversteps these bounds should be considered suspicious. 
+
+﻿
+
+Managing Passwords
+﻿
+
+Password management is still a popular concept when discussing security. Accounts — especially high-privileged ones — should have strong passwords and have Two-Factor Authentication (2FA) enabled when possible. Unfortunately, service accounts and other legacy accounts still remain that cannot utilize 2FA. Additional issues that may increase an organization’s password compromise risk might be multi-use systems and users being resistant or hesitant to change.
+
+﻿
+
+Decommissioning Accounts
+﻿
+
+Deleting or disabling accounts that are no longer necessary is an often overlooked function within the realm of account management. There are several considerations that must be made when deciding whether to delete or disable an account. Disabling an account can have far less negative impact on an investigation, because deletion may remove important data and event logs associated with that account. Similarly, account deletion may cause a huge headache if there are any downstream resources that rely on that account to be present — an account can be easily re-enabled, but restoring a deleted account is much more difficult. However, deleting accounts leads to a much cleaner directory, and allows for easier management of the directory in the future. One way an organization might choose to balance these considerations is via the creation of an account deletion policy — any accounts that are no longer needed must be disabled, then an appropriate amount of time must pass before deletion.
+
+﻿
+
+Account Management Attacks
+﻿
+
+Table 15.1-3 lists MITRE AT
+
+Security Management of Individual Users
+Proper management of user accounts can reduce the attack surface and mitigate a large number of attacker techniques. Use the Active Directory Users and Computers interface to address security issues within a Windows domain. This helps reduce a threat's ability to achieve success throughout multiple phases of the attack lifecycle. These mitigation actions can be executed directly by a CPT, or proposed to local defenders in order to harden the environment.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Log in to the cda-dc VM using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. Open Active Directory Users and Computers from the taskbar:
+
+﻿
+
+﻿
+
+﻿
+
+3. Double-click Mikaela Rubio to open the Properties menu.
+
+﻿
+
+4. Select the Member Of tab to display all the groups this user is a member of. 
+
+This user is a Domain User and also part of the Executives group. Knowing this information can provide a better understanding of the rights that this particular user has in relation to their group membership. It also gives some context into the user's job role. Based on this information, begin making changes to this user's account settings to help limit potential attack vectors.
+
+﻿
+
+5. Select the Account tab, and uncheck Password never expires. This means that the user’s password expires after the time specified by the domain’s password security policy — the user must change their password after this date in order to continue using the account.
+
+﻿
+
+6. Under the Account expires section, select End of: and enter a date four months from the current date. This means that this account is automatically disabled in four months, which can prevent an attacker from holding access over significant stretches of time. This is a great mitigation tactic for temporary or contracted employees who have a defined end-of-work date.
+
+﻿
+
+7. Under the Account options section, select User must change password at next logon. This forces a user to change their password upon their next login, and is a good method for forcing long-lived passwords to be compliant with updates to the password security policy.
+
+﻿
+
+8. Select Logon Hours… to change the user’s allowed logon hours. Select 12 AM to 4 AM from the All row, and select Logon Denied. Repeat this process for 9 PM to 12 AM. Select OK to submit the settings changes. This mitigation prevents a user from logging in outside the specified timeframes. An attacker who has compromised this account is unable to log in with it outside of the chosen timeframe.
+
+9. Select Log On To…. A pop-up menu displays specific individual workstations that this user is allowed to log on to. 
+
+﻿
+
+10. Select The following computers. 
+
+﻿
+
+11. Recall that the user Mikaela Rubio was a member of the Executives group, which provides information to the machines that the account might need to access. Enter CDA-EXEC-1 into the Computer name field, and select Add. Repeat this process with the CDA-EXEC-2 and CDA-EXEC-3 machines. After all computer names have been entered, select OK to save the names. This mitigation severely limits an attacker’s opportunities to use this account for lateral movement.
+
+12. Select Apply to save the changes in the Mikaela Rubio Properties window. Select OK to exit the window.
+
+﻿
+
+Protected Users Group
+﻿
+
+Follow the steps below to add a user account to a protected group. This is done due to the nature of the job role for that individual user. Some users with unique or important job roles — hence elevated privileges or access — require enhanced security protections and monitoring to better protect the organization.
+
+﻿
+
+1. Double-click Madelyn Rodriguez in Active Directory Users and Computers. 
+
+﻿
+
+2. On the Member Of tab, review the groups that the user is a member of.
+
+This user appears to be a member of the Human Resources group, which indicates their job role. Human Resources personnel frequently have access to sensitive employee data. Thus, additional protection mechanisms may need to be put in place for these user accounts.
+
+﻿
+
+3. Select Add…. The Select Groups window opens. 
+
+﻿
+
+4. Select Advanced… > Find Now, which collects a list of all groups currently existing within the domain. 
+
+﻿
+
+5. Scroll through the search results list and locate the Protected Users group. Select the group and select OK.
+
+﻿
+
+6. Select OK on the Select Groups window, and Apply on the Madelyn Rodriguez Properties window to complete the group membership process. Close the Madelyn Rodriguez Properties window.
+
+The Madelyn Rodriguez account has now been added to the Protected Users group, which comes pre-configured from Microsoft. Members of this group automatically have non-configurable protections applied to their accounts. The only method to modify these protections for an account is to remove the account from the group. 
+
+﻿
+
+As per the Microsoft documentation for the Protected Users security group:
+
+﻿
+
+Accounts that are members of the Protected Users group that authenticate to a Windows Server 2012 R2 domain are unable to:
+
+Authenticate with New Technology Local Area Network (LAN) Manager (NTLM) authentication.
+Use Data Encryption Standard (DES) or Rivest Cipher 4 (RC4) encryption types in Kerberos pre-authentication.
+Be delegated with unconstrained or constrained delegation.
+Renew the Kerberos Ticket-Granting Tickets (TGT) beyond the initial four-hour lifetime.
+Utilizing the above methods, user accounts can be managed to limit the attack surface of an organization and minimize the success of a potential threat actor. Preventing a threat actor’s ability to access and reuse credentials within a domain is one of the most important tasks for limiting a threat’s ability to be successful during a breach. Successfully accomplishing this can prevent execution, privilege escalation, persistence, and lateral movement of a threat actor.
+
+Which settings can be managed from within the Active Directory Users and Computers application?
+• Allowed logon hours
+• Password expiration policy
+• Workstation access policy
+
+
+
+Allowing an account to only log in to a single workstation could potentially limit lateral movement if that account was compromised.
+t
+
+Individual user logins can be prevented based on limiting login access to specific days and times.
+t
+
+
+Other than the Active Directory Users and Computers application, which other interfaces can be used to query user and group membership?
+ Windows Command Prompt
+• Windows PowerShell
+
+
+AD Group Security
+When discussing the security of groups, it is important to understand the difference between local and domain groups and the concept of group scope. As discussed earlier, an AD group can be a local group or a domain group. Local groups are groups that are specific to the particular system that the group was created on, while domain groups are groups that can apply to a larger AD environment. Note that membership in a local group can include domain users and groups, if the system is joined to a Windows domain. For example, an organization’s IT accounts might be added to the local Administrators group on each endpoint, in order to facilitate quick IT management and administration of that endpoint.
+
+﻿
+
+Group Scope
+﻿
+
+A group’s group scope defines the possible members of that group, and the location within an AD forest where permissions associated with that group are applicable. There are three possible group scopes.
+
+﻿
+
+Domain Local group: Only grants permissions within the same domain as it is defined in. These permissions do not apply to other domains within the tree or larger forest. It is important to note that membership within a Domain Local group is not very restricted — any user, global group, or universal group from within the forest can be a member of a Domain Local group. The only restriction is that a Domain Local group cannot be a member of another Domain Local group within a different domain.
+
+﻿
+
+Global group: Grants permissions over any domain within the AD forest. Membership for these Global groups can consist of accounts and other Global groups from the same domain.
+
+﻿
+
+Universal group: Grants permissions across the entirety of the AD forest. Members of a Universal group can consist of any user account, Global group, or Universal group within the forest.
+
+﻿
+
+Ultimately, group scopes exist to enable AD administrators to grant permissions in an efficient way. However, group scopes can be used by Defensive Cyber Operators to more accurately assess and investigate security issues with an AD domain. Misconfigurations of these group scopes within an AD forest could allow an attacker to gain unintended access to other resources within the forest.
+
+﻿
+
+Managing Security Group Membership
+﻿
+
+In this task, Active Directory Users and Computers is used to manage AD groups within the CDA domain. As demonstrated earlier in this lesson, both Windows Command Prompt and PowerShell could also be used to accomplish these tasks. These actions might be performed during a CPT operation as part of hardening KT-C related to a specific AD environment.
+
+2. Open Active Directory Users and Computers from the taskbar:
+
+﻿
+
+﻿
+
+﻿
+
+3. Double-click IT-Support to open the IT Support Properties window.
+
+﻿
+
+4. Select the Member Of tab, which displays all the groups that the IT-Support group is a member of.
+
+﻿
+
+5. Double-click the Enterprise Admins group to view the properties of that group. Note the group scope of the Enterprise Admins group.
+
+As indicated by the Universal group scope, the Enterprise Admins group grants permissions across an entire AD forest. The permissions granted by the Enterprise Admins group allow an account to achieve incredibly high-privileged access. The users within the IT-Support group may need some of these privileges to perform their job function, but they definitely do not require full Enterprise Admin privileges. Do you want low-level technical support staff able to make AD configuration changes across the entire AD forest?
+
+﻿
+
+6. Close the Enterprise Admins Properties window.
+
+﻿
+
+7. Remove the Enterprise Admins group from the IT-Support group. Select Enterprise Admins > Remove. 
+
+8. Select Apply to apply the changes, and OK to close the IT-Support Properties window.
+
+﻿
+
+Enterprise Admin privileges should be limited to an extremely specific set of users who absolutely require such a high level of privilege. Following some of the best-practice advice discussed earlier in the lesson, Enterprise Admin access could be assigned to a special account that is kept separate from a domain user's unprivileged account. This would provide proper separation of use between the accounts, requiring that the account owner only use the highly-privileged account when absolutely necessary. This limits the potential exposure of the elevated privileges within the domain, and minimizes the opportunity for a threat actor to take control of the account.
+
+﻿Which statements correctly describe the Domain Local group scope?
+• A Domain Local group can grant permissions within the same domain as it is defined in.
+• A Domain Local group may have members from other domains, provided that the member is not a Domain Local group from another domain.
+
+Recall that the Domain Local group scope allows a group to grant privileges within a domain. Any other user or group may be a member of the Domain Local group, so long as the member is not a different Domain Local group that exists within another domain. For example, a Domain Local group in Domain A can not be a member of another Domain Local group in Domain B.
+
+
+Question: 
+
+
+Which group scope is assigned to the Enterprise Admins group?
+Universal
+
+Auditing AD Activity
+Proper collection and monitoring of audit logs produced within an AD environment can be a key contributor to the security of an organization. Review the following types of AD auditing to better understand the importance of performing these crucial audits.
+
+﻿
+
+Usage Auditing
+﻿
+
+In the case of a breach, account usage auditing can drastically reduce the time required to determine what attacker actions have taken place. It is important to be able to monitor which accounts are accessing and modifying objects within the enterprise. Monitoring this behavior can help provide context regarding whether the account is being used in accordance with security policy and is being leveraged for legitimate use. 
+
+﻿
+
+Privilege Auditing
+﻿
+
+Continuous auditing of privileges available throughout the environment can ensure that privileges that are no longer needed are removed. This includes updating privileges as usage requirements change, and removing accounts for users or services that are no longer necessary to the organization. This is one of the most important aspects of maintaining the Principle of Least Privilege.
+
+﻿
+
+Change Auditing
+﻿
+
+Proper auditing of the changes made to an account — and deployment of alerts around any highly impactful changes — allows local defenders to quickly identify and respond to potential MCA from internal and external threats. This is important, as threats often manipulate account permissions as part of privilege escalation, discovery, lateral movement, and persistence activities. 
+
+﻿
+
+The events used to perform AD audits exist in many different places within an AD environment. Events are generated on Windows workstations, Windows servers, or directly on AD infrastructure such as DCs. These events can be collected and aggregated into a centralized source, such as a Security Information and Event Management (SIEM) instance. Investigation of these events can provide insight into the activity that occurred within an environment.
+
+event.code:4688 AND user.name:Administrator AND winlog.event_data.CommandLine:"net *”
+
+Identifying Group Enumeration
+The following query is the most suitable for investigating process execution events where the Administrator account has executed net commands:
+
+﻿
+
+event.code:4688 AND user.name:Administrator AND winlog.event_data.CommandLine:"net *”
+﻿
+
+This query looks for Windows 4688 Process Execution events. (Sysmon 1 events might also have been used to accomplish this.) The query also looks for a user.name of Administrator to ensure that the scope of the investigation is limited to the suspect account. Searching for winlog.event_data.CommandLine values containing net * returns all variations of the net command that could have occurred, thanks to the wildcard operator (*). Since this is one of the first searches being performed during the investigation, it is not clear yet which suspicious net commands were executed, so looking for any and all net commands by using a wildcard search is preferred. The other searches listed as possible answers were either incorrect, or did not limit the search to only the Administrator account.
+
+﻿
+
+Execute the following query in Kibana:
+
+﻿
+
+event.code:4688 AND user.name:Administrator AND winlog.event_data.CommandLine:"net *"
+
+Which search would return only the events listed in the table for only the marco.inaros account?
+marco.inaros AND (event.code:4720 OR event.code:4722 OR event.code:4724 OR event.code:4738)
+
+marco.inaros AND event.code:4672
+
+SSO is an authentication protocol that enables users to securely access multiple applications, systems, and services using only one set of credentials. Users may require access to multiple applications, from different vendors, throughout their average workday. With SSO in place, users do not need a unique username and password for each unique application. 
+
+Directory Federation Overview
+SSO is built on directory federation. Directory federation utilizes Federated Identity (FID) to enable access management by securely sharing digital identity and entitlement rights across security and enterprise boundaries. 
+
+﻿
+
+Federated Identity
+﻿
+
+Much like a person’s physical identity is made up of features and attributes, in the digital landscape a user’s digital identity is also made up of features and attributes that uniquely defines a user moving through the landscape. 
+
+﻿
+
+FID is a method of linking a user’s identity across multiple separate identity management systems. It allows users to quickly move between systems while maintaining security. In this way, different platforms can communicate and share without requiring another login.  
+
+﻿
+
+The Seven Laws of Identity 
+﻿
+
+Kim Cameron, Microsoft's Architect of Identity, developed seven Laws of Identity. The seven laws that federated identity systems are built upon and bound by include:
+
+﻿
+
+1. User Control and Consent: Digital identity systems must only reveal information identifying a user with the user's consent.
+
+﻿
+
+2. Limited Disclosure for Limited Use: The solution that discloses the least identifying information and best limits its use is the most stable, long-term solution.
+
+﻿
+
+3. The Law of Fewest Parties: Digital identity systems must limit disclosure of identifying information to parties having a necessary and justifiable place in a given identity relationship.
+
+﻿
+
+4. Directed Identity: A universal identity metasystem must support both omnidirectional identifiers for use by public entities and unidirectional identifiers for private entities, thus facilitating discovery while preventing unnecessary release of correlation handles.
+
+﻿
+
+5. Pluralism of Operators and Technologies: A universal identity metasystem must channel and enable the interworkings of multiple identity technologies run by multiple identity providers.
+
+﻿
+
+6. Human Integration: A unifying identity metasystem must define the human user as a component integrated through protected and unambiguous human-machine communications.
+
+﻿
+
+7. Consistent Experience Across Contexts: A unifying identity metasystem must provide a simple consistent experience while enabling separation of contexts through multiple operators and technologies.
+
+﻿
+
+NOTE: A metasystem is a system comprised of small systems connected together.
+
+﻿
+
+﻿
+Question
+﻿
+Which definition describes FID?
+﻿ method of linking a user’s identity across multiple separate identity management systems.
+
+Active Directory Federation Services
+Active Directory Federation Services (AD FS) is a Microsoft software component that runs on Windows Server OSs. AD FS provides users with SSO access to systems and applications. AD FS enables federated identity and access management by securely sharing digital identity and entitlements rights across security and enterprise boundaries.
+
+﻿
+
+This can be accomplished across those boundaries through the following process:
+
+﻿
+
+1. A user makes a request for a resource in the AD FS environment.
+
+﻿
+
+2. An organization server responsible for identity validation verifies the user through the authentication methods configured for that AD FS environment, such as the protocols described later in this lesson.
+
+﻿
+
+3. The server issues a token containing a progression of data about the client including its identity. 
+
+﻿
+
+4. On the resources side of the environment, another organization server approves the identity token.
+
+﻿
+
+5. The second server issues another token for the area servers to acknowledge the personality. This enables a framework to give controlled access to its assets or administration to a user that resides with another security domain without requiring the user to verify legitimately to the framework and without the two frameworks sharing a database of user identities or passwords.
+
+﻿
+
+6. The token for access to AD FS servers is employed by the user without the need to continue to verify the user’s identity.
+
+﻿
+
+One implementation of this model that is explored in greater detail later in this lesson is the Kerberos protocol.
+
+AD FS Security Protocols 
+﻿
+
+AD FS and its relationship with SSO makes it a critical asset for DCO. Access to the Domain Controller (DC) and AD FS should remain to a minimum. Below are security protocols and best practices to secure an AD FS deployment:
+
+Ensure only domain administrators have rights to access the AD FS.
+Keep the administrators group to a minimum number of users on AD FS servers.
+Enforce Multi-Factor Authentication (MFA).
+Place AD FS server computer objects in a top-level Operational Unit (OU) that does not host other servers.
+All Group Policy Objects (GPO) that apply to AD FS servers should only apply to them and not other servers as well. This limits potential privilege escalation through GPO modification.
+Configure security logging to the highest and most detailed level; this does not include the AD FS Trace Log. Send the Security Logs for AD FS — Applications and Services Log → AD FS → Admin — to a Security Information and Event Management (SIEM) to correlate with AD.
+
+Windows Authentication Hashing | Introduction
+Windows Authentication hashing methods includes: 
+
+LM: LAN Manager 
+NT-Hash: New Technology (NT) Hash, known popularly as NT LAN Manager (NTLM). 
+Unfortunately, the acronym NTLM is used ubiquitously throughout the security community while interchangeably referring to either the password hashing algorithm, the deprecated network authentication protocol, and the newer authentication protocol. In this lesson, to remove ambiguity, these are respectively referenced by the terms NT-Hash, Net-NTLMv1, and Net-NTLMv2.
+
+﻿
+
+NOTE: This means that NT-Hash only refers to how windows systems represent user passwords on disk and in memory, and Net-NTLMv1 or Net-NTLMv2 only refer to the challenge-response network protocols used by one system to authenticate to another.
+
+﻿
+
+Cryptography Vocabulary
+Hashing algorithm: A deterministic one-way function that ingests data (e.g., a message of any length) and outputs a fixed-length value that cannot be reversed into the original content. The output value is commonly referred to as a hash or message digest. A message always has the same hash as long as its contents have not changed.
+Salt: A random string (e.g., 1F3E1147AD7) that is appended to a message prior to being hashed and is saved afterward for future hashing verification. Salting a hash increases the level of complexity for an attacker to decrypt the hash into a cleartext password, and removes their ability to use rainbow tables for cracking.
+Encryption: A process that uses keys and a mathematical algorithm to convert human- or machine-readable data to an unreadable format, known as a ciphertext. The ciphertext can only be reversed or decrypted with the keys that were used to encrypt it. 
+Symmetric Key Cryptography: A method of encryption that uses the same key to both encrypt and decrypt messages. 
+Asymmetric  Key Cryptography: A method of encryption that employs the mathematical difficulty of factoring very large prime numbers to use two different — but complementary — key pairs for encryption and decryption between parties.
+Hash-based Message Authentication Code (HMAC): HMAC is a cryptographic technique that uses a pre-shared key, also known as a secret, and a defined hashing algorithm to create a well-padded, double-hashed hash.
+HMAC-MD5: Hash-based message authentication code using Message Digest (MD) 5 as the hashing algorithm.
+Rainbow tables: Large data structures used by attackers that contain a map of pre-computed hashes to the cleartext passwords used to generate them. They are often used by attackers for their effectiveness and low time to identify the cleartext password.
+
+Windows Password Hashing | LM
+The LM hash is the oldest password storage mechanism used by Windows, dating back to an OS first deployed in the 1980s. Due to the limited character set allowed at the time, the hashes — created by the algorithm — are fairly easy to crack with modern computing systems. LM is turned off by default starting in Windows Vista/Server 2008. LM hashes are obtained from the Security Account Manager (SAM) database on legacy Windows systems or a DC’s NT Directory Services (NTDS) database.
+
+﻿
+
+The principal weaknesses of the LM hashing algorithm are the limited character sets reducing complexity, the ease of cracking short passwords due to null-byte padding, and the usage of a publicly-deprecated encryption protocol known as Data Encryption Standard (DES).
+
+﻿
+
+With modern computing power, the relatively small key size in implementations of DES encryption led data encrypted with it to be exposed in a matter of hours or days. This impacted not only LM hashes but also Net-NTLMv1, which is discussed later.
+
+﻿
+The LM Hashing Algorithm
+﻿
+1. Convert all lower case to upper case
+2. Pad password to 14 characters with NULL characters
+3. Split the password to two 7-character chunks
+4. Create two DES keys from each 7-character chunk
+5. DES encrypt the string "KGS!@#$%" with these two chunks
+6. Concatenate the two DES encrypted strings. This is the LM hash.
+﻿
+
+An example of this algorithm in action is the following:
+
+﻿
+
+1. A user chooses the password PassWord.
+
+﻿
+
+2. All characters in the string are converted to uppercase:
+
+﻿
+
+PassWord → PASSWORD
+
+﻿
+
+3. If the password is less than 14 characters in length, the algorithm pads it with null characters:
+
+﻿
+
+PASSWORD → PASSWORD000000
+
+﻿
+
+4. These 14 characters are split into two halves:
+
+﻿
+
+PASSWORD000000 → PASSWOR  D000000
+
+﻿
+
+5. Each 7-byte half is used to generate a 64-bit DES key with a parity bit (0) inserted after every seven bits:
+
+﻿
+
+1101000011 → 11010000011…
+
+﻿
+
+6. Each key is then used to encrypt the string KGS!@#$% using the DES algorithm in Electronic Codebook (ECB) mode:
+
+﻿
+
+PASSWOR → E52CAC67419A9A22
+
+﻿
+
+D000000 → 4A3B108F3FA6CB6D
+
+﻿
+
+7. These two halves are combined to form the final LM hash:
+
+﻿
+
+E52CAC67419A9A224A3B108F3FA6CB6D
+
+﻿
+Weaknesses
+﻿
+
+LM hashing is a very weak cryptographic algorithm due to its age, and is riddled with flaws by using heavily constrained inputs and outputs.
+
+﻿
+
+For example, due to how the algorithm changes all characters to uppercase, the hashes of the following passwords all have the same hash:
+
+Password1
+pAssword1
+PASSWORD1
+PassWord1
+Even in a longer password like passwordpass123, the upper and lowercase combinations are more than 32,000 permutations, but they all have the same hash.
+
+﻿
+
+This algorithm only accepts the 95 American Standard Code for Information Interchange (ASCII) characters, with only 69 possibilities per character after eliminating the entire lowercase alphabet, which leads to only 7.5 trillion possible permutations for each half instead of the 69^14 for the whole 14 characters, since splitting the password in half lets an attacker brute-force seven characters rather than all of them.
+
+﻿
+
+Rainbow tables already exist containing all these possibilities. Rainbow tables are large data structures that map pre-computed hashes to the passwords used to generate them, and are normally processed with a system's Graphics Processing Unit (GPU) to reduce the resources used by the Central Processing Unit (CPU). This allows for significantly faster cracking on unsalted passwords since it requires only a lookup from a table rather than hashing the passwords on an entire wordlist and comparing each one.
+
+﻿
+
+If the password is seven characters or less, the second half of the encrypted string is AAD3B435B51404EE — the string KGS!@#$% encrypted with all zeroes. This cuts the total time to cracking the hash in half and is easily identifiable by an attacker.
+
+﻿
+
+In retrospect, the LM hashing algorithm was created on the assumption that no one would either reverse it or infiltrate the internal network to be in a position to capture it. 
+
+﻿
+﻿
+Question:
+﻿
+
+Passwords hashed with the LM algorithm are first padded with zeros if less than how many characters?
+﻿
+Windows Password Hashing | NT-Hash
+This hashing algorithm is the way passwords are stored on modern Windows systems, and those hashes can be obtained by threat actors by dumping the SAM/NTDS database, or using a tool for reading the hashes out of lsass.exe process memory, such as Mimikatz. These are the hashes used in the Pass-the-Hack (PtH) attack. A domain/standalone workstation could be exploited if vulnerable to such an attack. This is commonly called the NTLM hash, but Microsoft refers to this as the NTHash.
+
+﻿
+
+The NT-Hash Algorithm
+﻿
+
+MD4(UTF-16-LE(password))
+﻿
+
+The NT-Hash algorithm is relatively straightforward and uses the following process:
+
+﻿
+
+1. A user's password is converted to 16-byte (128-bit) little-endian Unicode Transformation Format (UTF) (UTF-16-LE).
+
+﻿
+
+2. The MD4 hashing algorithm is used to convert the Unicode password to an NT-Hash.
+
+﻿
+
+NOTE: The PtH technique can still be abused with the NT-Hash even if a threat actor fails to crack it.
+
+﻿
+
+Since a salt is not used while generating the hash, the NT-Hash can be cracked by using either pre-generated rainbow tables or a password cracking tool (e.g., hashcat or John the Ripper). Password cracking tools progressively brute-force a password sequentially or using a supplied wordlist, and leverage the associated hashing algorithm to identify the cleartext password. This attack can be made easier by scraping language from company websites, employee social media profiles, etc., in the wordlists that are used by these tools.
+
+﻿
+
+The MD4 algorithm employed in this method is defined in the document Request for Comments (RFC) 1320: rfc1320 
+
+Windows Authentication Protocols | Introduction
+Windows authentication protocols include LM, Net-NTLMv1, Net-NTLMv2, and Kerberos. 
+
+﻿
+
+Windows AD authentication protocols authenticate users, computers, and services in AD, and authorize the user and/or service to access requested resources.
+
+﻿
+
+LM is among the oldest authentication protocols used by Microsoft. However, its hashes were relatively easy to crack. By capturing hashes and cracking them to obtain account logon credentials, attackers could easily authenticate to other systems on the domain. Net-NTLMv1, which succeeded LM, is an encrypted challenge/response-based authentication protocol used for network logons by client devices, but its implementation is flawed and can be easily exploited by an attacker. Net-NTLMv2 was a significant improvement compared to Net-NTLMv1 in terms of both authentication and session security mechanisms. It enhanced the security of Net-NTLMv1 by adding the ability for a server to authenticate to a client, but remains vulnerable due to the ability of a third-party attacker to intercept and relay the challenge/response.
+
+﻿
+
+Kerberos authentication is a vast improvement over the previous technologies. Kerberos provides identity authentication by exchanging messages between the client, authentication server, and application server. Compared to Net-NTLMv2, Kerberos’s use of strong cryptography and third-party ticket authorization makes it much more difficult for threat actors to infiltrate the network, which provides an additional layer of security.
+
+﻿
+
+The Net-NTLMv2 protocol is not recommended for use in an AD environment, and any applications still employing it for authentication should have that feature deprecated where possible. This may not be feasible in all environments, and where those exceptions exist, increased security controls should be deployed in order to mitigate any possible risks of exploitation, as described in Microsoft Information Technology (IT) Documentation.
+
+﻿
+
+Table 15.2-1 compares Net-NTLMv1, Net-NTLMv2, and Kerberos.
+
+﻿
+
+﻿
+
+Table 15.2-1
+
+Symmetric Key Cryptography: A method of encryption that uses the same key to both encrypt and decrypt messages. 
+Asymmetric  Key Cryptography: A method of encryption that employs the mathematical difficulty of factoring very large prime numbers to use two different — but complementary — key pairs for encryption and decryption between parties.
+Kerberos should be required for authentication in AD, and clearly operate at higher security levels than LM, Net-NTLMv1, and Net-NTLMv2, which present significant cybersecurity risks for enterprises.
+
+﻿
+
+Official Microsoft guidance regarding authentication mechanisms in AD environments is to disable Net-NTLM authentication over the network:
+
+﻿
+
+NTLM and NTLMv2 authentication is vulnerable to a variety of malicious attacks, including Server Message Block (SMB) replay, Man-in-the-Middle attacks, and brute force attacks. Reducing and eliminating NTLM authentication from your environment forces the Windows operating system to use more secure protocols, such as the Kerberos version 5 protocol, or different authentication mechanisms, such as smart cards.
+
+﻿Windows Authentication Network Protocols | Net-NTLMv1
+The Net-NTLMv1 protocol employs the NT-Hash in a challenge/response between a server and a client to avoid sending a user’s hash over the network. The original version of the protocol uses both the NT and LM hash, depending on the domain’s configuration and available dialects. 
+
+﻿
+
+Net-NTLMv1 is deprecated and not typically used by default,  but it may still be found in some old versions of Windows, if present on a network.
+
+﻿
+
+The Authentication Process
+﻿
+
+1. The client initiates protocol-specific negotiations before authentication. If the protocol for the resource the client is authenticating to is SMB, then the first exchange consists of the SMB_COM_NEGOTIATE request and response messages. The client sends its supported dialects and the server responds with the highest possible dialect. 
+
+﻿
+
+2. The client initiates the Net-NTLMv1 protocol negotiation, and includes its hostname and domain, where applicable. This message is normally embedded inside a protocol setup request, such as SMB_COM_SESSION_SETUP_ANDX or SMB_COM_SESSION_SETUP.
+
+﻿
+
+3. In response, the server generates a random 8-byte challenge and sends it back to the client. This challenge message is contained in a session setup response message.
+
+﻿
+
+4. The client uses the hash of the user’s password to encrypt the challenge received from the server and returns the response — the 24-byte Net-NTLMv1 proof string — back to the server using another session setup request message.
+
+﻿
+
+5. The server sends the username, challenge, and client response to the DC to verify that the requesting user is authorized to authenticate to the domain resource.
+
+﻿
+
+6. The DC looks up the username and corresponding password hash in the NTDS database, and uses it to encrypt the challenge.
+
+﻿
+
+7. The DC compares the encrypted challenge with the response computed by the client. Authentication is successful if both are identical.
+
+﻿
+
+8. The server returns a STATUS SUCCESS message in a session setup response.
+
+﻿
+The Net-NTLMv1 Encryption Algorithm
+﻿
+
+C = 8-byte server challenge, random
+K1 | K2 | K3 = LM/NT-hash | 5-bytes-0
+response = DES(K1,C) | DES(K2,C) | DES(K3,C)
+﻿
+
+The challenge length is eight bytes long and the response is 24 bytes long.
+
+﻿
+
+The NT-Hash (16 bytes) is divided into three different 7-byte chunks
+
+K1: NT-Hash Bytes 1 to 7
+K2: NT-Hash Bytes 8 to 14
+K3: NT-Hash Bytes 15 to 16, with five bytes of padded zeros
+Each chunk is then used as the Cipher Key to encrypt the 8-byte challenge using DES. Once each chunk has been encrypted, they are concatenated in order and form the 24-byte Net-NTLMv1 proof string.
+
+﻿
+
+The Net-NTLMv1 Proof String cannot be used directly to pass the hash — like when the LM hash is sniffed from the network — but it can be cracked or relayed.
+
+﻿
+
+Since the challenge is variable, one cannot use rainbow tables against a Net-NTLMv1 proof string. Although, the password can be cracked by brute-forcing password hashes against the string, since the challenge plaintext is also known from sniffed traffic.
+
+﻿
+Workflow
+﻿
+
+1. Open Net-NTLMv1.pcap in the Analysis folder on the desktop:
+
+﻿
+
+﻿
+
+Figure 15.2-7
+
+﻿
+
+2. Observe that several protocols are proposed by the client during the negotiation, including the highly vulnerable LANMAN protocol.
+
+﻿
+
+﻿
+
+Figure 15.2-8
+
+﻿
+
+3. In response, the server provides the authentication protocols that it currently supports.
+
+﻿
+
+NOTE: The client does not support the Kerberos protocol while the server does. It is not used in this exchange. The Kerberos authentication protocol is discussed later in this lesson.
+
+﻿
+
+﻿
+
+Figure 15.2-9
+
+﻿
+
+4. Through the negotiation process, the client determines that the most secure protocol that they both support is Net-NTLMv1. The client then requests that authentication begins over the Net-NTLMv1 via a session setup request.
+
+﻿
+
+﻿
+
+Figure 15.2-10
+
+﻿
+
+5. Observe that in the session setup response, the message contains the Server Challenge.
+
+﻿
+
+﻿
+
+Figure 15.2-11
+
+﻿
+
+6. In response to the challenge, the client sends the NTLM Response, which is the Net-NTLMv1 Proof String.
+
+﻿
+
+﻿
+
+Figure 15.2-12
+
+﻿
+
+7. This authentication handshake resulted in a Status Success and the formation of an authenticated session.
+
+﻿
+
+﻿
+
+Figure 15.2-13
+
+﻿
+Why Net-NTLMv1 is Unsafe
+﻿
+
+The problem lies in the challenge and in the way it is encrypted by the client.
+
+The challenge used by Net-NTLMv1 is always an 8-byte random number.
+The protocol uses DES, which is designed to be very fast, but can be also decrypted very quickly.
+The three concatenated parts of the client response can be attacked separately to find the chunks of the NT hash, and of those chunks, the third can be used as an oracle since it is always padded with five zeroes.
+﻿
+
+True or False:
+﻿
+
+The Net-NTLMv1 Server Challenge is always 8 bytes, but the response message is of variable length.
+
+Response Key
+The 8-byte SC
+The variable components of the challenge response, which include:
+Current time in NT time format
+An 8-byte random value - Client Challenge (CC)
+Server name
+Other system information
+
+Kerberos is the modern Windows authentication protocol. It is — as authentication protocols go — very old, with the first publicly available version published in 1988. With improvements and updates, it exists as the most secure form of modern Windows Authentication mechanisms available when properly configured and implemented.
+
+
+Kerberos allows principals, which are client devices or user identities, to gain federated access to networked resources in a trusted environment — also known as a Kerberos realm. 
+
+
+In an AD domain, which normally encompasses the entire realm, the user account that performs the actions of the Key Distribution Center (KDC) is KRBTGT. This account delivers two services to the realm — the Authentication Service (AS) and the Ticket Granting Service (TGS). The AS is responsible for validating the identity of all principals. The TGS is responsible for granting access to domain services and resources requested by authenticated principals.
+
+
+The Kerberos protocol conducts authentication to those services and resources in the following steps:
+The principal requests authentication to the KDC with an Authentication Service Request (AS-REQ).In this request, the principal includes its own identity as a client name (cname_string).
+The KDC AS validates the principal’s identity and responds with a Authentication Service Response (AS-REP).In this response, the KDC AS encrypts the session key to be used in the TGS exchange with the principal’s NT-Hash.The KDC AS also encrypts the session key with the KRBTGT NT-Hash. This encrypted message is the TGT.The Key Distribution Service (KDS) AS sends both the encrypted session key and TGT to the principal in the AS-REP.
+The principal generates a request to the KDC for access to a specific service with a Ticket Granting Service Request (TGS-REQ).The principal encrypts its own identity with the session key decrypted from the AS-REP. This message is the Authenticator.The principal sends the TGT received from the AS-REP and the Authenticator in the TGS-REQ.
+The KDC TGS validates the principal’s TGT; responds with a Ticket Granting Service Response (TGS-REP).The session key is decrypted from the TGT using the KRBTGT NT-Hash.If the identity decrypted from the Authenticator matches the cname_string that the principal used in the TGS-REQ, then the TGS considers the request valid.The KDC TGS encrypts the session key for the requested service exchange using the current session key.The KDC TGS encrypts the session key for the requested service exchange using that service’s NT-Hash. This encrypted message is the Service Ticket.The KDC TGS sends both the Service Ticket and the encrypted session key. 
+The principal generates an access request to a specific service with a Service Authentication Protocol Request (AP-REQ).The principal encrypts its own identity with the session key decrypted from the TGS-REP. This message is the Authenticator.The principal sends the Service Ticket received from the TGS-REP and the Authenticator in the AP-REQ.
+The service validates the principal’s service ticket; responds with a Service Authentication Protocol Response (AP-REP).The session key is decrypted from the Service Ticket using the service’s own NT-Hash.If the identity decrypted from the Authenticator matches the cname_string that the principal used in the AP-REQ, then the service considers the request valid.The service responds to the principal confirming access to the service.
+
+. Observe the AS-REQ packet. Note that the client has sent its own identity in the cname_string field.
+
+3. Observe the AS-REP packet. In the ticket field, the enc-part data is the TGT that the KDC is sending back to the client. The second enc-part data in the AS-REP is the encrypted session key that the client uses for its next exchange with the TGS.
+
+4. Observe the TGS-REQ packet. In this request, it is important to note that the entire ticket has been included in the pre-authentication portion of the TGS-REQ to show the TGS that the principal has been properly authenticated by the AS, and the Authenticator is included to allow the TGS to compare the cname-string in the req-body field with the identity string decrypted from the Authenticator.
+
+5. Observe the TGS-REP packet. Since the request was properly validated, the TGS has returned a service ticket — the ticket portion of the response — and an encrypted session key for use in the principal’s communications. The ticket specifically identifies the service being requested with the server name (sname-string) value.
+
+Which types of Kerberos messages include a TGT?
+• AS-REP
+• TGS-REQ
+
+
+
+On a compromised system, when a threat actor uses a stolen NT-Hash to authenticate to a remote system, which user is assigned special privileges in the Security Log?
+The logged on user
+
+Windows Authentication Attacks, Audits, and Mitigations | Steal or Forge Kerberos Tickets
+Pass the Ticket Attack Overview
+﻿
+
+Kerberos tickets can also be stolen from the LSASS process memory in the same way that NT-Hashes can.  Once stolen, threat adversaries may use the captured TGS tickets or TGTs to move laterally within an environment. This technique allows authentication to a specific resource without requiring the plaintext account password. Of the two, TGTs allow a threat actor to request a wider range of accesses in a network, but also require higher administrative privileges to steal.
+
+﻿
+
+Forge Kerberos Tickets Attack Overview
+﻿
+
+Golden Ticket attacks can be carried out against AD domains where access control is implemented using Kerberos tickets issued to authenticated users by a KDS. The attacker gains control over the domain’s KRBTGT account by stealing its NTLM hash. This allows the attacker to generate TGTs for any account in the AD domain. With valid TGTs, the attacker can request access from the TGS to any resource/system on its domain. Because threat actors are controlling the component of the access control system that is responsible for issuing TGTs, they have the golden ticket to access any resource on the domain.
+
+﻿
+
+Silver Ticket attacks are very similar, but instead of controlling the KDC account, the attacker controls a domain service account, and is able to use that access to craft Service Tickets for that service at will. 
+
+﻿
+Audit for Stealing or Forging of Kerberos Tickets
+﻿
+
+In order to detect attacks on Kerberos authentication, configure auditing for anomalous Kerberos activity, such as malformed or blank fields in Windows logon/logoff events, which are found in Security Log event IDs 4624, 4672, 4634. Golden ticket attacks often appear as TGS requests without preceding TGT requests, so auditing for the standalone requests can reveal this attack in progress.
+
+﻿
+
+Monitor for unexpected processes, such as the credential dumping tool Mimikatz, interacting with lsass.exe process memory, as decrypting some sections in its memory can reveal Kerberos tickets for use in Pass the Ticket attacks, or hashes for forging new tickets. The method of monitoring for Sysmon event ID 10 — which reveals this type of access — has been discussed previously.
+
+﻿
+
+It is also important to monitor for unexpected lifetimes of TGTs granted by the AS. By default, Mimikatz sets the expiration of forged Golden Tickets to 10 years. In contrast, the best practice recommended by Microsoft for a TGT lifetime is 10 hours. When not defined otherwise, this is the default maximum lifetime in supported versions of Windows.
+
+﻿
+
+When a threat actor employs a Kerberos golden ticket after the KRBTGT password has been reset twice - as mentioned in the Mitigation section - a Security Log event ID 4769 is generated on the DC. The status code 0x1F indicates the action has failed due to Integrity check on decrypted field failed and indicates misuse by a previously invalidated golden ticket.
+
+﻿
+
+That code can be found in the body of the Event Data, as seen in Figure 15.2-45.
+
+﻿
+
+﻿
+
+Figure 15.2-45
+
+﻿
+Mitigations for Kerberos Ticket Attacks
+﻿
+
+Additional mitigations regarding Kerberos and AD configuration.
+
+﻿
+MITRE ATT&CK Technique M1015 — AD Configuration
+﻿
+
+If a domain compromise is suspected through auditing which indicates that a golden ticket has been created, an analyst or network maintainer can contain the impact of adversary access by resetting the KRBTGT account password twice. This will invalidate any existing golden tickets created with the old KRBTGT NT-Hash. Regularly rotating this account password is a valuable practice even when a compromise is not suspected. The STIG guidance for this rotation is every 180 days.
+
+﻿
+Workflow
+﻿
+
+1. Open Active Directory Users and Computers:
+
+﻿
+
+﻿
+
+Figure 15.2-46
+
+﻿
+
+2. From the View menu, select Advanced Features:
+
+﻿
+
+﻿
+
+Figure 15.2-47
+
+﻿
+
+3. Select the Users pane
+
+﻿
+
+4. Right-click krbtgt, and select Reset Password:
+
+﻿
+
+﻿
+
+Figure 15.2-48
+
+﻿
+
+5. When the password is reset, open a Windows Command Prompt and enter the following command
+
+﻿
+
+gpupdate /force
+﻿
+
+﻿
+
+Figure 15.2-49
+
+﻿
+
+6. Repeat Step 4 to reset the password again.
+
+﻿
+MITRE ATT&CK Technique M1041 — Encrypt Sensitive Information	
+﻿
+
+Enable AES Kerberos encryption, rather than DES or RC4, where possible. This can be enforced through GPO.
+
+﻿
+Workflow
+﻿
+
+1. Return to the edit view for the cda GPO.
+
+﻿
+
+2. Navigate to Computer Configuration > Policies > Windows Settings > Security Settings > Local Policies > Security Options.
+
+﻿
+
+3. In the Network security: Configure encryption types allowed for Kerberos policy, ensure that DES and RC4 algorithms are unchecked, and both AES128 and AES256 algorithms are selected.
+
+﻿
+
+﻿
+
+Figure 15.2-50
+
+﻿
+Pre-Authentication
+﻿
+
+Pre-Authentication provides a mechanism for the Authentication Server to identify who the principal (user or system being authenticated) is before it issues a Kerberos AS_REP message. This prevents certain types of known attacks on Kerberos.
+
+﻿
+
+From the Microsoft technical guidance:
+
+﻿
+
+By default, the KDC requires all accounts to use pre-authentication. This is a security feature that offers protection against password-guessing attacks. The AS request identifies the client to the KDC in plain text. If pre-authentication is enabled, a timestamp is encrypted using the user’s password hash as an encryption key. If the KDC reads a valid time when using the user’s password hash, which is available in the AD, to decrypt the timestamp, the KDC knows that request is not a replay of a previous request.
+
+﻿
+
+Since enumeration of AD accounts may result in failed login attempts for accounts in which pre-authentication is disabled, Kerberos logon events should be audited, and the enforcement of such auditing is capable through the GPO.
+
+﻿
+Workflow
+﻿
+
+1. Open Active Directory Users and Computers:
+
+﻿
+
+﻿
+
+Figure 15.2-51
+
+﻿
+
+2. Navigate to Users:
+
+﻿
+
+﻿
+
+Figure 15.2-52
+
+﻿
+
+3. Open the CDA user properties.
+
+﻿
+
+4. Select the Account tab.
+
+﻿
+
+5. Deselect the Account option Do not require Kerberos preauthentication.
+Which account NT-Hash must be stolen to execute a Golden Ticket attack?
+﻿krbtgt
 
 
 
