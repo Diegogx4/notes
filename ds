@@ -2341,8 +2341,41 @@ Which account NT-Hash must be stolen to execute a Golden Ticket attack?
 
 
 
+APT RagingHamster has been targeting DoD entities extensively in the last 90 days. Their attack vectors are SpearPhishing and spurious LinkedIn job offers. During previous campaigns, RagingHamster has modified user access rights and Group Policy Objects (GPO) to change directory replication security settings, auditing of Remote Procedure Control (RPC) operations, and to allow removable devices. The Microsoft SysInternals suite of tools is installed on cda-dc.
 
+GPOs on the cda-dc domain controller:
 
+accounting
+audit
+beats
+CDA
+Default Domain Controller Policy
+Default Domain Policy
+devices
+HRdevices
+install
+sysmon
+There are three user workstations that may have been compromised:
+
+cda-acct-1
+cda-hr-1
+cda-exec-1
+Credentials for cda-dc and the three workstations are:
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+User accounts that may have been targeted:
+
+cda\stevie.roach
+cda\patti.mcclure
+cda\jess.whitney
+Audit policies are one of the following:
+
+No auditing
+Success
+Failure
+Success and Failure
+Not configured
 
 
 
@@ -2363,9 +2396,7 @@ Which account NT-Hash must be stolen to execute a Golden Ticket attack?
 
 
   accesschk "Domain\user" -a * >> priveledge
-
 auditpol.exe /get /category:* >> enforeced
-
 GPM >> NAME OF GPO
   LSP >> LOCAL
   RSOP.MSC >> USING RSOP
