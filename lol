@@ -1160,7 +1160,7 @@ There is one log entry associated with a potential PtH attack.
 user.name
 winlog.computer_name
 winlog.event_data.SubjectLogonID
-winlog.event_data.TargetLogonID
+winlog.event_data.TargetLogonID       who became jdoe
 The LogonId denotes the logon session of the user. If the LogonId of the adversary is known, then it becomes very easy to discover their activities on the target. The subject LogonId denotes their current session, and the target session denotes the new session they started with different credentials. If there is a LogonId associated with an entry linked to a potential attack, pay close attention to it.
 
 ﻿
@@ -1668,18 +1668,565 @@ Recall that process auditing can be seen under event ID 4688. If and event.code:
 
 The process wsmprovhost is of interest since it implies that WinRM is being used here. This indicates that there may be PowerShell logs detailing Jdoe’s session. 
 
+4648 login from other user
+
+event 1 
+timestamp
+host.hostname
+process.executable
+process.command_line
+process.pid 
+
+visualise
+data table
+*so
+process.exec or process.exec.keyword
+vvv
+python.exe
+click on process.executable
+process.command_line enter event.code:1 in search bar
+*python*
+
+advance in stack search 500 
+set to 500
+close
+pip install intall function
+parent process pivet
+
+details tells you what application will start when the user logs in
+exe and pid tells you what was executed to tell you what
+
+MitM Overview
+MitM attacks are hard to reveal, and a successful MitM campaign is often transparent to the user, but there are many common ways to protect the connection making a MitM scenario less fruitful for the attacker. To create a MitM scenario, an attacker only needs to redirect traffic through a device they have control of. This redirection could be via some sort of iptables redirection on a compromised router, an installation of a tool that can complete MitM actions on the compromised router, a spoofed default gateway on a local subnet, or another tactic. 
+
+﻿
+
+The internet is a network of shared devices with a variety of administrators with varying degrees of technical prowess, security understanding, and funding, which leaves attackers many opportunities to attack and compromise devices in order to monitor or modify traffic. As with Operations Security (OPSEC), it only takes one break in the chain to possibly compromise the entire mission, but there are some actions that can limit the amount of worthwhile data for the attacker.
+
+﻿
+
+Subnet-localized spoofing can also be utilized to perform redirection tasks. This type of attack requires an attacker to gain a foothold in the subnet either through physical access or a compromised host. ARP spoofing is one technique that allows an attacker to route traffic through their own — or a compromised — host by advertising itself as another host or hosts on the network. This technique is discussed and investigated later in this lesson.
+
+﻿
+
+In a similar fashion to ARP spoofing, attackers can respond to Link-Local Multicast Name Resolution (LLMNR) and Network Basic Input/Output System (NetBIOS) Name Service (NBT-NS) multicast queries. Microsoft Windows systems use LLMNR and NBT-NS when Domain Name System (DNS) resolution fails for some reason (outage, misspelling, etc.). The initial requester then communicates with the attacker-controlled system instead of the real host, which could lead to credential and or system compromise.
+
+﻿
+
+MITRE tracks MitM techniques under ID T1557, and provides a litany of mitigations to include: disable legacy protocols, encrypt data, filter traffic, setup Intrusion Detection and Prevention Systems (IDS/IPS), and most 
+
+SSH MitM Overview
+SSH was created to replace telnet and other cleartext remote access applications. Each time an SSH client connects to an SSH server, the server presents its host key:
+
+﻿
+
+﻿
+
+Figure 17.3-2
+
+﻿
+
+NOTE: Elliptic Curve Digital Signature Algorithm (ECDSA)
+
+﻿
+
+When a client connects to an SSH server, the server sends its public key to the client. At this point, the client checks its known_hosts file for an entry for the corresponding Internet Protocol (IP) address or hostname. If there is no entry, the client asks the user if they would like to add the key to the known_hosts file. Alternately, If there is an existing entry, the client compares the transmitted public key from the server with the one stored in the known_hosts file. If the two match, the client and server proceed to negotiating parameters and establishing a shared secret key that is used to encrypt traffic between the two endpoints. If it is determined that the transmitted key and the stored key in the known_hosts file do not match, the client issues a warning, letting the user know of the mismatch and provides instructions on how it can be resolved — commonly through deletion of the existing entry.
+
+﻿
+
+NOTE: Different clients save the keys in different places, but the client informs the user how to delete the original key.
+
+﻿
+
+Once the SSH client accepts the fingerprint presented by the server — either via a prompt from the current user or by the hostname and fingerprint matching the known_hosts file — the client and server negotiate encryption parameters and establish a symmetric encryption key used to encrypt all additional traffic sent between the two endpoints.
+
+﻿
+
+The symmetric encryption key — or session key — is negotiated using the Diffie-Hellman algorithm, which provides a way for both client and server to combine private and public data in order to create a shared secret key that is not transmitted across the wire. This session key is used to encrypt everything henceforth associated with the session.
+
+﻿
+
+A MitM for SSH has a few different outcomes. The traffic could be collected for data aggregation from the threat actor, which would include the cleartext host key and encryption parameters, but everything else would be encrypted. The user would have no indication of this tactic. 
+
+﻿
+
+A SSH MitM could be accomplished using many different methods. The first method would be a redirection of the path used to connect a client and server or compromise of a device within the path. This method gives an attacker an understanding of client software, server software, what hosts are interacting with SSH on the specific server, how often and long the connections are, etc. All this data would be in cleartext or noticeable without viewing the encrypted session. 
+
+﻿
+
+Another method used in this scenario is to have the client's SSH destination redirected to an intermediary SSH server using something like iptables or other firewall redirection. The attacker sets up an intermediary SSH server, like mitm-ssh, that allows the client to complete all the SSH connection process and transparently pass the user input to the intended SSH server over a separate encrypted session. This method allows the attacker to see all the user input to include username, password, etc. This method likely spawns a host key mismatch error because the new intermediary SSH server does not have the same host key.
 
 
 
+An attacker only needs to control one device within the route taken from a client and server in order to intercept or modify the traffic.
+true
+
+SSH MitM Overview
+SSH was created to replace telnet and other cleartext remote access applications. Each time an SSH client connects to an SSH server, the server presents its host key:
+
+﻿
+
+﻿
+
+Figure 17.3-2
+
+﻿
+
+NOTE: Elliptic Curve Digital Signature Algorithm (ECDSA)
+
+﻿
+
+When a client connects to an SSH server, the server sends its public key to the client. At this point, the client checks its known_hosts file for an entry for the corresponding Internet Protocol (IP) address or hostname. If there is no entry, the client asks the user if they would like to add the key to the known_hosts file. Alternately, If there is an existing entry, the client compares the transmitted public key from the server with the one stored in the known_hosts file. If the two match, the client and server proceed to negotiating parameters and establishing a shared secret key that is used to encrypt traffic between the two endpoints. If it is determined that the transmitted key and the stored key in the known_hosts file do not match, the client issues a warning, letting the user know of the mismatch and provides instructions on how it can be resolved — commonly through deletion of the existing entry
+﻿
+
+NOTE: Different clients save the keys in different places, but the client informs the user how to delete the original key
+﻿
+
+Once the SSH client accepts the fingerprint presented by the server — either via a prompt from the current user or by the hostname and fingerprint matching the known_hosts file — the client and server negotiate encryption parameters and establish a symmetric encryption key used to encrypt all additional traffic sent between the two endpoints.
+
+The symmetric encryption key — or session key — is negotiated using the Diffie-Hellman algorithm, which provides a way for both client and server to combine private and public data in order to create a shared secret key that is not transmitted across the wire. This session key is used to encrypt everything henceforth associated with the session.
+
+A MitM for SSH has a few different outcomes. The traffic could be collected for data aggregation from the threat actor, which would include the cleartext host key and encryption parameters, but everything else would be encrypted. The user would have no indication of this tactic. 
+
+A SSH MitM could be accomplished using many different methods. The first method would be a redirection of the path used to connect a client and server or compromise of a device within the path. This method gives an attacker an understanding of client software, server software, what hosts are interacting with SSH on the specific server, how often and long the connections are, etc. All this data would be in cleartext or noticeable without viewing the encrypted session. 
+
+Another method used in this scenario is to have the client's SSH destination redirected to an intermediary SSH server using something like iptables or other firewall redirection. The attacker sets up an intermediary SSH server, like mitm-ssh, that allows the client to complete all the SSH connection process and transparently pass the user input to the intended SSH server over a separate encrypted session. This method allows the attacker to see all the user input to include username, password, etc. This method likely spawns a host key mismatch error because the new intermediary SSH server does not have the same host key.
+
+At what point during the SSH client/server connection is data fully encrypted?
+Everything after the negotiating encryption parameters is agreed upon.
+
+SH MitM | Behind the Scenes
+Below is a quick comparison of the SSH version, keys, accepted encryption algorithms, host key, and server banner. Barring any system upgrades or updates, changes to any of these over time should be investigated.
+
+The attacker placed a redirection rule on the compromised edge-router, which forwarded all SSH requests to the attacker’s own machine, where the attacker was running a program called ssh-mitm. When administrators attempted to log in to the edge-router via SSH, they actually submitted the credentials to the attacker, who then sent them to the correct machine and returned a session to the unwitting administrator.
+
+The attacker not only captured the credentials, but also mirrored the session itself in order to observe every command the administrators ran. At will, the adversary could assume control of the session and begin entering commands instead of simply observing.
+
+﻿
+
+NOTE: ssh-mitm also has a database of Common Vulnerabilities and Exposures (CVE) associated with SSH clients and servers. If a vulnerable client or server connects, the adversary is notified of the opportunity. For example, the CVE-2021-33500 annotated in Figure 17.3-9 is a Denial of Service (DoS) for certain versions of the PuTTY client, which would be a great way to block administrators out of a remote system.
+
+How would an SSH user realize a MitM was underway?
+host key mismatch requires user intervenion to proceed
+
+SSH MitM | Prevention
+The administrators had a good understanding of how SSH works and knew not to use the new keys, but one of the newer administrators connected and blindly accepted the host keys. This is a great reason to have a documented list of the keys saved for all administrators to double-check prior to accepting or sharing the known_hosts file for all to compare. Updates could be annotated in the shared file as well.
+
+﻿
+
+When the SSH clients are properly configured, a warning banner — such as in Figure 17.3-11 — should appear when a server’s SSH host key has changed, tipping off defenders that something nefarious may be occurring.
+
+﻿
+
+﻿
+
+Figure 17.3-11
+
+﻿
+
+On a machine running OpenSSH, the following banner appears in properly configured devices.
+
+﻿
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that the RSA host key has just been changed.
+The fingerprint for the RSA key sent by the remote host is
+12.34.56.789
+Please contact your system administrator.
+Add correct host key in /home/user/.ssh/known_hosts to get rid of this message.
+Offending key in /home/user/.ssh/known_hosts:4
+RSA host key for domain.com has changed and you have requested strict checking.
+Host key verification failed.
+﻿
+
+Most, often, the misconfiguration or failure that allows SSH MitM attacks to occur is either a poorly-trained user clicking through and ignoring warning banners, or a setting in an SSH client configuration file. OpenSSH on Linux has a system-wide configuration file (/etc/ssh/ssh.conf) and a user-specific file (~/.ssh/config) that can be configured to automatically trust new keys from known hosts with the following:
+
+﻿
+
+#Do not keep HostKeys for internal networks.
+Host 10.*.*.*  192.168.*.*
+  StrictHostKeyChecking no
+﻿
+
+Mitigation
+﻿
+
+Only having network flow within the network limits the investigation that can be done on this incident because all traffic from the attacker would have been from the internet. The network analyst would be able to assess that the host key changed and acknowledge the administrator's findings, but would have little understanding of why. In this case, the administrator would need to log in to the local console of the router to find the firewall rule changes without passing credentials across the attacker’s SSH server.
+
+﻿
+
+Remotely logging firewall configurations changes and logins would have provided a better timeline of when the attack was completed. It is possible the attacker did not have credentials to log into the firewall because they gained access to the firewall through some unknown vulnerability. Since, a proper login wasn’t completed there wouldn’t be a log for a login, but a firewall rule change would have been logged. The attacker can now gather credentials for reuse in the network or redirect other SSH servers, as needed.
+
+﻿
+
+Requiring the use of SSH keys removes any ability for the attacker to collect credentials and not allow the authentication to complete. ssh-mitm is unable to reuse the private key in order to authenticate to an SSH server. 
+
+﻿
+
+Two-factor authentication would be a viable option to mitigate the reuse of any credentials the attacker was able to compromise.
+
+What file could be shared to make sure all administrators are using the correct host keys?
+known_hosts
+
+SSL/TLS Proxy MitM | Overview
+Proxies are employed to allow many users to access a shared resource to get out of a network. In some cases, the proxies are used to cache web content, or the proxies are used to allow network defenders a way to decrypt Hypertext Transfer Protocol Secure (HTTPS) traffic to increase awareness about what is happening on and leaving the network. Transport Layer Security Inspection (TLSI) or Transport Layer Security (TLS) break and inspect is the process where an enterprise uses a proxy or other device to decrypt traffic, inspect the decrypted content for threats, and re-encrypt the traffic before it enters or leaves the network. This is possible by configuring clients with Intermediate Certification Authorities (ICA) certificates. Without it, the encrypted traffic on the network is an enigma which the defenders cannot interact with or investigate aside from connection logs.
+
+﻿
+
+Proxies can also be used for nefarious purposes. If an attacker can place a proxy between a client and their intended website, they can sniff credentials, reuse session Identifiers (ID), or some other corrupt activity. In the case of cleartext HTTP, the end-user may not notice anything, but HTTPS should cause a mismatched Secure Sockets Layer (SSL) certificate notification, which should notify properly-trained users of a possible problem. Those properly-trained users should then notify the help desk for further action.
+
+﻿
+
+This is a case where LLMNR or NBT-NS spoofing could be used to redirect Microsoft Windows machines through a proxy server by spoofing the Web Proxy Auto-Discovery (WPAD) server’s IP address. The WPAD server is used to provide a centralized location for proxy configuration on a network. Before fetching an initial page, web browsers request the location of a WPAD server from a Dynamic Host Configuration Protocol (DHCP) followed by DNS, if DHCP does not respond. If both are unsuccessful, LLMNR and NBT-NS requests are sent out over multicast, which can be spoofed by a unicast response by an attacker. The WPAD configuration could then redirect all affected hosts through a rogue proxy server.
+
+﻿
+
+A user in the Accounting department has been complaining about mismatched SSL certificate notifications being annoying, and they would like the Information Technology (IT) department to fix the issue. This employee has not had any such issues when working from home. The network defenders were astounded to see the employee accepted and saved the untrusted certificates in order to continue to their favorite websites, which resulted in remedial cyber training before regaining access to the internet on the corporate network.
 
 
+Time to find out what happened.
 
+SSL/TLS Proxy | MitM Mitigation
+The SOCKS proxy does not transmit traffic between the proxy and client in a way that the IDS can see the mismatch of SSL traffic. In some cases, the sensors could pick up a change in SSL/TLS certificates, which would indicate a possible MitM.
 
+﻿
 
+After the Indicators of Compromise (IOC) were passed to the Cyber Protection Team (CPT) members responsible for responding to this incident and clearing adversary presence, they confirmed that the Accounting department user had opened a suspicious email attachment that performed Malicious Cyberspace Activity (MCA) on the system, including altering settings on the browser that forced it to use the attacker’s server as a SOCKS proxy for all web connections.
 
+﻿
 
+There are some ways to mitigate and prevent these types of attacks or to minimize the amount of useful data for the attacker.
 
+﻿
 
+Enterprise Changes
+﻿
+
+Configure the proxy settings or disable the ability for users to change proxy settings via Group Policy Object (GPO). If no proxy is used within the network set the registry key HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ProxyEnable to zero via GPO and audit for any registry updates. It is also important to configure WPAD on the DNS server, which could be spoofed via LLMNR and NBT-NS. If DNS is able to resolve an address for WPAD, the client does not attempt the multicast request for WPAD IP address resolution.
+
+﻿
+
+User Training
+﻿
+
+Make sure all users are aware if they get a TLS mismatch, it should be questioned before clicking. In a remote working Department of Defense (DoD) environment, this can be problematic without appropriately-installed certificates, but teaching users to not click on improperly signed sites and installing the DoD root certificates goes a long way.
+
+﻿
+
+Virtual Private Network
+﻿
+
+Virtual Private Networks (VPN) allow users to encrypt communications between the user and the VPN server thus subverting any MitM data collection.
+
+﻿
+
+Limit User Access Privileges
+﻿
+
+Part of the goal of a MitM is collecting credentials to help gain a foothold into the network. If users have minimal access, so does the attacker, if they were able to get into the network by using those credentials.
+
+﻿
+
+Limit Network Access
+﻿
+
+One of the ways that attackers achieve effects on systems and resources beyond the initial compromise is because those resources are not hardened at the network border or are exposed inside the network due to an over-reliance on trust between network systems. Limit access to key resources (such as DNS, routers, domain controllers, etc.) in order to prevent single system compromise from becoming a network-wide MitM attack.
+
+﻿
+
+Monitor
+﻿
+
+Monitor sensors for changes to collected certificates. Most users navigate to a small subset of the internet from within the enterprise network. Create a list of those known good certificates and schedule a script to look for changes to those certificates as users access them.
+
+﻿
+
+Monitor for gratuitous ARP messages used in ARP spoofing.
+
+﻿
+
+Canaries
+﻿
+
+Create a script that attempts to access an HTTPS website or websites. If the server responds with the improper certificate chain, sound an alert. Run this script on a recurring basis.
+
+ARP
+In earlier lessons, ARP was discussed as a way to resolve IPv4 addresses to Media Access Control (MAC) addresses. 
+
+﻿
+
+﻿
+
+Figure 17.3-37
+
+﻿
+
+Attackers can leverage the trust of ARP to poison the ARP cache. 
+
+﻿
+
+﻿
+
+Figure 17.3-38
+
+﻿
+
+An attacker can send out an ARP reply to a computer (192.168.0.10) indicating that it is the default gateway (192.168.0.1). At the same time, the attacker can also send an ARP replay to the default gateway (192.168.0.1) saying it is the computer (192.168.0.10). 
+
+﻿
+
+﻿
+
+Figure 17.3-39
+
+﻿
+
+The computer and gateway both update their ARP cache and direct all traffic for those IPs to the attacker. The attacker now acts as an intermediary until the ARP caches get updated with the correct information. This is known as ARP spoofing or ARP poisoning and is highly effective. This ARP spoofing can be specific to a single computer or blasted at the entire subnet. The key is continue updating the spoofing so the real host does not regain control of the IP. MITRE ATT&CK framework tracks this spoofing as T1557.002 Man-in-the-Middle: ARP Cache Poisoning and classifies it as a Collection and Credential Access tactic.
+
+﻿
+
+ARP spoofing is contained to the local subnet, which decreases — but does not eliminate — the possibility in enterprise networks. Remote workers are increasing the possibilities of attacks by using untrusted networks. Public Wireless Fidelity (Wi-Fi) access points or shared Wi-Fi (e.g., hotels, campgrounds, restaurants, supermarkets, etc.) can be used securely, but users must be trained on how best to interact with these networks. This is especially true if the user is connecting to one of these networks in order to conduct business or connect to business resources. Most Wi-Fi access points put all users in a single subnet, so the users can interact on the local subnet as needed. If an attacker was able to tell another user that their system was the default gateway, they could create a MitM scenario and scrape any cleartext data from the traffic being routed. 
+
+﻿
+
+NOTE: Some Wi-Fi access points section off each user to subvert this type of attack.
+
+﻿
+
+If a picture is worth 1,000 words, then a PCAP must be worth 100,000. The following walkthrough describes the process of ARP spoofing and highlights some key indicators for network monitoring for this tactic.
+
+﻿
+
+Workflow
+
+﻿
+
+1. Log in to the cda-win-hunt VM using the following credentials:
+
+﻿
+
+Username: trainee
+Password: Th1s is 0perational Cyber Training!
+﻿
+
+2. Open Wireshark from the taskbar.
+
+﻿
+
+3. Open arpspoof.pcap from the desktop.
+
+﻿
+
+NOTE: This PCAP was collected from the internal interface of a subnet's default gateway.
+
+﻿
+
+4. Filter out DNS traffic, and select the apply arrow (or Enter):
+
+﻿
+
+!dns
+﻿
+
+﻿
+
+Figure 17.3-40
+
+﻿
+
+5. Notice packets 29 and 30 ARP request and response.
+
+﻿
+
+Packet 29 is an ARP request for the MAC address for the device with 210.210.210.1 from 210.210.210.6 (MAC 00:02:B3:00:29:01). Packet 30 is the response from 210.210.210.1 with MAC address 00:02:b3:00:0d:02. This is a directed ARP request and response procedure used to update ARP cache on the 210.210.210.6 host. 210.210.210.6 has conversed with 210.210.210.1 previously, otherwise the request would have been sent to the broadcast (MAC 00:00:00:00:00:00).
+
+﻿
+
+6. Filter the PCAP to show only ARP traffic by changing the filter:
+
+﻿
+
+arp
+﻿
+
+﻿
+
+Figure 17.3-41
+
+﻿
+
+Packets 205 and 206 are examples of an ARP request, and reply that are not updating the cache. Notice the request has a target MAC address of 00:00:00:00:00.
+
+﻿
+
+7. Scroll down to packet 428. 
+
+﻿
+
+The packet does not have an associated ARP request like the rest of the ARP packets. ARP replies without ARP requests are usually referred to as gratuitous ARP replies, but gratuitous ARP replies are sent to the broadcast address, and packet 428 is being directed at a specific host. If an attacker is trying to be stealthy, it is best to decrease the amount of hosts involved in the spoofing to decrease the likelihood of being caught or causing an issue that could alert network defenders. Gratuitous ARP messages are used when interfaces are initially turned on, which can help with notifying all devices on the subnet of new IPs and alert to IP conflicts.
+
+﻿
+
+﻿
+
+Figure 17.3-42
+
+﻿
+
+Packet 428 is the first of many ARP replies with the same data, which says 210.210.210.6 is associated with the MAC address ending with 2c:01. The ARP replies repeat every second, which is very abnormal. This type of traffic should be investigated.
+
+﻿
+
+NOTE: Wireshark is flagging on duplicate IP address detected for 210.210.210.6.
+
+﻿
+
+8. Update the filter to see what other ARP traffic is being sent from the MAC address ending with 2c:01:
+
+﻿
+
+arp && eth.src == 00:02:b3:00:2c:01
+﻿
+
+﻿
+
+Figure 17.3-43
+
+﻿
+
+Packet 481 shows an ARP request for the MAC associated with IP address 210.210.210.1, which was sent from the malicious hosts MAC address. The malicious host is advertising itself with the IP address 210.210.210.2, which could be another spoofed IP.
+
+﻿
+
+At this point, the following facts have been found:
+
+210.210.210.6 has an original MAC of 00:02:B3:00:29:01
+210.210.210.1 has an original MAC of 00:02:B3:00:0D:02
+A host with MAC address 00:02:B3:00:2c:01 has been spoofing 210.210.210.6's IP address
+210.210.210.2 has also been seen with the MAC address 00:02:B3:00:2c:01
+NOTE: Because this traffic was collected on the gateway side of the conversation (210.210.210.1), the PCAP does not show any spoofing directed to the 210.210.210.6 host. Seeing both sides of the traffic for this type of attack would be unlikely unless a hub was used or a switch that allowed promiscuous mode to see all traffic on the subnet.
+
+﻿
+
+The 210.210.210.2 host is implementing an ARP spoofing attack between the 210.210.210.6 host (client) and the gateway. The attacker is also sending spoofed traffic to the 210.210.210.6 host, which is pointing the 210.210.210.1 to the 00:02:B3:00:2c:01 MAC address, but the sensor cannot see this traffic. (See the note above). In this case, the attacking host is repeatedly sending ARP replies to the gateway saying it is the client and to the client saying it is the gateway. The ARP replies sent to the client are of the same type and form as those sent to the gateway, but outside of the sensor collection capability.
+
+﻿
+
+It is important to investigate how long the attack took place and what traffic may have been compromised.
+
+﻿
+
+9. Create a Coloring Rule for all the packets with the malicious MAC by selecting View > Coloring Rules:
+
+﻿
+
+﻿
+
+Figure 17.3-44
+
+﻿
+
+10. Select + to add a rule. Set the Name to SpoofMAC and the Filter to eth.addr == 00:02:B3:00:2c:01:
+
+﻿
+
+﻿
+
+Figure 17.3-45
+
+﻿
+
+11. Set the Foreground color to Red by selecting the filter (if not already selected) and selecting Foreground at the bottom:
+
+﻿
+
+﻿
+
+Figure 17.3-46
+
+﻿
+
+12. Set the Background color to Black by selecting the filter (if not already selected) and selecting Background at the bottom.
+
+﻿
+
+13. Check the box to the left of the Name to enable the filter:
+
+﻿
+
+﻿
+
+Figure 17.3-47
+
+﻿
+
+14. Disable all other filters by removing the checkboxes from everything but SpoofMAC:
+
+﻿
+
+﻿
+
+Figure 17.3-48
+
+﻿
+
+15. Change the display filter to easily see all the traffic that was passed through the malicious host:
+
+﻿
+
+ip.addr == 210.210.210.6
+﻿
+
+﻿
+
+Figure 17.3-49
+
+﻿
+
+NOTE: Assume anything unencrypted as compromised and anything encrypted as possible.
+
+﻿
+
+To monitor for this type of attack in real time, monitor for repetitive unsolicited ARP replies. This could be monitored in Arkime by searching for IP addresses associated with routers that do not have the correct MAC addresses. This could also be monitored using Suricata or Snort rules for gratuitous ARPs, but sensor placement is vital to cover all devices.﻿
+
+Which indicate that an ARP spoofing attack may be ongoing?
+• Multiple ARP replies for the same IP address without an associated request.
+• ARP replies for a default gateway that do not match the gateway's MAC address.
+
+Based on DNS records in the PCAP, what webpage was the user accessing during the MitM activity?
+google.com
+
+Does this MitM attack resemble the previous SOCKS event in the network?
+• No, all the hosts are talking to different IPs across the internet on port 443. The previous event was using SOCKS to that device.
+
+Something Strange Again? | Hypothesize Redirection
+Based on the ARP data, the network is not being compromised using ARP spoofing, which disproves that hypothesis.
+
+﻿
+
+While not every system browsed to the internet during the investigation window, the MitM redirection does appear to have affected machines in multiple subnets of the mission partner network.
+
+﻿
+
+Determine what access the threat actor needed to accomplish this. Use the network map below as a reference.
+
+﻿Based on the network map and what has been learned so far, what device could be causing the redirection?
+
+Something Strange Again? | Suggest Mitigation
+The compromised device was the edge-router, which was also compromised during the SSH MitM attack. In this case, the edge-router — or something within the Internet Service Provider (ISP) space — would most likely be the culprit. All systems were affected by the MitM attack, which means it must have been something that all systems must transit to reach the internet. It is possible that everything was compromised, but that seems like a lot of extra effort when one router would suffice.
+
+﻿
+
+The CDA.com mission partner has requested the CPT’s assistance in an enable hardening operation to prevent this compromise in the future.
+
+Which techniques can be employed to mitigate future occurrences of this type of attack?
+• Encrypt sensitive information
+• User training
+• NIDS/Network Intrusion Prevention System (NIPS)
 
 
 
