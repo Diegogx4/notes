@@ -1155,14 +1155,6 @@ Recall that event ID 4624 denotes a logon event. The logon type 9 denotes that t
 
 There is one log entry associated with a potential PtH attack.
 
-﻿
-
-﻿
-
-Figure 16.3-29
-
-﻿
-
 7. Toggle the following fields:
 
 user.name
@@ -1199,23 +1191,10 @@ The earliest event occurs Jul 14, 2021 @ 19:44:33.772. It has an event ID of 467
 
 12. Toggle the winlog.event_data.NewProcessName and winlog.event_data.CommandLine fields. These fields give more information about what processes were started for the event ID 4688. Recall that event ID 4688 is associated with process auditing.
 
-
-
-
-
-Figure 16.3-32
-
-
 Conhost.exe is a process that allows cmd to interface with explorer.exe. The other process started is powershell. PowerShell has its own logging utility; this is seen shortly. The next events — 4673 — indicate that a privileged service was called.
 
 
 13. Expand the first event code with the ID 4648 and expand the Message field.
-
-
-
-
-
-Figure 16.3-33
 
 
 This is rather concerning. The user is now attempting to authenticate to an administrator account in the domain on a DC whereas before it was limited to a local account. The associated process name was powershell.exe. All the other 4648 entries are similar. While the commands executed in PowerShell are not visible here, PowerShell maintains its own logs.
@@ -1233,13 +1212,6 @@ event.code:4103 and winlog.user.name:patricia.hans and host.name:"cda-exec-3"
 
 Recall that event ID 4103 logs the PowerShell cmdlet that was executed. The query searches for cmdlets executed by the user Patricia.Hans on the computer with the hostname cda-exec-3.
 
-
-
-
-
-Figure 16.3-34
-
-
 16. Toggle the winlog.event_data.Payload field. This contains the cmdlet and switches used in the command.
 
 
@@ -1255,13 +1227,6 @@ event.code:4103 and winlog.user.name:patricia.hans and host.name:"cda-exec-3.cda
 
 Now there is one result, and it is apparent that the user employed WinRM — as evidenced by the Enter-PSSession cmdlet — to enter an interactive PowerShell session with the DC.
 
-
-
-
-
-Figure 16.3-35
-
-
 While the log does not reference the username that accessed the DC, the previous event code 4648 references using explicit credentials to log onto the DC. Therefore, it seems likely that Patricia.Hans is using CDA\Administrator’s credentials.
 
 
@@ -1270,14 +1235,6 @@ While the log does not reference the username that accessed the DC, the previous
 
 event.code:4103 and winlog.user.name:administrator and host.name:"cda-dc.cda.corp"
 
-
-
-
-
-
-Figure 16.3-36
-
-
 The query contains the cmdlets executed on the target. In other cases, it may contain entries that are unrelated to the attack as a user, event ID, and a hostname may not be specific enough to narrow down MCA.
 
 
@@ -1285,13 +1242,6 @@ The query contains the cmdlets executed on the target. In other cases, it may co
 
 
 The first entry’s ContextInfo appears as follows.
-
-
-
-
-
-Figure 16.3-37
-
 
 The Host Application is C:\windows\system32\wsmprovhost.exe, which is started on the server-side of a WinRM session.
 
@@ -1536,13 +1486,6 @@ PS C:\windows\system32> schtasks /create /RU cda\trainee /RP "Th1s is 0perationa
 
 This command utilizes the schtasks utility to create a job (test_privs) as the trainee user that runs once at midnight and starts an instance of Notepad.
 
-﻿
-
-﻿
-
-Figure 16.3-56
-
-﻿
 
 A warning message appears that states the task may not run due to the start time being earlier than the current time; however this is not important in this case. The task is successfully created without further issue.
 
@@ -1553,13 +1496,6 @@ A warning message appears that states the task may not run due to the start time
 ﻿
 
 PS C:\windows\system32> schtasks /delete /TN test_privs
-﻿
-
-﻿
-
-Figure 16.3-57
-
-﻿
 
 22. Attempt the same command with the Administrator account:
 
@@ -1567,13 +1503,6 @@ Figure 16.3-57
 
 PS C:\windows\system32> schtasks /create /RU cda\administrator /RP "Th1s is 0perational Cyber Training!" /SC once /ST 00:00 /TN test_privs /TR notepad.exe
 ﻿
-
-﻿
-
-Figure 16.3-58
-
-﻿
-
 Notice in this case, a warning message appears warning that the task may fail to start due to the batch logon privilege needing to be enabled for the principal. It has been confirmed that the GPO setting for Deny log on as a batch job successfully restricted the Administrator account. 
 
 ﻿
@@ -1586,14 +1515,6 @@ PS C:\windows\system32> schtasks /delete /TN test_privs
 ﻿
 
 24. Test normal administrative functionality for services by right-clicking Services on the desktop, and selecting Run as administrator.
-
-﻿
-
-﻿
-
-Figure 16.3-59
-
-﻿
 
 25. Find the Sysmon64 service on the list, right-click it, and select Properties.
 
@@ -1618,56 +1539,12 @@ Password: Th1s is 0perational Cyber Training!
 Confirm password: Th1s is 0perational Cyber Training!
 ﻿
 
-﻿
-
-Figure 16.3-61
-
-﻿
-
 28. Select Apply > OK. A prompt appears stating that the service must be restarted for the new logon name to take effect. Select OK.
-
-﻿
-
-﻿
-
-Figure 16.3-62
-
-﻿
 
 29. Right-click Sysmon64 again and select Restart from the menu.
 
-﻿
-
-﻿
-
-Figure 16.3-63
-
-﻿
-
 It restarts without issue.
 
-﻿
-
-30. Attempt the steps 25-29 with the CDA\Administrator user:
-
-﻿
-
-This account: cda\administrator
-Password: Th1s is 0perational Cyber Training!
-Confirm password: Th1s is 0perational Cyber Training!
-﻿
-
-﻿
-
-Figure 16.3-64
-
-﻿
-
-﻿
-
-Figure 16.3-65
-
-﻿
 
 31. Upon restarting the service, an error message pops up stating that there was a logon failure. This is due to the GPO setting Deny log on as a service, which was confirmed effective. Select OK.
 
@@ -1768,19 +1645,6 @@ Message: Event code 1102 — Audit logs were cleared
 Time: Jul 20, 2021 @ 11:25:31.249
 Event Source: Windows Event Log
 ﻿
-
-Workflow
-
-﻿
-
-1. Log on to the cda-win-hunt VM using the following credentials:
-
-﻿
-
-Username: trainee
-Password: Th1s is 0perational Cyber Training!
-﻿
-
 2. Open Chrome from the desktop.
 
 ﻿
