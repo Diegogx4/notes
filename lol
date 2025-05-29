@@ -1957,33 +1957,10 @@ Create a script that attempts to access an HTTPS website or websites. If the ser
 ARP
 In earlier lessons, ARP was discussed as a way to resolve IPv4 addresses to Media Access Control (MAC) addresses. 
 
-﻿
-
-﻿
-
-Figure 17.3-37
-
-﻿
-
 Attackers can leverage the trust of ARP to poison the ARP cache. 
 
-﻿
-
-﻿
-
-Figure 17.3-38
-
-﻿
 
 An attacker can send out an ARP reply to a computer (192.168.0.10) indicating that it is the default gateway (192.168.0.1). At the same time, the attacker can also send an ARP replay to the default gateway (192.168.0.1) saying it is the computer (192.168.0.10). 
-
-﻿
-
-﻿
-
-Figure 17.3-39
-
-﻿
 
 The computer and gateway both update their ARP cache and direct all traffic for those IPs to the attacker. The attacker now acts as an intermediary until the ARP caches get updated with the correct information. This is known as ARP spoofing or ARP poisoning and is highly effective. This ARP spoofing can be specific to a single computer or blasted at the entire subnet. The key is continue updating the spoofing so the real host does not regain control of the IP. MITRE ATT&CK framework tracks this spoofing as T1557.002 Man-in-the-Middle: ARP Cache Poisoning and classifies it as a Collection and Credential Access tactic.
 
@@ -2030,13 +2007,6 @@ NOTE: This PCAP was collected from the internal interface of a subnet's default 
 ﻿
 
 !dns
-﻿
-
-﻿
-
-Figure 17.3-40
-
-﻿
 
 5. Notice packets 29 and 30 ARP request and response.
 
@@ -2051,13 +2021,6 @@ Packet 29 is an ARP request for the MAC address for the device with 210.210.210.
 ﻿
 
 arp
-﻿
-
-﻿
-
-Figure 17.3-41
-
-﻿
 
 Packets 205 and 206 are examples of an ARP request, and reply that are not updating the cache. Notice the request has a target MAC address of 00:00:00:00:00.
 
@@ -2068,14 +2031,6 @@ Packets 205 and 206 are examples of an ARP request, and reply that are not updat
 ﻿
 
 The packet does not have an associated ARP request like the rest of the ARP packets. ARP replies without ARP requests are usually referred to as gratuitous ARP replies, but gratuitous ARP replies are sent to the broadcast address, and packet 428 is being directed at a specific host. If an attacker is trying to be stealthy, it is best to decrease the amount of hosts involved in the spoofing to decrease the likelihood of being caught or causing an issue that could alert network defenders. Gratuitous ARP messages are used when interfaces are initially turned on, which can help with notifying all devices on the subnet of new IPs and alert to IP conflicts.
-
-﻿
-
-﻿
-
-Figure 17.3-42
-
-﻿
 
 Packet 428 is the first of many ARP replies with the same data, which says 210.210.210.6 is associated with the MAC address ending with 2c:01. The ARP replies repeat every second, which is very abnormal. This type of traffic should be investigated.
 
@@ -2122,33 +2077,10 @@ It is important to investigate how long the attack took place and what traffic m
 
 9. Create a Coloring Rule for all the packets with the malicious MAC by selecting View > Coloring Rules:
 
-﻿
-
-﻿
-
-Figure 17.3-44
-
-﻿
-
 10. Select + to add a rule. Set the Name to SpoofMAC and the Filter to eth.addr == 00:02:B3:00:2c:01:
-
-﻿
-
-﻿
-
-Figure 17.3-45
-
-﻿
 
 11. Set the Foreground color to Red by selecting the filter (if not already selected) and selecting Foreground at the bottom:
 
-﻿
-
-﻿
-
-Figure 17.3-46
-
-﻿
 
 12. Set the Background color to Black by selecting the filter (if not already selected) and selecting Background at the bottom.
 
@@ -2156,36 +2088,13 @@ Figure 17.3-46
 
 13. Check the box to the left of the Name to enable the filter:
 
-﻿
-
-﻿
-
-Figure 17.3-47
-
-﻿
-
 14. Disable all other filters by removing the checkboxes from everything but SpoofMAC:
-
-﻿
-
-﻿
-
-Figure 17.3-48
-
-﻿
 
 15. Change the display filter to easily see all the traffic that was passed through the malicious host:
 
 ﻿
 
 ip.addr == 210.210.210.6
-﻿
-
-﻿
-
-Figure 17.3-49
-
-﻿
 
 NOTE: Assume anything unencrypted as compromised and anything encrypted as possible.
 
@@ -2227,6 +2136,240 @@ Which techniques can be employed to mitigate future occurrences of this type of 
 • Encrypt sensitive information
 • User training
 • NIDS/Network Intrusion Prevention System (NIPS)
+
+APT28 | Malware
+APT28 has consistently upgraded the sophistication of its malware and the tactics and techniques they use to target victims. There are several main components used in APT28 malware, an exploit with a dropper malware, a downloader, and a second stage implant. The initial exploit is typically delivered from a spearphishing email that, if successful, starts dropper malware which obtains a more robust downloader. The downloader then obtains a second-stage implant. This process of one piece of malware downloading and running another piece of malware is used to obfuscate communications and separate out specific C2 channels so that if one piece is caught and mitigated by security vendors, other pieces may still be undetected and can be used with a new version of the compromised malware. Microsoft has reported that a significant portion of APT28’s exploit arsenal consists of zero-day exploits and that they have shown the capability to deploy exploits within days of a vendor releasing a security update. APT28 has used exploits against a wide variety of software from multiple vendors, including Microsoft, Adobe, and Oracle. Some notable frequent targets for exploitation include Word and Internet Explorer. Some of APT28’s malware is well documented.  This includes the following malware families:
+
+SOURFACE (Sofacy) — Downloader (some vendors also include EVILTOSS and CHOPSTICK when referring to Sofacy malware)
+CORESHELL — Updated version of SOURFACE downloader
+EVILTOSS — Second stage implant from a downloader
+CHOPSTICK — Second stage implant that is modular in design to provide flexible, on-the-fly loading and unloading of modules to obtain or perform a specific action on the compromised device, also known as X-Agent (Android and OS X versions as well)
+Cannon — Downloader associated with weaponized malware documents, or maldocs, using SMTP Secure (SMTPS) and POP3 Secure (POP3S) for C2, written in C# and Delphi
+Fysbis — Linux backdoor in both 32-bit and 64-bit Executable and Linking Format (ELF) binaries
+Komplex — OS X backdoor and trojan
+OLDBAIT — Credential harvester
+Drovorub — Linux backdoor
+NOTE: Each security vendor uses their own terminology to refer to the APT28 and each has their own names for pieces of malware associated with the group. Since there is no common terminology, this makes it difficult to piece together if a report from one vendor matches the name from another vendor unless Indicators of Compromise (IoC) are present in analysis from both vendors.
+
+﻿
+
+As can be seen by the sampling listed above, APT28 has a wide variety of malware available for use against targets. This scope of different Operating Systems (OS) and applications indicates that there is a significant development group associated with APT28. The skill to develop against all these products is very difficult to obtain and most software development groups specialize in a specific platform or technology since the differences are vast.
+
+﻿
+
+In a 2015 report, Microsoft documented the APT28 tactics and techniques in use at that time. They found that APT28 had sent spearphishing attacks targeting several thousand individuals in only six months and some of its campaigns lasted over a year. This shows a level of persistence that indicates there is a deliberate targeting of the organizations they are attacking and continue to attack until they are successful. As was discussed in the Phishing Attacks and Defenses lesson, APT28 creates a sense of urgency with its spearphishing lures, impersonates legitimate senders — especially those that are associated with webmail accounts, and appeals to authority with lures to check and change account passwords. Figure 19.1-6 and Figure 19.1-7 are representative of some of the spearphishing emails cataloged by Microsoft.
+
+﻿CORESHELL
+The CORESHELL backdoor is used to download other modules and is installed by the initial exploit’s dropper, which deletes itself after starting CORESHELL. CORESHELL is usually a Dynamic-Link Library (DLL) started using rundll32. The DLL file has been seen in the following locations:
+
+C:\Program Files\Common Files\Microsoft Shared\MSInfo\
+C:\Users\<user name>\AppData\Local\Microsoft\Help\
+C:\ProgramData\
+The C2 configuration was encrypted in a file or in the registry:
+
+HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\<path>
+%ALLUSERSPROFILE%\msd
+%PROGRAMDATA%\msd
+Persistence was maintained by using auto-start registry keys, including the following:
+
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ShellServiceOjbectDelayLoad\
+HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders\
+HKCU\Environment\UserInitMprLogonScript = <batchfile>
+%ALLUSERSPROFILE%\Application Data\Microsoft\Internet Explorer\Quick Launch\
+%USERPROFILE%\Application Data\Microsoft\Internet Explorer\Quick Launch\
+CORESHELL and second stage implants were also composed of various tools to include keylogger, email address and file harvester, system information about the local computer, and remote communication with C2 servers. There was also a component designed to infect connected Universal Serial Bus (USB) storage devices so that information and C2 could be achieved with and captured from air-gapped computers that are not on the network when a user transfers the USB device to the air-gapped computer and back to the network again. This component registered a callback using the RegisterDeviceNotification Application Programming Interface (API) function to detect when a USB device was inserted into the compromised computer and harvest data from it, or infect the device. Some of the filenames seen for various components of CORESHELL include:
+
+runrun.exe
+vmware-manager.exe
+ctf.exe
+MicrosoftSup.dll
+mshelpc.dll
+winsys.dll
+advstorshell.exe
+credssp.dll
+mfxscom.dll
+api-ms-win-[random].dll
+run_x86.exe
+run_x64.exe
+psw.exe
+svchosl.exe
+svehost.exe
+servicehost.exe
+SupUpNvidia.exe
+Microsoft was also able to analyze and document the network protocols used by second-stage implants for C2, which included Hypertext Transfer Protocol (HTTP), SMTP, and POP3. Initially the backdoor would test network connectivity by sending a series of HTTP POST requests to legitimate websites, and then attempt communication with the configured C2 servers. The domains used for the C2 servers are designed to blend in with legitimate traffic, or look like software update sites to try and trick users from investigating them further. In some cases, the malware had an additional component intended to use the Open-SSL (Secure Sockets Layer) library to encrypt and route C2 communications through a victim’s normally configured proxy server, such as may be configured for an enterprise or corporate network.
+
+﻿
+
+Other tools APT28 used that Microsoft documented in this report include:
+
+WinExe — A remote command-line execution tool similar to psexec.exe
+Mimikatz — A tool used to retrieve security tokens and hashes from memory (used for attacks like pass-the-hash)
+﻿
+Cannon
+Palo Alto Networks Unit 42 threat research team reported on the Cannon malware used by APT28 in late 2018. Cannon makes extensive use of SMTP and POP3 (both encrypted and unencrypted protocols) rather than web-based C2 channels other threat actors tend to use. Some of the initial compromises documented by Unit 42 included Microsoft Word documents being sent with spearphishing emails to European government organizations. The file name included crash list (Lion Air Boeing 737).docx as a lure for victims to open it. This document had malicious macros and a payload to download and save additional malware from a C2 server as:
+
+%TEMP%\~temp.docm
+%APPDATA%\MSDN\~msdn.exe
+This additional malware was a variant of APT28 second-stage implants compiled in the Delphi language and compressed using the Ultimate Packer for Executables (UPX) packer. Cannon sent various system reconnaissance data to the C2 servers which included the output from the systeminfo.exe and tasklist commands, as well as taking a screenshot of the victim’s host computer screen. In the cases documented by Unit 42, Cannon sent emails to sahro.bella7@post.cz with various attachments and included a unique system identifier. The email was sent via SMTPS from one of the following accounts:
+
+bishtr.cam47@post.cz
+lobrek.chizh@post.cz
+cervot.woprov@post.cz
+trala.cosh2@post.cz
+Attachment names included:
+
+i.ini
+sysscr.ops
+A good visualization of this technique is depicted in Figure 19.1-8 created by Azeria Labs.
+
+Figure 19.1-8 — Image from Azeria-labs.com/command-and-control
+
+Once the compromised computer sent system information to the sahro.bella7@post.cz account, the threat actor sent an email to trala.cosh2@post.cz with commands in an American Standard Code for Information Interchange (ASCII) hexadecimal format for the compromised computer to execute. The compromised computer retrieved these commands using POP3S from the trala.cosh2@post.cz account. It is important to note that this historical data shows the tactic APT28 was using and that email addresses used in other campaigns are not the same. 
+
+One of the persistence mechanisms documented by Unit 42 was the use of DLL side-loading targeted at Microsoft Office products. Recall from the Libraries lesson that DLL side-loading takes advantage of Windows Side-by-Side (SxS, or Win SxS) assembly system to load a duplicate, but vulnerable, DLL to the legitimate one. The SxS system is used to manage multiple, and conflicting versions of the same DLL. The registry key HKCU\SOFTWARE\Microsoft\Office test\Special\Perf is used by legitimate Office applications for performance testing, but is not a normal function used by most users. Since the HKCU hive is able to be modified by the current user, this mechanism can be used without having elevated privileges necessary to modify keys in the HKLM hive.
+﻿
+Fysbis
+Fysbis is malware designed for Linux systems and has been seen as both 32-bit and 64-bit ELF binaries. Unit 42 released its analysis of Fysbis in 2016. Some of the IoCs related to the files and binaries Fysbis installed on compromised systems are:
+
+/bin/rsyncd with root privileges
+~/.config/dbus-notifier/dbus-inotifier with non-root privileges
+/bin/ksysdefd with root privileges
+~/.config/ksysdef/ksysdefd with non-root privileges
+One of the versions of Fysbis that Unit 42 analyzed did not have the debugging symbols stripped from the binary. Most malware uses techniques to remove debugging data from binaries — called stripped binaries — to hinder analytic and reverse-engineering efforts. APT28 typically uses stripped binaries and the sample analyzed by Unit 42 is likely an oversight that was missed during their development and operational release/use processes. The Fysbis backdoors were not deemed especially advanced, but that is likely due to the lack of security products available for Linux systems. More advanced threat actors typically develop their malware to the state of the security systems present for a particular target so as to not “waste” development time and hold in reserve more prestigious exploitation techniques they have developed so they are not compromised unnecessarily. 
+
+Drovorub
+Drovorub is a malware toolset designed for Linux systems and was analyzed and reported on by the NSA and FBI in the August, 2020 Cybersecurity Advisory discussed earlier. Drovorub consists of a kernel module rootkit, file transfer and port forwarding capabilities, and a C2 communication module. Since Drovorub is installed as a kernel module rootkit, it can hide artifacts from commonly installed security products and system analysis tools. The C2 communications can be detected at network boundaries since the rootkit only affects the infected system. The kernel module rootkit is persisted through reboots unless Unified Extensible Firmware Interface (UEFI) secure boot is enabled in Full or Thorough modes of operation. The different components of Drovorub communicate via JavaScript Object Notation (JSON) over WebSockets and use Rivest-Shamire-Adleman (RSA) public key encryption. Drovorub has two components that are installed on compromised systems, the Drovorub-client and the Drovorub-kernel module.
+
+
+The Drovorub-client’s initial configuration contains the server callback URL, a username and password, and an RSA public key for encryption embedded into the binary. Once a successful callback and registration has been completed, the client writes a new JSON-formatted text configuration file to disk, which is hidden by the kernel module. 
+
+The Drovorub-kernel module creates system call hooks for the functions it needs to be able to hide files, processes, and sockets. The kernel module then hides the client’s running processes, the executable and configuration files, and any network connections or listening ports owned by the client. The Drovorub Cybersecurity Advisory report details how the client and server communications start, specifically using HTTP with the Upgrade request to use a WebSocket, which the server responds to with an HTTP 101 Switching Protocols response and starts the WebSocket handshake. Figure 19.1-10 depicts the start of this process.
+
+Figure 19.1-10 — Image from CSA Drovorub Russian GRU Malware Aug 2020
+
+Drovorub has a module designed for tunneling connections through the compromised system, allowing attackers additional access to the networks with which the compromised system is attached. The port forwarding rules, or entries, in the tunnel module are not automatically hidden and the attacker must specifically instruct the kernel module to hide those connections.
+
+The Drovorub-client and Drovorub-kernel module use a designated pseudo-device, /dev/zero, for communication between the two processes. The /dev/zero pseudo-device is not intended for bi-directional Input/Output, but the kernel module hooks the function calls associated with reading and writing to this device, allowing it to re-write how the pseudo-device operates when the communication is between the client and kernel module.
+
+The best method recommended in the Cybersecurity Advisory for detecting Drovorub is to use network-based detection techniques using a Network Intrusion Detection System (NIDS) to look for the JSON C2 traffic and Yara rules to identify the Drovorub components.
+
+APT28 | Attacks and ATT&CK
+
+Figure 19.1-11 — Image from MITRE ATT&CK Navigator
+
+At this point trainees should have a good understanding of the types of attacks and past TTPs that have been associated with APT28. The following list shows the industry agreement on ATP28 techniques. Additional ATT&CK techniques may be also used by APT28, but have not been fully attributed to the group and are provided for reference.
+
+Campaigns
+﻿
+APT28 attack campaigns are highly targeted. Each tool within the campaign has been customized with hardcoded target name space and IP addresses. Domain spoofing and domain typo-squatting techniques have also been utilized to hide in the higher traffic connections from target space. These tactics show a high degree of understanding of their targets as well, and show an intentional effort to decrease uncontrollable spread of their tools.
+
+APT28 has been associated with attack campaigns using the following domains for C2 and phishing:
+
+linuxkrnl.net
+accounts.qooqle.com
+accounts-gooogle.com
+misdepatrment.com
+actblues.com
+misdepatrment and actblues were used for spoofing legitimate departments and donation sites for specific campaigns, while the others were used across multiple spearphishing campaigns.
+
+Spearphishing campaigns have also been correlated with APT28 using very targeted verbiage and attachments to increase click through and exploitation. For example, the DCCC and DNC hack used an attachment named hillary-clinton-favorable-rating.xlsx to lure recipients into opening the document. Table 19.1-2 shows a small sampling of the APT28 domains that have been identified over the years.
+
+APT28 has been seen using services like the bit.ly URL shortener to mask URLs for multiple attack campaigns. In some cases a more generic Google account compromise notification has been used to lure unsuspecting targets to compromised and spoofed websites like the following:
+
+Malware Documents Analysis
+In this task, use a scanning tool to review a repository of attachments for malicious macros and other indicators of malicious activity. Many organizations have applications integrated into their corporate networks to scan email and email attachments for a variety of policy-based rules as well as for malicious attachments. In this case, the situation is less useful as the network the CPT is operating on does not have this capability. The Exchange administrator was able to extract attachments from emails that are still resident in the users' mailboxes on the Exchange server. Unfortunately this is a manual process and if there are any identified malicious files, the administrator has to manually identify those files and clean them from the mail server.
+
+Phishing Investigation | Wrap-up
+This investigation started with a tip that something was amiss on the network. The initial phishing email was identified after the user interacted with it. You were able to follow a workflow to identify that the attacker email address targeted Camron with many emails that had malicious attachments.  You were also able to follow as files were created, processes were started, a network connection was attempted and all originating from the malicious attachment. Further investigation of Camron’s computer is needed to identify, quarantine, and remove the malicious files found during the investigation and look for additional files and processes that may have been surreptitiously added. Camron’s mailboxes also need to be inspected and cleaned of any malicious emails and attachments. This one incident is an indicator that a threat actor may be targeting the CDA network, so additional hunts should be undertaken for the ieupdate.exe, ieupdate.zip, or ieupdate@internet.com IoCs. Additionally, the 210.210.210.2 IP address should be blacklisted to prevent any compromised hosts from attempting to communicate with it.
+
+﻿
+
+In the event this was a hunt outside of an active investigation, there are several hypotheses that could have driven this hunt. Since it is suspected that an APT similar to APT28 is targeting the CDA network, you have several of APT28’s known techniques to formulate the hunt hypothesis around.
+
+﻿
+
+Hunts could be started to support the following statements. It is difficult to disprove these since the absence of data does not prove or disprove anything, but a proven hypothesis allows defenders and administrators to mitigate and clear ongoing attacks.
+
+An attacker attempting to gain initial access using phishing may use attachments that are malicious word docs.
+An attacker attempting to communicate with external C2 servers may use domain names not contained in the Alexa top one million sites data set.
+An attacker attempting to gain initial access may attempt to start processes from temporary user directories.
+An attacker attempting to obfuscate C2 by using email protocols may use mail servers that are not inside the corporate network.
+An attacker attempting to gain initial access or persistence may use scheduled tasks to use rundll32.exe to load malware.
+An attacker attempting to gain persistence may create registry keys in HKCU\Environment\UserInitMprLogonScript to run malware.
+An attacker attempting to gain initial access using phishing attachments may use lures associated with updating Internet Explorer and come from ieupdate@internet.com.
+Each  incident and hunt pro vides data that astute investigators can use to either rule out activity, or hone in on additional activity that needs to be investigated for indicators of malicious  activ ity.
+
+event.code:3 and destination.port:(25 or 110)
+
+PlugX
+PlugX is a RAT used by multiple Chinese threat actors, such as APT3, APT10, and APT41. PlugX is a modular tool, meaning that actors can add or remove modules to change PlugX’s capabilities and threat presentation. PlugX has a large amount of capabilities due to its modular design, including the ability to use several different network protocols for C2 communications and the manipulation of system services to establish persistence or perform actions on objectives. PwC and BAE systems state that PlugX has been used by APT10 in campaigns since 2014, though APT10 seems to be replacing PlugX with custom malware RedLeaves and ChChes in more recent attacks. One notable capability seen across many samples of PlugX is the ability to perform DLL side-loading attacks. These types of attacks are discussed later on during this lesson.
+
+﻿
+
+MITRE ATT&CK lists the following techniques in association with PlugX:
+
+Encrypt C2 communications using Advanced Encryption Standard (AES);
+this encryption is applied as an additional layer on top of the normal encryption used by the 
+ChChes malware
+Execute shell commands
+Upload and download files
+Load and run DLLs
+Notably, ChChes implants communicate with the C2 server by sending encrypted data within HTTP cookie headers.
+
+
+
+APT10 Usage of DLL Side-loading Attacks
+
+
+APT10 has been seen using DLL side-loading techniques during several attack campaigns. According to PwC and BAE Systems, APT10 has used DLL side-loading extensively, especially when they were employing the PlugX malware, which has DLL side-loading built in as a default execution mechanism. Notably, PlugX is unique in that it drops an additional file during DLL side-loading attacks, in addition to the vulnerable executable and malicious DLL file. This additional file is encrypted, but contains the full malware payload; the task of the malicious DLL file is to simply load, decrypt, and execute the payload file.
+
+In their Cloud Hopper Technical Annex document, PwC and BAE Systems show the following combination of files that have been attributed to APT10 side-loading attacks with the PlugX malware.
+
+Figure 19.2-29 — Image from the PwC and BAE Systems Cloud Hopper Technical Annex document
+
+FireEye reported on an APT10 attack targeting the Japanese media sector in July 2018 that involved a maldoc deploying the APT10 custom UPPERCUT backdoor, which contains capabilities similar to ChChes. The backdoor was loaded via DLL side-loading that involved the following files:
+GUP.exe: GUP is an open-source binary used by Notepad++ for software updateslibcurl.dll: Malicious loader DLL3F2E3AB9: Encrypted shellcode
+FireEye also reported that DLL side-loading was used by APT10 to deploy the RedLeaves malware — RedLeaves is known to FireEye as BUGJUICE — but does not specify any technical details regarding the files involved in the DLL side-loading attack. Given that the RedLeaves code has been found to overlap with PlugX, it is likely that APT10 made use of the same DLL side-loading technique as PlugX, which includes the telltale third encrypted payload file.
+
+Both destination.geo.country_iso_code and destination.geo.country_name are fields that can be used to effectively search by geographical location.
+
+Traffic to South Korean IPs
+Either of the following queries can be used to identify traffic to South Korean IPs:
+
+﻿
+
+destination.geo.country_name:”south korea”
+﻿
+
+destination.geo.country_iso_code:”kr”
+﻿
+
+Using either of these queries, a Kibana data table visualization can be built on the destination.ip field in order to identify the most frequent destination IP addresses. As shown in Figure 19.2-31, the IP address 210.210.210.2 was the most frequent destination IP address. Overall, there are not a lot of outbound connections to South Korean IP space — this makes the relatively large amount of connections to 210.210.210.2 worthy of further investigation.
+
+﻿
+event.module:sysmon and event.code:11 and host.hostname:"cda-exec-1" and file.target:*updates.exe
+
+event.module:sysmon and event.code:3 and host.hostname:"cda-exec-1" and destination.ip:210.210.210.2
+
+$credentials = Get-Credential
+Invoke-Command -Credential $credentials -ComputerName 'cda-exec-1' -ScriptBlock {Get-ChildItem 'C:\ProgramData\tmp\'}
+
+sc create CorWrTool binPath= "\"C:\Windows\vss\vixDiskMountServer.exe\"" start= auto displayname= "Corel Writing Tools Utility" type= own
+
+
+
+sc description CorWrTool "Corel Graphics Corporation Applications."
+
+event.module:sysmon and event.code:1 and host.hostname:"cda-exec-1" and process.command_line:"*sc*"
+
+event.module:sysmon and event.code:1 and process.command_line:"* a *"
+
+
+
+
+
 
 
 
