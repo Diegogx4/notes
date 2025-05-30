@@ -2366,6 +2366,46 @@ event.module:sysmon and event.code:1 and host.hostname:"cda-exec-1" and process.
 
 event.module:sysmon and event.code:1 and process.command_line:"* a *"
 
+$credentials = Get-Credential
+Invoke-Command -Credential $credentials -ComputerName 'cda-exec-1' -ScriptBlock {Get-ChildItem 'C:\ProgramData\tmp\'}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
