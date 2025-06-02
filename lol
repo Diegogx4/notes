@@ -2369,22 +2369,55 @@ event.module:sysmon and event.code:1 and process.command_line:"* a *"
 $credentials = Get-Credential
 Invoke-Command -Credential $credentials -ComputerName 'cda-exec-1' -ScriptBlock {Get-ChildItem 'C:\ProgramData\tmp\'}
 
+nt is valid 
+was the payload made in jamurary
+
+1 network traffic
+2 temp payload
+3 new users
+4 run keys
+twice
+
+Look for communications that match the following known C2 patterns:
+
+HTTP URI Strings
+.
+Zeek conn
 
 
+b.
+Zeek http
+
+c.
+Zeek dns
 
 
+d.
+Sysmon 3
+/en-us/docs.html
+/en-us/test.html
+HTTP User-Agent
+Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36
 
+Look for communications that match the following known C2 patterns:
 
+Which data source events can be used to perform a hunt for the identified indicators?
+Zeek conn
+Zeek http
+Zeek dns
+Sysmon 3
 
+event.code:3,
 
+event.module:sysmon,
 
+event.code:8
 
+event.module:sysmon and event.code:10
 
+event.module:sysmon,
 
-
-
-
-
+winlog.event_id:1 and process.parent.executable:*word.exe
 
 
 
